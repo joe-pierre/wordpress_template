@@ -176,6 +176,52 @@
 
 ---
 
+## [CHOIX] Contenu factice du template abandonné au profit de données WordPress réelles (single/author)
+
+**Contexte :** `blog-details.html` et `author-profile.html` embarquent des blocs riches mais entièrement fictifs : compteurs "Awards"/"Followers" (PureCounter), badge "Featured Author"/"Top Contributor", "Areas of Expertise" (tags), liens GitHub/Twitter/dev.to inventés, bouton "Subscribe to Newsletter" non fonctionnel, réactions "Helpful/Insightful/Save" avec des compteurs figés, et une barre de progression de lecture + sommaire (`sidebar-navigation`) calée sur des ancres de section fixes (`#overview`, `#diagnostics`...) propres à cet unique article de démonstration.
+**Symptôme / Problème :** Aucun de ces éléments n'a d'équivalent dans le modèle de données WordPress natif ni dans SPEC.md ; les reproduire obligerait soit à inventer de nouveaux champs (utilisateur ACF, meta de réactions) hors périmètre, soit à laisser des données figées (donc mensongères) en production — ce que CLAUDE.md interdit explicitement ("aucune donnée variable codée en dur").
+**Cause / Alternatives :** (a) répliquer fidèlement tout le balisage, y compris les données fictives ; (b) ne garder que les blocs pour lesquels WordPress a une donnée réelle et fonctionnelle, et supprimer le reste.
+**Fix / Décision :** Option (b), appliquée à `single.php` et `author.php` :
+- gardé et rendu réel : avatar (`get_avatar()`), nom, biographie (`get_the_author_meta('description')`), nombre d'articles (`count_user_posts()`), site web (`user_url`), liste des autres articles de l'auteur (`get_posts()` filtré par `author`), nombre de commentaires (`get_comments_number()`), partage social (liens de partage réels vers Twitter/Facebook/LinkedIn/e-mail, générés à partir de `get_permalink()`) ;
+- supprimé : compteurs Awards/Followers, expertise-tags, badges "vérifié", liens sociaux inventés, bouton newsletter (déjà en ROADMAP, non construit), boutons de réaction, sommaire à ancres fixes et barre de progression de lecture (`sidebar-navigation`, sans JS de support dans `main.js` — décoratif même dans le template source).
+**Leçon :** Un template de démonstration mélange souvent contenu réutilisable et enrobage marketing fictif ; ne convertir que ce qui a une source de données réelle, plutôt que de figer des faux chiffres en dur.
+**Statut :** 🔵 Choix assumé
+
+---
+
+## [CHOIX] Une seule carte article (`card-article.php`) pour `archive.php` et `search.php`, malgré deux maquettes différentes dans le template source
+
+**Contexte :** `category.html` (2 colonnes, avec sidebar) et `search-results.html` (3 colonnes, sans sidebar) utilisent chacun une maquette de carte différente : la première n'affiche que catégorie + date + titre, la seconde ajoute une photo d'auteur et son nom.
+**Symptôme / Problème :** La tâche demande explicitement un template-part `card-article.php` unique pour éviter la duplication entre les deux gabarits ; il faut donc choisir une seule maquette.
+**Cause / Alternatives :** (a) garder les deux maquettes, dupliquées dans chaque gabarit ; (b) adopter la maquette la plus complète (celle de `search-results.html`, avec auteur) comme carte unique, réutilisée dans les deux contextes avec une largeur de colonne différente (`col-lg-6` dans `archive.php`, `col-lg-4` dans `search.php`).
+**Fix / Décision :** Option (b) — voir `template-parts/card-article.php`. La largeur de colonne (Bootstrap grid) reste définie dans le gabarit appelant, pas dans le template-part, pour rester réutilisable dans les deux mises en page.
+**Leçon :** Quand une tâche impose explicitement la déduplication, choisir la maquette source la plus riche en information plutôt que la plus simple, pour ne perdre aucune donnée utile en unifiant.
+**Statut :** 🔵 Choix assumé
+
+---
+
+## [CHOIX] `comments.php` et `searchform.php` ajoutés bien que non listés dans SPEC.md §5
+
+**Contexte :** `blog-details.html` contient une section commentaires (avec réponses imbriquées) et un formulaire ; `category.html` contient un widget de recherche. WordPress fournit des mécanismes natifs pour les deux (`comments_template()` + `wp_list_comments()`/`comment_form()`, et `get_search_form()`), mais leur rendu par défaut ne correspond pas au balisage/CSS du template (ex. `get_search_form()` natif produit `input[type=search]` + `input[type=submit]`, alors que le CSS cible `.search-widget form input[type=text]` et `form button`).
+**Symptôme / Problème :** Sans ces deux fichiers, soit les commentaires/la recherche ne s'affichent pas du tout, soit ils s'affichent avec le rendu WordPress par défaut, visuellement incohérent avec le reste du thème.
+**Cause / Alternatives :** (a) ne pas fournir ces fichiers, laisser les valeurs par défaut de WordPress ; (b) ajouter `comments.php` et `searchform.php` — fichiers standards reconnus automatiquement par `comments_template()` et `get_search_form()`, non explicités dans SPEC.md §5 mais nécessaires pour respecter la consigne "utiliser les boucles natives" avec le rendu visuel du template.
+**Fix / Décision :** Option (b). Les boutons "J'aime"/"Partager" par commentaire du template source (sans logique JS ni donnée associée, y compris dans le fichier HTML d'origine) ne sont pas reproduits ; seul `comment_reply_link()` (réponse imbriquée native) est conservé.
+**Leçon :** Une consigne "template-part pour éviter la duplication" ou "boucles natives" implique parfois de créer les fichiers de convention WordPress correspondants (`comments.php`, `searchform.php`) même quand SPEC.md ne les énumère pas explicitement — SPEC.md §5 n'est pas exhaustif sur les fichiers de convention WordPress.
+**Statut :** 🔵 Choix assumé
+
+---
+
+## [CHOIX] `template-parts/page-title.php` ajouté (bannière titre + fil d'Ariane commun)
+
+**Contexte :** Le bloc `.page-title` (titre + sous-titre + fil d'Ariane `Accueil > Page actuelle`) est identique dans `about.html`, `contact.html`, `starter-page.html`, `blog-details.html`, `category.html`, `author-profile.html` et `search-results.html` — seuls le titre et le texte varient.
+**Symptôme / Problème :** Cette tâche implémente à elle seule 4 gabarits ayant besoin de ce bloc ; le dupliquer 4 fois enfreint directement CONVENTIONS.md ("Toute section HTML répétée devient un template-part").
+**Cause / Alternatives :** (a) dupliquer le balisage dans chaque gabarit ; (b) créer `template-parts/page-title.php`, appelé avec `$args` (`title`, `subtitle`, `breadcrumb`).
+**Fix / Décision :** Option (b), bien que non explicitement demandé par l'énoncé de la tâche (qui ne mentionne que `card-article.php`) — appliqué la même logique de déduplication à un bloc au moins aussi répété. Sera réutilisé par les futurs gabarits de pages (Phase 4 restante) et métier (Phase 5).
+**Leçon :** Suivre l'esprit de CONVENTIONS.md au-delà de la liste explicite de template-parts citée dans une tâche, quand la duplication concernée est aussi évidente.
+**Statut :** 🔵 Choix assumé
+
+---
+
 ## [CHOIX] Modèle de décision — copier ce format pour les prochaines entrées
 
 **Contexte :** ...

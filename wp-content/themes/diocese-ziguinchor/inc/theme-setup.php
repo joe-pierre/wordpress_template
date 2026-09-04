@@ -83,3 +83,13 @@ function dz_get_reading_time( $post_id ) {
 
 	return max( 1, (int) ceil( $word_count / 200 ) );
 }
+
+/**
+ * Enqueues WordPress's built-in threaded-comments script on singular posts.
+ */
+function dz_enqueue_comment_reply() {
+	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
+		wp_enqueue_script( 'comment-reply' );
+	}
+}
+add_action( 'wp_enqueue_scripts', 'dz_enqueue_comment_reply' );

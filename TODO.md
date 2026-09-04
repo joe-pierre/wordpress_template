@@ -39,7 +39,13 @@
 - [ ] `page-contact.php` — formulaire Contact Form 7 intégré au design du template + carte
 - [ ] `page-dons.php` — modalités de don (v1 informative, cf. Phase 0)
 - [ ] `page.php` — gabarit générique pour pages simples
-- [ ] `single.php` / `archive.php` / `search.php` / `author.php` / `404.php` — actualités
+- [x] `single.php` — depuis `blog-details.html` (hero + contenu natif + partage + tags + auteur + commentaires natifs)
+- [x] `archive.php` — depuis `category.html` (boucle + pagination native + sidebar `template-parts/sidebar-blog.php`)
+- [x] `search.php` — depuis `search-results.html` (boucle + pagination native, sans sidebar comme dans la source)
+- [x] `author.php` — depuis `author-profile.html` (données réelles de l'auteur WP, voir DECISIONS.md)
+- [ ] `404.php`
+- [x] `comments.php` + `searchform.php` créés (non listés dans SPEC.md §5, nécessaires pour des commentaires/une recherche natifs fonctionnels — voir DECISIONS.md)
+- [x] `template-parts/card-article.php` (partagé entre `archive.php` et `search.php`) et `template-parts/page-title.php` (bannière titre + fil d'Ariane, partagée par tous les gabarits de contenu)
 
 ## Phase 5 — Gabarits métier (Paroisses, Prêtres, Événements, Sacrements)
 
@@ -47,7 +53,7 @@
 - [ ] `single-pretre.php` + `archive-pretre.php` (annuaire + fiche prêtre)
 - [ ] `single-evenement.php` + `archive-evenement.php` (agenda, filtré sur événements à venir — voir SPEC.md §4)
 - [ ] `single-sacrement.php` (liste des sacrements, pas forcément d'archive si peu nombreux)
-- [ ] Template-parts réutilisables : `card-article.php`, `card-paroisse.php`, `card-pretre.php`, `card-evenement.php`
+- [ ] Template-parts réutilisables : `card-paroisse.php`, `card-pretre.php`, `card-evenement.php` (`card-article.php` fait, Phase 4)
 
 ## Phase 6 — Formulaires & sécurité
 
