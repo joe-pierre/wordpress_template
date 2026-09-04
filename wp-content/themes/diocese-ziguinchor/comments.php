@@ -99,6 +99,7 @@ if ( ! function_exists( 'dz_comment_list_item' ) ) {
 	<section id="blog-comment-form" class="blog-comment-form section">
 		<div class="container" data-aos="fade-up" data-aos-delay="100">
 			<?php
+			$dz_commenter = wp_get_current_commenter();
 			comment_form(
 				array(
 					'title_reply'          => __( 'Partagez votre avis', 'diocese-ziguinchor' ),
@@ -107,9 +108,9 @@ if ( ! function_exists( 'dz_comment_list_item' ) ) {
 					'comment_notes_before' => '<div class="row gy-3">',
 					'comment_notes_after'  => '',
 					'fields'               => array(
-						'author' => '<div class="col-md-6 form-group"><label for="author">' . esc_html__( 'Nom complet', 'diocese-ziguinchor' ) . ' *</label><input type="text" name="author" class="form-control" id="author" required></div>',
-						'email'  => '<div class="col-md-6 form-group"><label for="email">' . esc_html__( 'Adresse e-mail', 'diocese-ziguinchor' ) . ' *</label><input type="email" name="email" class="form-control" id="email" required></div>',
-						'url'    => '<div class="col-12 form-group"><label for="url">' . esc_html__( 'Site web', 'diocese-ziguinchor' ) . '</label><input type="url" name="url" class="form-control" id="url"></div>',
+						'author' => '<div class="col-md-6 form-group"><label for="author">' . esc_html__( 'Nom complet', 'diocese-ziguinchor' ) . ' *</label><input type="text" name="author" class="form-control" id="author" value="' . esc_attr( $dz_commenter['comment_author'] ) . '" required></div>',
+						'email'  => '<div class="col-md-6 form-group"><label for="email">' . esc_html__( 'Adresse e-mail', 'diocese-ziguinchor' ) . ' *</label><input type="email" name="email" class="form-control" id="email" value="' . esc_attr( $dz_commenter['comment_author_email'] ) . '" required></div>',
+						'url'    => '<div class="col-12 form-group"><label for="url">' . esc_html__( 'Site web', 'diocese-ziguinchor' ) . '</label><input type="url" name="url" class="form-control" id="url" value="' . esc_attr( $dz_commenter['comment_author_url'] ) . '"></div>',
 					),
 					'comment_field'        => '<div class="col-12 form-group"><label for="comment">' . esc_html__( 'Votre commentaire', 'diocese-ziguinchor' ) . ' *</label><textarea class="form-control" name="comment" id="comment" rows="5" required></textarea></div>',
 					'submit_field'         => '<div class="col-12 text-center">%1$s %2$s</div></div>',

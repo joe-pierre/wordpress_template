@@ -312,6 +312,50 @@
 
 ---
 
+## [RÉSOLU] `page-about.php`/`page-contact.php`/`page-dons.php` sans en-tête `Template Name` — champs ACF et lien du footer cassés
+
+**Contexte :** Revue de sécurité et QA (Tâche 9). Les groupes de champs ACF de `page-about.php` et `page-dons.php` (Tâche 8) utilisent une règle de localisation `page_template == page-about.php` / `page-dons.php` ; le CTA du footer utilise `dz_get_page_url_by_template( 'page-contact.php' )` (Tâche 2), qui cherche une page dont la meta `_wp_page_template` vaut `page-contact.php`.
+**Symptôme / Problème :** Aucun des trois fichiers n'avait de commentaire d'en-tête `Template Name:`. Sans cet en-tête, WordPress ne propose PAS le gabarit dans le sélecteur "Attributs de la page" de l'admin — un rédacteur n'a donc aucun moyen de l'assigner à une page, et la meta `_wp_page_template` correspondante n'est jamais écrite en base. Conséquence en cascade : les champs ACF des Tâches 8 (badges "À propos", modalités "Dons") ne seraient jamais visibles dans l'admin, quelle que soit la page créée, et le lien "Nous contacter" du footer retomberait silencieusement sur la page d'accueil (`dz_get_page_url_by_template()` ne trouvant aucune page correspondante).
+**Cause / Alternatives :** Aucune — c'est un oubli pur et simple lors de la création de ces trois fichiers (Tâche 8), non détecté à l'époque faute d'installation WordPress réelle pour le vérifier. Trouvé en croisant le mécanisme de localisation ACF (`page_template`) avec la façon dont WordPress associe réellement un gabarit à une page.
+**Fix / Décision :** Ajout d'un en-tête `Template Name:` dans le docblock de tête de chacun des trois fichiers (`À propos`, `Contact`, `Dons`). Aucun changement de logique métier.
+**Leçon :** Une règle de localisation ACF `page_template` ou une recherche par `_wp_page_template` ne fonctionnent que si le gabarit est explicitement sélectionnable dans l'admin (en-tête `Template Name`) — le simple nommage `page-{slug}.php` suffit à WordPress pour l'affichage (hiérarchie de gabarits par slug), mais pas pour peupler cette metadonnée.
+**Statut :** ✅ Résolu
+
+---
+
+## [RÉSOLU] Liens `tel:`/`mailto:` échappés avec `esc_attr()` au lieu de `esc_url()`
+
+**Contexte :** Revue de sécurité et QA (Tâche 9), vérification systématique de l'échappement des sorties (CONVENTIONS.md §Validation).
+**Symptôme / Problème :** Sur `page-contact.php`, `single-pretre.php`, `single-paroisse.php` et `template-parts/card-pretre.php` (8 occurrences), les liens `href="tel:..."` / `href="mailto:..."` n'échappaient que la partie numéro/adresse avec `esc_attr()`, le préfixe `tel:`/`mailto:` restant un littéral PHP hors de toute fonction d'échappement. Sans faille exploitable ici (le préfixe est un littéral non contrôlable par l'utilisateur, `esc_attr()` bloque déjà l'évasion d'attribut), mais non conforme à la règle explicite de CONVENTIONS.md ("esc_url() ... selon le contexte") et moins robuste en cas de refactor futur.
+**Cause / Alternatives :** (a) laisser tel quel (pas de faille avérée) ; (b) échapper l'URL complète (`'tel:' . $numero`) avec `esc_url()`, conformément à la convention "toute sortie de type URL passe par esc_url()".
+**Fix / Décision :** Option (b), appliquée aux 8 occurrences. `single.php` : les 4 liens de partage social (Twitter/Facebook/LinkedIn/e-mail) ont aussi été refactorés pour construire l'URL complète dans une variable PHP puis l'échapper une seule fois avec `esc_url()`, au lieu d'un `rawurlencode()` dispersé sur plusieurs balises `<?php ?>` sans échappement final de l'attribut.
+**Leçon :** Toujours échapper l'attribut `href` dans son ensemble avec `esc_url()`, même quand une partie de sa valeur est un littéral non contrôlable par l'utilisateur — plus robuste et surtout plus lisible qu'un mélange de fonctions d'échappement à l'intérieur d'un même attribut.
+**Statut :** ✅ Résolu
+
+---
+
+## [RÉSOLU] `template-parts/hero-slider.php` créé en Tâche 1 jamais appelé (mort depuis la Tâche 4)
+
+**Contexte :** SPEC.md §5 liste `template-parts/hero-slider.php` dans l'architecture cible (créé en stub, Tâche 1). La Tâche 4 a implémenté le hero slider directement dans `front-page.php`, sans jamais appeler ce template-part ni le supprimer.
+**Symptôme / Problème :** Fichier mort dans le dépôt, en contradiction avec CONVENTIONS.md ("Toute section HTML répétée devient un template-part dédié... appelé via `get_template_part()`") et avec l'architecture déclarée dans SPEC.md — repéré lors du balayage des stubs restants (Tâche 9).
+**Cause / Alternatives :** (a) supprimer le stub inutilisé, en admettant que le hero reste inline dans `front-page.php` ; (b) extraire réellement le balisage du hero (déjà écrit dans `front-page.php`) vers ce template-part, appelé avec `$args['slides']`, conformément à ce que le fichier était censé être depuis le départ.
+**Fix / Décision :** Option (b). `front-page.php` calcule toujours `dz_get_option( 'dz_hero_slides', array() )` (récupération de donnée = responsabilité du gabarit appelant, cf. CONVENTIONS.md) et le passe en argument à `get_template_part( 'template-parts/hero-slider', null, array( 'slides' => ... ) )` ; le template-part se contente d'afficher. Le bloc JSON `swiper-config` reste identique au template source (vérifié par comparaison octet à octet après refactor).
+**Leçon :** Vérifier, à la fin d'un enchaînement de tâches, qu'aucun fichier prévu dans l'architecture ne reste un stub mort parce qu'une tâche ultérieure a réimplémenté son contenu ailleurs par inadvertance.
+**Statut :** ✅ Résolu
+
+---
+
+## [RÉSOLU] Collision `menu_position` entre le CPT `paroisse` (20) et le menu natif "Pages"
+
+**Contexte :** Revue de sécurité et QA (Tâche 9). Les 4 CPT métier (Tâche 3) utilisaient `menu_position` 20, 21, 22, 23.
+**Symptôme / Problème :** 20 est la position réservée par WordPress Core au menu natif "Pages" (5=Articles, 10=Média, 20=Pages, 25=Commentaires, 60=Apparence...). Enregistrer le CPT `paroisse` sur ce même créneau peut produire un ordre d'affichage imprévisible entre "Pages" et "Paroisses" dans le menu d'administration.
+**Cause / Alternatives :** Décalage des 4 CPT vers des créneaux libres.
+**Fix / Décision :** `paroisse` → 21, `pretre` → 22, `evenement` → 23, `sacrement` → 24 (créneaux libres entre "Pages" (20) et "Commentaires" (25), voir `inc/cpt-*.php`).
+**Leçon :** Vérifier la liste des `menu_position` réservées par WordPress Core avant d'enregistrer un CPT (5, 10, 20, 25, 60, 65, 70, 75, 80, 99).
+**Statut :** ✅ Résolu
+
+---
+
 ## [CHOIX] Modèle de décision — copier ce format pour les prochaines entrées
 
 **Contexte :** ...

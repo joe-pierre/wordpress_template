@@ -1,5 +1,7 @@
 <?php
 /**
+ * Template Name: Dons
+ *
  * Donations page — informative only in v1 (SPEC.md §3): a repeater of
  * payment modalities (bank transfer, Mobile Money...). No online payment
  * integration is implemented here — see BUGS_AND_ROADMAP.md.

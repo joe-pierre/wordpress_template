@@ -37,7 +37,7 @@ function dz_register_cpt_paroisse() {
 			'has_archive'  => true,
 			'show_in_rest' => true,
 			'menu_icon'    => 'dashicons-location-alt',
-			'menu_position' => 20,
+			'menu_position' => 21,
 			'supports'     => array( 'title', 'editor', 'thumbnail' ),
 			'rewrite'      => array( 'slug' => 'paroisse' ),
 		)

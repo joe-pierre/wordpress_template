@@ -37,7 +37,7 @@ function dz_register_cpt_sacrement() {
 			'has_archive'   => true,
 			'show_in_rest'  => true,
 			'menu_icon'     => 'dashicons-awards',
-			'menu_position' => 23,
+			'menu_position' => 24,
 			'supports'      => array( 'title', 'editor', 'thumbnail' ),
 			'rewrite'       => array( 'slug' => 'sacrement' ),
 		)

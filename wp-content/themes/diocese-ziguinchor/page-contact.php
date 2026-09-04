@@ -1,5 +1,7 @@
 <?php
 /**
+ * Template Name: Contact
+ *
  * Contact page. Contact Form 7 mounts via the_content(): once the plugin
  * is installed (TODO.md Phase 6), the form's [contact-form-7 ...]
  * shortcode is pasted into this page's content in wp-admin — see
@@ -56,7 +58,7 @@ while ( have_posts() ) :
 								<div class="icon-container"><i class="bi bi-envelope-open"></i></div>
 								<div class="card-content">
 									<h4><?php esc_html_e( 'E-mail', 'diocese-ziguinchor' ); ?></h4>
-									<p><a href="mailto:<?php echo esc_attr( $dz_email ); ?>"><?php echo esc_html( $dz_email ); ?></a></p>
+									<p><a href="<?php echo esc_url( 'mailto:' . $dz_email ); ?>"><?php echo esc_html( $dz_email ); ?></a></p>
 								</div>
 							</div>
 						<?php endif; ?>
@@ -66,7 +68,7 @@ while ( have_posts() ) :
 								<div class="icon-container"><i class="bi bi-telephone-fill"></i></div>
 								<div class="card-content">
 									<h4><?php esc_html_e( 'Téléphone', 'diocese-ziguinchor' ); ?></h4>
-									<p><a href="tel:<?php echo esc_attr( preg_replace( '/\s+/', '', $dz_phone ) ); ?>"><?php echo esc_html( $dz_phone ); ?></a></p>
+									<p><a href="<?php echo esc_url( 'tel:' . preg_replace( '/\s+/', '', $dz_phone ) ); ?>"><?php echo esc_html( $dz_phone ); ?></a></p>
 								</div>
 							</div>
 						<?php endif; ?>

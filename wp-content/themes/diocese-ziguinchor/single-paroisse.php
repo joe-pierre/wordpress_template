@@ -138,7 +138,7 @@ while ( have_posts() ) :
 										<div class="icon-container"><i class="bi bi-telephone-fill"></i></div>
 										<div class="card-content">
 											<h4><?php esc_html_e( 'Téléphone', 'diocese-ziguinchor' ); ?></h4>
-											<p><a href="tel:<?php echo esc_attr( preg_replace( '/\s+/', '', $dz_telephone ) ); ?>"><?php echo esc_html( $dz_telephone ); ?></a></p>
+											<p><a href="<?php echo esc_url( 'tel:' . preg_replace( '/\s+/', '', $dz_telephone ) ); ?>"><?php echo esc_html( $dz_telephone ); ?></a></p>
 										</div>
 									</div>
 								<?php endif; ?>
@@ -148,7 +148,7 @@ while ( have_posts() ) :
 										<div class="icon-container"><i class="bi bi-envelope-open"></i></div>
 										<div class="card-content">
 											<h4><?php esc_html_e( 'E-mail', 'diocese-ziguinchor' ); ?></h4>
-											<p><a href="mailto:<?php echo esc_attr( $dz_email ); ?>"><?php echo esc_html( $dz_email ); ?></a></p>
+											<p><a href="<?php echo esc_url( 'mailto:' . $dz_email ); ?>"><?php echo esc_html( $dz_email ); ?></a></p>
 										</div>
 									</div>
 								<?php endif; ?>

@@ -26,10 +26,10 @@ $dz_paroisse = dz_get_field( 'pretre_paroisse' );
 			<div class="social-overlay">
 				<div class="social-icons">
 					<?php if ( $dz_phone ) : ?>
-						<a href="tel:<?php echo esc_attr( preg_replace( '/\s+/', '', $dz_phone ) ); ?>" aria-label="<?php esc_attr_e( 'Téléphone', 'diocese-ziguinchor' ); ?>"><i class="bi bi-telephone-fill"></i></a>
+						<a href="<?php echo esc_url( 'tel:' . preg_replace( '/\s+/', '', $dz_phone ) ); ?>" aria-label="<?php esc_attr_e( 'Téléphone', 'diocese-ziguinchor' ); ?>"><i class="bi bi-telephone-fill"></i></a>
 					<?php endif; ?>
 					<?php if ( $dz_email ) : ?>
-						<a href="mailto:<?php echo esc_attr( $dz_email ); ?>" aria-label="<?php esc_attr_e( 'E-mail', 'diocese-ziguinchor' ); ?>"><i class="bi bi-envelope-fill"></i></a>
+						<a href="<?php echo esc_url( 'mailto:' . $dz_email ); ?>" aria-label="<?php esc_attr_e( 'E-mail', 'diocese-ziguinchor' ); ?>"><i class="bi bi-envelope-fill"></i></a>
 					<?php endif; ?>
 				</div>
 			</div>

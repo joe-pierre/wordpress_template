@@ -37,7 +37,7 @@ function dz_register_cpt_pretre() {
 			'has_archive'   => true,
 			'show_in_rest'  => true,
 			'menu_icon'     => 'dashicons-admin-users',
-			'menu_position' => 21,
+			'menu_position' => 22,
 			'supports'      => array( 'title', 'editor', 'thumbnail' ),
 			'rewrite'       => array( 'slug' => 'pretre' ),
 		)

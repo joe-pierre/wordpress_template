@@ -1,8 +1,10 @@
 # BUGS CORRIGÉS
 
-*(Aucun bug à ce jour — le projet n'a pas encore démarré son implémentation. Cette section sera alimentée par Claude Code au fil des tâches, au format ci-dessous.)*
-
-- **[Date]** Description du bug corrigé (renvoyer vers l'entrée correspondante dans `DECISIONS.md` si la correction a nécessité une décision technique)
+- **[2026-09-04]** `page-about.php`, `page-contact.php` et `page-dons.php` n'avaient pas d'en-tête `Template Name`, rendant invisibles dans l'admin les champs ACF des Tâches 8 et cassant silencieusement le lien "Nous contacter" du footer (voir `DECISIONS.md`).
+- **[2026-09-04]** Liens `tel:`/`mailto:` échappés avec `esc_attr()` au lieu de `esc_url()` sur 4 gabarits (8 occurrences) ; 4 liens de partage social de `single.php` renforcés de la même façon (voir `DECISIONS.md`).
+- **[2026-09-04]** `template-parts/hero-slider.php` créé en Tâche 1 n'était jamais appelé : le hero de l'accueil était resté codé en dur dans `front-page.php` depuis la Tâche 4. Balisage extrait dans le template-part, appelé via `get_template_part()` (voir `DECISIONS.md`).
+- **[2026-09-04]** `menu_position` du CPT `paroisse` (20) entrait en collision avec le menu natif "Pages" de WordPress. Les 4 CPT métier décalés vers des créneaux libres (21–24, voir `DECISIONS.md`).
+- **[2026-09-04]** Le formulaire de commentaires (`comments.php`) ne préremplissait pas nom/e-mail/site en cas de réaffichage après une erreur de validation (à la différence du comportement par défaut de `comment_form()`). Ajout de `wp_get_current_commenter()` pour préremplir ces trois champs, avec échappement `esc_attr()`.
 
 ---
 

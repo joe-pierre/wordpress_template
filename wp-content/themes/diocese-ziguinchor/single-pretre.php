@@ -74,10 +74,10 @@ while ( have_posts() ) :
 								<?php if ( $dz_telephone || $dz_email ) : ?>
 									<div class="social-links">
 										<?php if ( $dz_telephone ) : ?>
-											<a href="tel:<?php echo esc_attr( preg_replace( '/\s+/', '', $dz_telephone ) ); ?>" aria-label="<?php esc_attr_e( 'Téléphone', 'diocese-ziguinchor' ); ?>"><i class="bi bi-telephone-fill"></i></a>
+											<a href="<?php echo esc_url( 'tel:' . preg_replace( '/\s+/', '', $dz_telephone ) ); ?>" aria-label="<?php esc_attr_e( 'Téléphone', 'diocese-ziguinchor' ); ?>"><i class="bi bi-telephone-fill"></i></a>
 										<?php endif; ?>
 										<?php if ( $dz_email ) : ?>
-											<a href="mailto:<?php echo esc_attr( $dz_email ); ?>" aria-label="<?php esc_attr_e( 'E-mail', 'diocese-ziguinchor' ); ?>"><i class="bi bi-envelope-fill"></i></a>
+											<a href="<?php echo esc_url( 'mailto:' . $dz_email ); ?>" aria-label="<?php esc_attr_e( 'E-mail', 'diocese-ziguinchor' ); ?>"><i class="bi bi-envelope-fill"></i></a>
 										<?php endif; ?>
 									</div>
 								<?php endif; ?>

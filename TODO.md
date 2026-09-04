@@ -59,7 +59,7 @@
 
 - [ ] Installer le plugin Contact Form 7, créer le formulaire et coller son shortcode dans le contenu de la page Contact (le point de montage `the_content()` et le CSS de base — `.wpcf7-form-control` + `.form-floating` — sont déjà en place, voir `page-contact.php` et DECISIONS.md, Tâche 8)
 - [ ] Ajouter la protection anti-spam (honeypot + reCAPTCHA v3 si retenu)
-- [ ] Revue de sécurité : échappement des sorties, sanitization des entrées, nonces (voir CONVENTIONS.md)
+- [x] Revue de sécurité du code du thème (échappement, sanitization, `ABSPATH`, notices/warnings potentielles) — Tâche 9, voir DECISIONS.md et BUGS_AND_ROADMAP.md. Nonces : sans objet, aucun formulaire admin custom dans le thème (commentaires natifs, recherche native, Contact Form 7 gèrent déjà les leurs)
 
 ## Phase 7 — Contenu & médias
 
@@ -71,7 +71,7 @@
 ## Phase 8 — QA & mise en production
 
 - [ ] Checklist QA responsive (mobile/tablette/desktop) sur chaque gabarit
-- [ ] Vérification `WP_DEBUG` sans notice/warning
+- [ ] Vérification `WP_DEBUG` sans notice/warning sur une vraie installation WordPress (revue statique du code déjà faite en Tâche 9 — reste à confirmer en conditions réelles : aucun environnement WordPress actif dans ce dépôt pour l'exécuter)
 - [ ] Test du formulaire de contact en conditions réelles
 - [ ] Vérification des performances (poids des sliders/images, lazy loading)
 - [ ] Mise en production

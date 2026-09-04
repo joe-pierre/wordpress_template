@@ -37,7 +37,7 @@ function dz_register_cpt_evenement() {
 			'has_archive'   => true,
 			'show_in_rest'  => true,
 			'menu_icon'     => 'dashicons-calendar-alt',
-			'menu_position' => 22,
+			'menu_position' => 23,
 			'supports'      => array( 'title', 'editor', 'thumbnail' ),
 			'rewrite'       => array( 'slug' => 'evenement' ),
 		)

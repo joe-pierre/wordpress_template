@@ -1,5 +1,7 @@
 <?php
 /**
+ * Template Name: À propos
+ *
  * About the diocese page.
  *
  * Reuses about.html's ".about" section as-is: portrait image (the page's

@@ -82,21 +82,29 @@ while ( have_posts() ) :
 				</main>
 			</div>
 
+			<?php
+			$dz_share_permalink = get_permalink();
+			$dz_share_title     = get_the_title();
+			$dz_share_twitter   = 'https://twitter.com/intent/tweet?url=' . rawurlencode( $dz_share_permalink ) . '&text=' . rawurlencode( $dz_share_title );
+			$dz_share_facebook  = 'https://www.facebook.com/sharer/sharer.php?u=' . rawurlencode( $dz_share_permalink );
+			$dz_share_linkedin  = 'https://www.linkedin.com/sharing/share-offsite/?url=' . rawurlencode( $dz_share_permalink );
+			$dz_share_email     = 'mailto:?subject=' . rawurlencode( $dz_share_title ) . '&body=' . rawurlencode( $dz_share_permalink );
+			?>
 			<div class="article-actions" data-aos="fade-up">
 				<div class="engagement-section">
 					<div class="social-sharing">
 						<h3><?php esc_html_e( 'Partager cet article', 'diocese-ziguinchor' ); ?></h3>
 						<div class="share-options">
-							<a href="https://twitter.com/intent/tweet?url=<?php echo rawurlencode( get_permalink() ); ?>&amp;text=<?php echo rawurlencode( get_the_title() ); ?>" target="_blank" rel="noopener" class="share-btn twitter">
+							<a href="<?php echo esc_url( $dz_share_twitter ); ?>" target="_blank" rel="noopener" class="share-btn twitter">
 								<i class="bi bi-twitter-x"></i><span>Twitter</span>
 							</a>
-							<a href="https://www.facebook.com/sharer/sharer.php?u=<?php echo rawurlencode( get_permalink() ); ?>" target="_blank" rel="noopener" class="share-btn facebook">
+							<a href="<?php echo esc_url( $dz_share_facebook ); ?>" target="_blank" rel="noopener" class="share-btn facebook">
 								<i class="bi bi-facebook"></i><span>Facebook</span>
 							</a>
-							<a href="https://www.linkedin.com/sharing/share-offsite/?url=<?php echo rawurlencode( get_permalink() ); ?>" target="_blank" rel="noopener" class="share-btn linkedin">
+							<a href="<?php echo esc_url( $dz_share_linkedin ); ?>" target="_blank" rel="noopener" class="share-btn linkedin">
 								<i class="bi bi-linkedin"></i><span>LinkedIn</span>
 							</a>
-							<a href="mailto:?subject=<?php echo rawurlencode( get_the_title() ); ?>&amp;body=<?php echo rawurlencode( get_permalink() ); ?>" class="share-btn email">
+							<a href="<?php echo esc_url( $dz_share_email ); ?>" class="share-btn email">
 								<i class="bi bi-envelope"></i><span>E-mail</span>
 							</a>
 						</div>
