@@ -4786,3 +4786,97 @@ sections (prêtres, coordonnées, carte) reuse .team/.contact as-is.
   border-top: 1px solid color-mix(in srgb, var(--default-color), transparent 90%);
   padding-top: 12px;
 }
+
+/*--------------------------------------------------------------
+# Diocèse de Ziguinchor — Agenda des événements (card-evenement.php)
+No equivalent card exists in the source template.
+--------------------------------------------------------------*/
+.evenement-card {
+  background-color: var(--surface-color);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  height: 100%;
+}
+
+.evenement-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+.evenement-card .evenement-card-img {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+}
+
+.evenement-card .evenement-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.evenement-card .evenement-card-date-badge {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background-color: var(--accent-color);
+  color: var(--contrast-color);
+  border-radius: 8px;
+  padding: 6px 12px;
+  text-align: center;
+  line-height: 1.1;
+}
+
+.evenement-card .evenement-card-date-badge .day {
+  display: block;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.evenement-card .evenement-card-date-badge .month {
+  display: block;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.evenement-card .evenement-card-body {
+  padding: 20px;
+}
+
+.evenement-card .evenement-card-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.evenement-card .evenement-card-title a {
+  color: var(--heading-color);
+}
+
+.evenement-card .evenement-card-title a:hover {
+  color: var(--accent-color);
+}
+
+.evenement-card .evenement-card-meta {
+  font-size: 14px;
+  color: color-mix(in srgb, var(--default-color), transparent 20%);
+  margin-bottom: 4px;
+}
+
+.evenement-card .evenement-card-meta i {
+  color: var(--accent-color);
+  margin-right: 6px;
+}
+
+/*--------------------------------------------------------------
+# Diocèse de Ziguinchor — Sacrements (single-sacrement.php)
+Reuses .about .feature-item (about.html) for the steps repeater, with a
+step number instead of an icon glyph in .feature-icon.
+--------------------------------------------------------------*/
+.about .feature-item .feature-icon .step-number {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--accent-color);
+}

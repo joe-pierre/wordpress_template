@@ -51,9 +51,9 @@
 
 - [x] `single-paroisse.php` + `archive-paroisse.php` (annuaire + fiche paroisse — coordonnées, horaires, carte, curé/vicaires)
 - [x] `single-pretre.php` + `archive-pretre.php` (annuaire + fiche prêtre — fonction, ordination, paroisse d'affectation)
-- [ ] `single-evenement.php` + `archive-evenement.php` (agenda, filtré sur événements à venir — voir SPEC.md §4)
-- [ ] `single-sacrement.php` (liste des sacrements, pas forcément d'archive si peu nombreux)
-- [ ] Template-parts réutilisables : `card-evenement.php` (`card-article.php`, `card-paroisse.php`, `card-pretre.php` faits)
+- [x] `single-evenement.php` + `archive-evenement.php` (agenda filtré sur événements à venir/en cours — voir SPEC.md §4 et DECISIONS.md ; tri du plus proche au plus lointain)
+- [x] `single-sacrement.php` (étapes, documents à télécharger, paroisse référente ; pas d'archive-sacrement.php, cf. SPEC.md)
+- [x] Template-parts réutilisables : toutes faites (`card-article.php`, `card-paroisse.php`, `card-pretre.php`, `card-evenement.php`)
 
 ## Phase 6 — Formulaires & sécurité
 

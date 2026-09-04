@@ -255,6 +255,30 @@
 
 ---
 
+## [RÉSOLU] Filtrage des événements passés implémenté via `meta_query` sur l'archive, sans suppression
+
+**Contexte :** SPEC.md §4 : "Les événements passés ne doivent plus apparaître dans les listings 'à venir' (filtrage par date dans la requête, pas de suppression)." Tâche 7 demande explicitement ce filtrage sur `archive-evenement.php`.
+**Symptôme / Problème :** Un événement peut avoir une date de fin optionnelle (`evenement_date_fin`) ; se baser uniquement sur la date de début pour décider "passé/à venir" ferait disparaître de l'agenda un événement multi-jours dès son jour de début, alors qu'il est encore en cours.
+**Cause / Alternatives :** (a) filtrer uniquement sur `evenement_date_debut >= maintenant` ; (b) filtrer sur `evenement_date_fin >= maintenant` OU (`evenement_date_fin` absent ET `evenement_date_debut >= maintenant`), ce qui couvre à la fois les événements à venir et ceux actuellement en cours.
+**Fix / Décision :** Option (b), implémentée via un hook `pre_get_posts` (`dz_evenement_archive_query()` dans `inc/cpt-evenement.php`) qui ne s'applique qu'à la requête principale de l'archive `evenement` en front-end (jamais dans `wp-admin`, où les rédacteurs doivent pouvoir gérer les événements passés). Tri du plus proche au plus lointain (`orderby = meta_value` sur `evenement_date_debut`, `order = ASC`). Aucune suppression : les événements passés restent en base et restent accessibles via leur URL directe (`single-evenement.php` affiche alors un badge "Terminé").
+**Leçon :** Une règle "n'afficher que les événements à venir" doit tenir compte des événements en cours (date de fin optionnelle), pas seulement comparer la date de début à la date du jour.
+**Statut :** ✅ Résolu
+
+---
+
+## [CHOIX] `.evenement-card` créée sur mesure ; `.about .feature-item` et `.contact .info-card` réutilisées pour les sacrements
+
+**Contexte :** Comme pour les paroisses/prêtres (Tâche 6), ni les événements ni les sacrements n'ont d'équivalent visuel direct dans le template source.
+**Symptôme / Problème :** Même arbitrage qu'en Tâche 6 entre réutilisation forcée d'un composant sans rapport et création d'une classe minimale cohérente.
+**Cause / Alternatives :** voir la décision équivalente de la Tâche 6 ("`.paroisse-card` créée sur mesure...").
+**Fix / Décision :**
+- `card-evenement.php` : nouvelle classe `.evenement-card` (image + badge date + titre + lieu), ajoutée à la suite de `.paroisse-card` dans `assets/css/main.css` du thème.
+- `single-sacrement.php` : les étapes (`sacrement_etapes`) réutilisent `.about .feature-item` (about.html), avec un numéro d'étape à la place de l'icône (nouvelle règle `.feature-icon .step-number`, 6 lignes de CSS) ; la paroisse référente réutilise `.contact .info-card` (3ᵉ réutilisation de ce composant après la Tâche 6, confirmant sa pertinence comme "tuile d'information" générique du thème) ; les documents à télécharger utilisent le composant natif Bootstrap `.list-group` (aucun équivalent dans le template source, et Bootstrap est déjà chargé — pas besoin de CSS supplémentaire) ; le badge de statut d'un événement (à venir/en cours/terminé) utilise les classes Bootstrap `.badge`/`.text-bg-*`, également sans CSS supplémentaire.
+**Leçon :** Avant de créer une nouvelle classe CSS, vérifier aussi si un composant Bootstrap déjà chargé (badge, list-group, card) couvre le besoin — pas seulement les classes propres au template "Story".
+**Statut :** 🔵 Choix assumé
+
+---
+
 ## [CHOIX] Modèle de décision — copier ce format pour les prochaines entrées
 
 **Contexte :** ...
