@@ -1,0 +1,71 @@
+{
+    "key": "group_dz_cpt_evenement",
+    "title": "Événement",
+    "fields": [
+        {
+            "key": "field_dz_evenement_date_debut",
+            "label": "Date et heure de début",
+            "name": "evenement_date_debut",
+            "type": "date_time_picker",
+            "required": 1,
+            "display_format": "d/m/Y H:i",
+            "return_format": "Y-m-d H:i:s"
+        },
+        {
+            "key": "field_dz_evenement_date_fin",
+            "label": "Date et heure de fin",
+            "name": "evenement_date_fin",
+            "type": "date_time_picker",
+            "required": 0,
+            "display_format": "d/m/Y H:i",
+            "return_format": "Y-m-d H:i:s"
+        },
+        {
+            "key": "field_dz_evenement_lieu",
+            "label": "Lieu (texte libre)",
+            "name": "evenement_lieu",
+            "type": "text",
+            "instructions": "À utiliser si l'événement n'a pas lieu dans une paroisse référencée ci-dessous (ex. Cathédrale, centre diocésain).",
+            "required": 0
+        },
+        {
+            "key": "field_dz_evenement_paroisse",
+            "label": "Paroisse",
+            "name": "evenement_paroisse",
+            "type": "post_object",
+            "instructions": "Optionnel. Si renseigné, prend le pas sur le champ «Lieu (texte libre)» pour l'affichage.",
+            "required": 0,
+            "post_type": [
+                "paroisse"
+            ],
+            "return_format": "id",
+            "ui": 1
+        },
+        {
+            "key": "field_dz_evenement_lien_inscription",
+            "label": "Lien d'inscription",
+            "name": "evenement_lien_inscription",
+            "type": "url",
+            "required": 0
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "evenement"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Champs de la fiche événement (voir SPEC.md §3).",
+    "show_in_rest": 0,
+    "modified": 1788557839
+}

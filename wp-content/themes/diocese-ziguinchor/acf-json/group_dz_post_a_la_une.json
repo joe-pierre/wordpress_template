@@ -1,0 +1,36 @@
+{
+    "key": "group_dz_post_a_la_une",
+    "title": "Mise en avant de l'actualité",
+    "fields": [
+        {
+            "key": "field_dz_post_a_la_une",
+            "label": "Mettre à la une",
+            "name": "post_a_la_une",
+            "type": "true_false",
+            "instructions": "Affiche cette actualité dans le slider «À la une» de la page d'accueil. Sélection éditoriale manuelle, pas automatique (voir SPEC.md §4).",
+            "required": 0,
+            "message": "",
+            "default_value": 0,
+            "ui": 1
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "post"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "side",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Pilote le slider d'actualités à la une de l'accueil.",
+    "show_in_rest": 0,
+    "modified": 1788557839
+}

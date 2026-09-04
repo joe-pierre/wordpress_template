@@ -24,12 +24,13 @@
 
 ## Phase 3 — Custom Post Types & ACF
 
-- [ ] Enregistrer le CPT `paroisse` + champs ACF (voir SPEC.md §3)
-- [ ] Enregistrer le CPT `pretre` + champs ACF + relation vers `paroisse`
-- [ ] Enregistrer le CPT `evenement` + champs ACF
-- [ ] Enregistrer le CPT `sacrement` + champs ACF
-- [ ] Créer la taxonomie `secteur_pastoral` si confirmée en Phase 0
-- [ ] Exporter la config ACF en JSON dans le thème (`acf-json/`) pour versionner les champs avec le code
+- [x] Enregistrer le CPT `paroisse` + champs ACF (voir SPEC.md §3) — `inc/cpt-paroisse.php`, `acf-json/group_dz_cpt_paroisse.json`
+- [x] Enregistrer le CPT `pretre` + champs ACF + relation vers `paroisse` — `inc/cpt-pretre.php`, `acf-json/group_dz_cpt_pretre.json` (relation bidirectionnelle, voir DECISIONS.md)
+- [x] Enregistrer le CPT `evenement` + champs ACF — `inc/cpt-evenement.php`, `acf-json/group_dz_cpt_evenement.json`
+- [x] Enregistrer le CPT `sacrement` + champs ACF — `inc/cpt-sacrement.php`, `acf-json/group_dz_cpt_sacrement.json`
+- [ ] Créer la taxonomie `secteur_pastoral` si confirmée en Phase 0 (toujours en attente de confirmation client)
+- [x] Exporter la config ACF en JSON dans le thème (`acf-json/`) pour versionner les champs avec le code
+- [x] Champ ACF "Mettre à la une" (`post_a_la_une`) sur le type natif `post`, pour le slider d'actualités de l'accueil — `acf-json/group_dz_post_a_la_une.json`
 
 ## Phase 4 — Gabarits de pages
 

@@ -1,0 +1,98 @@
+{
+    "key": "group_dz_cpt_pretre",
+    "title": "Prêtre",
+    "fields": [
+        {
+            "key": "field_dz_pretre_fonction",
+            "label": "Fonction",
+            "name": "pretre_fonction",
+            "type": "select",
+            "required": 1,
+            "choices": {
+                "cure": "Curé",
+                "vicaire": "Vicaire",
+                "diacre": "Diacre",
+                "autre": "Autre"
+            },
+            "default_value": "cure",
+            "multiple": 0,
+            "ui": 0
+        },
+        {
+            "key": "field_dz_pretre_statut",
+            "label": "Statut",
+            "name": "pretre_statut",
+            "type": "select",
+            "instructions": "Permet de gérer les prêtres sans affectation (retraités, en formation...) sans laisser la relation «Paroisse d'affectation» vide (voir DECISIONS.md).",
+            "required": 1,
+            "choices": {
+                "en_fonction": "En fonction",
+                "retraite": "Retraité",
+                "en_formation": "En formation",
+                "sans_affectation": "Sans affectation"
+            },
+            "default_value": "en_fonction",
+            "multiple": 0,
+            "ui": 0
+        },
+        {
+            "key": "field_dz_pretre_date_ordination",
+            "label": "Date d'ordination",
+            "name": "pretre_date_ordination",
+            "type": "date_picker",
+            "required": 0,
+            "display_format": "d/m/Y",
+            "return_format": "Y-m-d"
+        },
+        {
+            "key": "field_dz_pretre_paroisse",
+            "label": "Paroisse d'affectation",
+            "name": "pretre_paroisse",
+            "type": "post_object",
+            "instructions": "Laisser vide si le prêtre n'est pas affecté à une paroisse (voir le champ Statut).",
+            "required": 0,
+            "post_type": [
+                "paroisse"
+            ],
+            "return_format": "id",
+            "ui": 1,
+            "bidirectional": 1,
+            "bidirectional_target": [
+                "field_dz_paroisse_pretres"
+            ]
+        },
+        {
+            "key": "field_dz_pretre_telephone",
+            "label": "Téléphone",
+            "name": "pretre_telephone",
+            "type": "text",
+            "required": 0
+        },
+        {
+            "key": "field_dz_pretre_email",
+            "label": "E-mail",
+            "name": "pretre_email",
+            "type": "email",
+            "required": 0
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "pretre"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Champs de la fiche prêtre (voir SPEC.md §3 et §4).",
+    "show_in_rest": 0,
+    "modified": 1788557839
+}

@@ -1,0 +1,120 @@
+{
+    "key": "group_dz_cpt_paroisse",
+    "title": "Paroisse",
+    "fields": [
+        {
+            "key": "field_dz_paroisse_adresse",
+            "label": "Adresse",
+            "name": "paroisse_adresse",
+            "type": "text",
+            "required": 0
+        },
+        {
+            "key": "field_dz_paroisse_secteur",
+            "label": "Ville / secteur pastoral",
+            "name": "paroisse_secteur",
+            "type": "text",
+            "required": 0
+        },
+        {
+            "key": "field_dz_paroisse_telephone",
+            "label": "Téléphone",
+            "name": "paroisse_telephone",
+            "type": "text",
+            "required": 0
+        },
+        {
+            "key": "field_dz_paroisse_email",
+            "label": "E-mail",
+            "name": "paroisse_email",
+            "type": "email",
+            "required": 0
+        },
+        {
+            "key": "field_dz_paroisse_localisation",
+            "label": "Localisation (carte)",
+            "name": "paroisse_localisation",
+            "type": "google_map",
+            "instructions": "Utilisé pour afficher la paroisse sur une carte.",
+            "required": 0
+        },
+        {
+            "key": "field_dz_paroisse_horaires_messes",
+            "label": "Horaires des messes",
+            "name": "paroisse_horaires_messes",
+            "type": "repeater",
+            "required": 0,
+            "layout": "table",
+            "button_label": "Ajouter un horaire",
+            "min": 0,
+            "max": 0,
+            "sub_fields": [
+                {
+                    "key": "field_dz_paroisse_horaire_jour",
+                    "label": "Jour",
+                    "name": "paroisse_horaire_jour",
+                    "type": "select",
+                    "required": 1,
+                    "choices": {
+                        "lundi": "Lundi",
+                        "mardi": "Mardi",
+                        "mercredi": "Mercredi",
+                        "jeudi": "Jeudi",
+                        "vendredi": "Vendredi",
+                        "samedi": "Samedi",
+                        "dimanche": "Dimanche"
+                    },
+                    "multiple": 0,
+                    "ui": 0
+                },
+                {
+                    "key": "field_dz_paroisse_horaire_heure",
+                    "label": "Heure",
+                    "name": "paroisse_horaire_heure",
+                    "type": "time_picker",
+                    "required": 1,
+                    "display_format": "H:i",
+                    "return_format": "H:i"
+                }
+            ]
+        },
+        {
+            "key": "field_dz_paroisse_pretres",
+            "label": "Prêtres affectés",
+            "name": "paroisse_pretres",
+            "type": "relationship",
+            "instructions": "Rempli automatiquement à partir du champ «Paroisse d'affectation» de la fiche du prêtre (relation bidirectionnelle). Le curé et les vicaires se distinguent via le champ «Fonction» du prêtre.",
+            "required": 0,
+            "post_type": [
+                "pretre"
+            ],
+            "filters": [
+                "search"
+            ],
+            "return_format": "id",
+            "bidirectional": 1,
+            "bidirectional_target": [
+                "field_dz_pretre_paroisse"
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "paroisse"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Champs de la fiche paroisse (voir SPEC.md §3).",
+    "show_in_rest": 0,
+    "modified": 1788557839
+}

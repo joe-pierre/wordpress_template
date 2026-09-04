@@ -110,6 +110,39 @@
 
 ---
 
+## [CHOIX] Relation `paroisse` ↔ `pretre` : un champ bidirectionnel ACF PRO plutôt que deux relations maintenues séparément
+
+**Contexte :** SPEC.md §3 décrit une relation dans les deux sens : `paroisse` → "relation vers pretre (curé responsable, éventuellement vicaires en repeater)" et `pretre` → "relation vers paroisse". SPEC.md §4 précise par ailleurs qu'"un prêtre peut être rattaché à une seule paroisse principale (relation simple)".
+**Symptôme / Problème :** Créer deux champs relationnels indépendants (un repeater de vicaires sur `paroisse`, un champ paroisse sur `pretre`) obligerait un rédacteur à mettre à jour deux fiches à chaque changement d'affectation, avec un risque réel de désynchronisation (ex. un prêtre listé comme vicaire d'une paroisse mais dont la fiche indique une autre paroisse d'affectation).
+**Cause / Alternatives :** (a) deux relations indépendantes, fidèles à la formulation littérale de SPEC.md §3 ; (b) un seul champ éditable (`pretre_paroisse`, `post_object` simple sur la fiche prêtre) relié en **bidirectionnel** (fonctionnalité ACF PRO 6.1+) à un champ `relationship` en lecture quasi automatique sur la fiche paroisse (`paroisse_pretres`), synchronisé par ACF dans les deux sens.
+**Fix / Décision :** Option (b) — voir `acf-json/group_dz_cpt_pretre.json` (`field_dz_pretre_paroisse`, `bidirectional_target: field_dz_paroisse_pretres`) et `acf-json/group_dz_cpt_paroisse.json` (`field_dz_paroisse_pretres`). La distinction curé/vicaire se fait via le champ `pretre_fonction` (filtré côté template lors de l'affichage, Phase 5), pas via deux repeaters séparés. Un prêtre "sans affectation" (retraité, en formation) laisse `pretre_paroisse` vide et utilise le champ `pretre_statut` dédié, conformément à SPEC.md §4.
+**Leçon :** Quand une relation a un sens métier "un vers plusieurs" avec un seul côté réellement éditorial (ici : c'est la fiche du prêtre qui déclare son affectation, pas la paroisse qui "choisit" ses prêtres), préférer un champ bidirectionnel à deux champs indépendants — la donnée reste une source de vérité unique tout en restant consultable des deux côtés dans les templates.
+**Statut :** 🔵 Choix assumé — nécessite ACF PRO 6.1+ (déjà supposé par SPEC.md §2 pour les champs répéteurs/relationnels)
+
+---
+
+## [CHOIX] Pas de champs ACF dupliquant les champs natifs (titre, contenu, image mise en avant)
+
+**Contexte :** SPEC.md §3 liste, pour chaque CPT, des champs comme "nom", "description", "titre", "image" / "photo" à côté des champs réellement spécifiques (adresse, horaires, relations...).
+**Symptôme / Problème :** Ces champs correspondent en réalité aux champs natifs WordPress déjà supportés par les CPT (`post_title`, `post_content` en WYSIWYG, image mise en avant) — créer un champ ACF `paroisse_nom` en plus du titre natif dupliquerait la donnée sans aucun bénéfice.
+**Cause / Alternatives :** (a) créer un champ ACF pour chaque entrée de la table SPEC.md §3, y compris nom/description/photo ; (b) réutiliser les champs natifs (titre, éditeur, image mise en avant, déjà activés via `add_theme_support('post-thumbnails')` en Tâche 1) et ne créer des champs ACF que pour les données réellement structurées et propres au CPT.
+**Fix / Décision :** Option (b), pour les 4 CPT. `supports => array( 'title', 'editor', 'thumbnail' )` dans chaque `inc/cpt-*.php` couvre nom/titre, description et photo/image ; les groupes ACF (`acf-json/group_dz_cpt_*.json`) ne contiennent que les champs structurés (adresse, horaires, dates, relations, fichiers, étapes...).
+**Leçon :** Même logique que la décision "post natif pour les Actualités" : ne pas recréer en ACF ce que WordPress fournit déjà nativement.
+**Statut :** 🔵 Choix assumé
+
+---
+
+## [CHOIX] Groupes de champs des CPT en JSON versionné, page d'options en PHP local
+
+**Contexte :** La Tâche 2 a enregistré le groupe de champs de la page d'options ("Réglages du thème") via `acf_add_local_field_group()` dans `inc/acf-fields.php`. La Tâche 3 demande explicitement d'exporter les groupes de champs des CPT en JSON dans `acf-json/`.
+**Symptôme / Problème :** Utiliser deux méthodes différentes dans le même thème (PHP local vs JSON) pourrait sembler incohérent à première vue.
+**Cause / Alternatives :** (a) tout enregistrer en PHP local, comme la page d'options ; (b) tout exporter en JSON ; (c) garder PHP local pour la page d'options (un seul groupe, déjà en place, pas de bénéfice à l'exporter) et JSON pour les groupes de champs liés aux CPT métier (contenu versionné, plus naturel à faire évoluer via l'admin ACF puis committer le JSON généré).
+**Fix / Décision :** Option (c), conforme à l'énoncé de chaque tâche et à SPEC.md §5 (`acf-fields.php # si définition en PHP plutôt que JSON export`, qui laisse le choix au cas par cas). Les fichiers `acf-json/group_dz_cpt_*.json` et `acf-json/group_dz_post_a_la_une.json` sont repris automatiquement par ACF (dossier `acf-json/` du thème actif), sans filtre `acf/settings/load_json` supplémentaire nécessaire.
+**Leçon :** Documenter explicitement un choix qui pourrait sinon ressembler à une incohérence involontaire entre deux tâches.
+**Statut :** 🔵 Choix assumé
+
+---
+
 ## [CHOIX] Modèle de décision — copier ce format pour les prochaines entrées
 
 **Contexte :** ...
