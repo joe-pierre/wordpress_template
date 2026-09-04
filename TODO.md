@@ -9,11 +9,11 @@
 
 ## Phase 1 — Socle du thème
 
-- [ ] Créer l'arborescence du thème `diocese-ziguinchor` (voir SPEC.md §5)
-- [ ] Écrire `style.css` (en-tête thème obligatoire) et `functions.php` (enqueue des assets vendor : Bootstrap, Bootstrap Icons, AOS, Swiper, PureCounter, `main.css`, `main.js`)
-- [ ] Copier le dossier `assets/vendor/` et `assets/img/` du template dans le thème
-- [ ] Activer les supports de thème nécessaires (`post-thumbnails`, `title-tag`, `html5`, menus custom)
-- [ ] Enregistrer l'emplacement de menu principal + menu footer
+- [x] Créer l'arborescence du thème `diocese-ziguinchor` (voir SPEC.md §5) — fichiers de gabarits/inc/template-parts créés en stubs (garde `ABSPATH` + TODO de phase), à implémenter aux phases suivantes
+- [x] Écrire `style.css` (en-tête thème obligatoire) et `functions.php` (enqueue des assets vendor : Bootstrap, Bootstrap Icons, AOS, Swiper, PureCounter, `main.css`, `main.js`)
+- [x] Copier le dossier `assets/vendor/` et `assets/img/` du template dans le thème (le vendor `php-email-form` n'a volontairement pas été copié, remplacé par Contact Form 7 — voir DECISIONS.md)
+- [x] Activer les supports de thème nécessaires (`post-thumbnails`, `title-tag`, `html5`, `automatic-feed-links`) — dans `inc/theme-setup.php`
+- [x] Enregistrer l'emplacement de menu principal + menu footer — `register_nav_menus()` dans `inc/theme-setup.php`
 
 ## Phase 2 — Header / Footer / Navigation
 

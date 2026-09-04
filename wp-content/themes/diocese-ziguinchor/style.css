@@ -1,0 +1,16 @@
+/*
+Theme Name: Diocèse de Ziguinchor
+Theme URI: https://diocesedeziguinchor.org
+Author: Diocèse de Ziguinchor
+Author URI: https://diocesedeziguinchor.org
+Description: Thème WordPress classique pour le site institutionnel du Diocèse de Ziguinchor, adapté du template Bootstrap "Story" (BootstrapMade).
+Version: 0.1.0
+Requires at least: 6.0
+Requires PHP: 8.1
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: diocese-ziguinchor
+*/
+
+/* Ce fichier ne contient volontairement pas de règles CSS : le style du thème
+   est chargé via assets/css/main.css (voir functions.php, dz_enqueue_assets()). */

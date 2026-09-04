@@ -55,6 +55,28 @@
 
 ---
 
+## [CHOIX] Arborescence du thème créée en stubs dès la Tâche 1 (socle)
+
+**Contexte :** SPEC.md §5 décrit l'arborescence complète du thème (gabarits de page, template-parts, fichiers `inc/`), mais la Tâche 1 ne porte que sur le socle technique (`style.css`, `functions.php`, assets vendor, supports de thème, menus).
+**Symptôme / Problème :** Créer uniquement `style.css`/`functions.php` sans le reste de l'arborescence aurait laissé le thème incomplet par rapport à SPEC.md §5, alors qu'implémenter le contenu de chaque gabarit dépasserait le périmètre de la Tâche 1 (et empièterait sur les Phases 2 à 5).
+**Cause / Alternatives :** (a) ne créer que `style.css`/`functions.php` et différer le reste ; (b) créer tous les fichiers de SPEC.md §5 en stubs minimaux (garde `if ( ! defined( 'ABSPATH' ) ) exit;` + commentaire `TODO (Phase X)`) sans aucune logique métier.
+**Fix / Décision :** Option (b). Tous les fichiers de gabarits (`header.php`, `footer.php`, `front-page.php`, `single-*.php`, `archive-*.php`, `template-parts/*.php`), ainsi que `inc/cpt-*.php` et `inc/acf-fields.php`, existent déjà comme stubs vides à compléter phase par phase. Seuls `functions.php` et `inc/theme-setup.php` contiennent une implémentation réelle (enqueue des assets vendor, supports de thème, `register_nav_menus()`). Un `index.php` de secours (non listé explicitement dans SPEC.md §5 mais requis par WordPress pour qu'un thème soit valide) a également été ajouté.
+**Leçon :** Créer la structure complète en stubs référencés (`TODO (Phase X)`) permet de respecter l'architecture cible dès le départ sans anticiper de code métier hors périmètre de la tâche en cours.
+**Statut :** 🔵 Choix assumé
+
+---
+
+## [CHOIX] Vendor `php-email-form` non copié dans le thème
+
+**Contexte :** Le template d'origine (`assets/vendor/php-email-form/`) est déjà remplacé par Contact Form 7 (voir décision "Remplacer le formulaire PHP natif...").
+**Symptôme / Problème :** Copier ce vendor dans le thème sans jamais l'enqueuer serait du code mort dès le socle.
+**Cause / Alternatives :** Copier tous les dossiers de `assets/vendor/` tels quels vs. exclure ceux déjà remplacés par une décision actée.
+**Fix / Décision :** `php-email-form` n'est pas copié dans `wp-content/themes/diocese-ziguinchor/assets/vendor/`. Seuls Bootstrap, Bootstrap Icons, AOS, Swiper et PureCounter y sont présents, conformément à la liste d'assets à enqueuer de la Tâche 1.
+**Leçon :** Ne pas porter dans le thème un vendor déjà remplacé par une décision actée, même si le template d'origine le contenait.
+**Statut :** 🔵 Choix assumé
+
+---
+
 ## [CHOIX] Modèle de décision — copier ce format pour les prochaines entrées
 
 **Contexte :** ...
