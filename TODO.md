@@ -35,9 +35,9 @@
 ## Phase 4 — Gabarits de pages
 
 - [x] `front-page.php` — hero slider (repeater ACF `dz_hero_slides`, max 5) + actualités à la une (`WP_Query` sur `post_a_la_une`) ; accès rapides (Paroisses/Prêtres/Sacrements/Dons) pas encore fait — hors périmètre de cette passe, à ajouter avec `category-section`/`latest-posts`
-- [ ] `page-about.php` — À propos du diocèse (badges compteurs PureCounter dynamiques)
-- [ ] `page-contact.php` — formulaire Contact Form 7 intégré au design du template + carte
-- [ ] `page-dons.php` — modalités de don (v1 informative, cf. Phase 0)
+- [x] `page-about.php` — chiffres clés (badges PureCounter) administrables via ACF (`page_template == page-about.php`), contenu principal via `the_content()`
+- [x] `page-contact.php` — coordonnées/réseaux (déjà sur la page d'options, Tâche 2) + carte Google Maps (adresse géocodée) + point de montage Contact Form 7 via `the_content()` (plugin/formulaire à installer en Phase 6)
+- [x] `page-dons.php` — modalités de don en repeater ACF (RIB, Mobile Money...), 100% informatif, aucune intégration de paiement (voir BUGS_AND_ROADMAP.md)
 - [ ] `page.php` — gabarit générique pour pages simples
 - [x] `single.php` — depuis `blog-details.html` (hero + contenu natif + partage + tags + auteur + commentaires natifs)
 - [x] `archive.php` — depuis `category.html` (boucle + pagination native + sidebar `template-parts/sidebar-blog.php`)
@@ -57,7 +57,7 @@
 
 ## Phase 6 — Formulaires & sécurité
 
-- [ ] Installer/configurer Contact Form 7, adapter son rendu au design `form-floating` du template
+- [ ] Installer le plugin Contact Form 7, créer le formulaire et coller son shortcode dans le contenu de la page Contact (le point de montage `the_content()` et le CSS de base — `.wpcf7-form-control` + `.form-floating` — sont déjà en place, voir `page-contact.php` et DECISIONS.md, Tâche 8)
 - [ ] Ajouter la protection anti-spam (honeypot + reCAPTCHA v3 si retenu)
 - [ ] Revue de sécurité : échappement des sorties, sanitization des entrées, nonces (voir CONVENTIONS.md)
 

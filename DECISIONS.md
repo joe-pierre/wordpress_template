@@ -279,6 +279,39 @@
 
 ---
 
+## [CHOIX] Contenu de `page-about.php` : `the_content()` pour le texte, ACF seulement pour les 2 badges chiffrés
+
+**Contexte :** `about.html` a une section "About" avec un titre, un paragraphe, 2 blocs `.feature-item` (icône + titre + texte), une `.check-list` et un bouton CTA, en plus des deux badges compteurs (`experience-badge`/`projects-badge`) explicitement visés par la Tâche 8.
+**Symptôme / Problème :** Reproduire fidèlement `.feature-item`/`.check-list` obligerait soit à saisir du HTML brut dans l'éditeur (contraire à "utilisable par des rédacteurs non techniques sans toucher au code"), soit à créer des champs ACF pour un contenu dont la structure exacte (nombre de feature-items, longueur du check-list) n'est pas connue avant la collecte de contenu réel (Phase 0, toujours en attente).
+**Cause / Alternatives :** (a) champs ACF/repeater pour chaque bloc du template (feature-items, check-list, CTA) ; (b) laisser tout le texte de la colonne de droite (titre, paragraphes, listes, liens) dans l'éditeur natif de la page (`the_content()`), et ne créer des champs ACF que pour ce qui ne peut pas exister dans un éditeur classique : les deux badges chiffrés positionnés en absolu sur l'image.
+**Fix / Décision :** Option (b), conforme à la formulation de la tâche ("en rendant **les badges compteurs** PureCounter administrables via ACF" — pas le reste du contenu). Les deux badges (`dz_about_badge_bottom`/`dz_about_badge_top`, type `group` avec nombre/suffixe/légende) sont des champs distincts et non un repeater, car leurs positions CSS (`.experience-badge` en bas à gauche, `.projects-badge` en haut à droite, styles différents) sont fixes dans le template, pas une liste extensible. La section "Team" d'`about.html` (collègues fictifs) n'est pas reprise : elle fait doublon avec `archive-pretre.php` (Tâche 6) et n'apparaît pas dans la description de l'écran "À propos" de SPEC.md §11.
+**Leçon :** Ne créer des champs ACF que pour ce que l'éditeur classique ne peut pas produire (positionnement CSS spécifique, valeurs numériques pilotant une animation JS) ; laisser le texte libre au contenu natif de la page.
+**Statut :** 🔵 Choix assumé
+
+---
+
+## [CHOIX] Formulaire Contact Form 7 monté via `the_content()`, sans ID de formulaire codé en dur
+
+**Contexte :** Contact Form 7 n'est pas encore installé (Phase 6, TODO.md) ; la Tâche 8 demande néanmoins d'intégrer "un formulaire Contact Form 7... au style form-floating du template" dans `page-contact.php`.
+**Symptôme / Problème :** Coder en dur un shortcode `[contact-form-7 id="X"]` dans le template PHP est fragile : l'ID du formulaire est généré par CF7 à la création et diffère d'une installation à l'autre ; ce n'est de toute façon pas comme cela que CF7 est conçu pour être utilisé (le shortcode s'insère normalement dans le contenu d'une page, pas dans le code du thème).
+**Cause / Alternatives :** (a) `echo do_shortcode( '[contact-form-7 id="..."]' )` avec un ID codé en dur ou stocké dans une option ; (b) laisser `the_content()` de la page Contact être le point de montage : une fois CF7 installé (Phase 6), le shortcode du formulaire est simplement collé dans le contenu de cette page depuis l'admin, sans toucher au code.
+**Fix / Décision :** Option (b). `page-contact.php` appelle `the_content()` à l'intérieur du bloc `.form-container` réutilisé de `contact.html`. Un style de base cible directement les classes propres à CF7 (`.wpcf7-form-control`, `.wpcf7-not-valid-tip`, `.wpcf7-response-output`) pour un rendu correct même sans configuration supplémentaire ; les règles `.form-floating .form-control` déjà présentes s'appliqueront automatiquement si le formulaire CF7 est construit en enveloppant chaque champ dans une div `.form-floating` (recommandé, à faire en Phase 6 — note laissée dans le commentaire du template et dans TODO.md).
+**Leçon :** Ne jamais coder en dur l'identifiant d'un contenu qui n'existe pas encore au moment du développement du thème (ID de formulaire CF7, ID de page...) ; prévoir le point d'insertion natif WordPress (`the_content()`) à la place.
+**Statut :** 🔵 Choix assumé
+
+---
+
+## [CHOIX] Carte du contact géocodée depuis l'adresse texte, réutilisation de `.info-card`/`.social-links-panel`
+
+**Contexte :** Les coordonnées de contact (téléphone, e-mail, adresse) et les réseaux sociaux sont déjà administrables depuis la Tâche 2 (page d'options "Réglages du thème"), mais n'étaient encore affichés nulle part sur le site.
+**Symptôme / Problème :** L'adresse est stockée en simple texte (`textarea`), pas en `google_map` (type utilisé uniquement pour les paroisses, Tâche 3) ; il n'existe donc pas de latitude/longitude pour la carte de la page Contact.
+**Cause / Alternatives :** (a) ajouter un champ `google_map` dédié sur la page d'options, en plus du champ adresse texte existant (risque de duplication : deux champs à maintenir pour la même information) ; (b) géocoder l'adresse texte existante directement dans l'URL d'embed (`https://www.google.com/maps?q={adresse}&output=embed`, cf. décision équivalente pour les paroisses, Tâche 6).
+**Fix / Décision :** Option (b) — aucune donnée dupliquée, l'adresse reste éditable à un seul endroit. `page-contact.php` réutilise aussi `template-parts/social-links.php` (Tâche 2) pour le panneau "Suivez-nous", et le composant `.info-card` (Tâche 6) pour les tuiles adresse/e-mail/téléphone.
+**Leçon :** Avant d'ajouter un nouveau champ ACF, vérifier si un champ existant peut être réutilisé pour un nouveau besoin d'affichage (ici : texte libre suffisant pour un géocodage Google Maps basique, pas besoin de coordonnées précises).
+**Statut :** 🔵 Choix assumé
+
+---
+
 ## [CHOIX] Modèle de décision — copier ce format pour les prochaines entrées
 
 **Contexte :** ...

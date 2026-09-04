@@ -293,3 +293,170 @@ function dz_register_options_field_group() {
 	);
 }
 add_action( 'acf/init', 'dz_register_options_field_group' );
+
+/**
+ * "Chiffres clés" counter badges on page-about.php (see about.html's
+ * .experience-badge/.projects-badge — two fixed, differently positioned
+ * badges, not a repeatable list, see DECISIONS.md).
+ */
+function dz_register_about_field_group() {
+	if ( ! function_exists( 'acf_add_local_field_group' ) ) {
+		return;
+	}
+
+	$dz_badge_sub_fields = array(
+		array(
+			'key'   => 'field_dz_about_badge_number',
+			'label' => __( 'Nombre', 'diocese-ziguinchor' ),
+			'name'  => 'dz_number',
+			'type'  => 'number',
+		),
+		array(
+			'key'          => 'field_dz_about_badge_suffix',
+			'label'        => __( 'Suffixe', 'diocese-ziguinchor' ),
+			'name'         => 'dz_suffix',
+			'type'         => 'text',
+			'instructions' => __( 'Optionnel, ex. "+".', 'diocese-ziguinchor' ),
+		),
+		array(
+			'key'   => 'field_dz_about_badge_label',
+			'label' => __( 'Légende', 'diocese-ziguinchor' ),
+			'name'  => 'dz_label',
+			'type'  => 'text',
+		),
+	);
+
+	acf_add_local_field_group(
+		array(
+			'key'      => 'group_dz_page_about',
+			'title'    => __( 'Page "À propos" — chiffres clés', 'diocese-ziguinchor' ),
+			'fields'   => array(
+				array(
+					'key'        => 'field_dz_about_badge_bottom',
+					'label'      => __( 'Badge bas', 'diocese-ziguinchor' ),
+					'name'       => 'dz_about_badge_bottom',
+					'type'       => 'group',
+					'sub_fields' => $dz_badge_sub_fields,
+				),
+				array(
+					'key'        => 'field_dz_about_badge_top',
+					'label'      => __( 'Badge haut', 'diocese-ziguinchor' ),
+					'name'       => 'dz_about_badge_top',
+					'type'       => 'group',
+					'sub_fields' => $dz_badge_sub_fields,
+				),
+			),
+			'location' => array(
+				array(
+					array(
+						'param'    => 'page_template',
+						'operator' => '==',
+						'value'    => 'page-about.php',
+					),
+				),
+			),
+		)
+	);
+}
+add_action( 'acf/init', 'dz_register_about_field_group' );
+
+/**
+ * Payment methods shown on page-dons.php: value => [ label, Bootstrap Icons class ].
+ *
+ * @return array<string,array{label:string,icon:string}>
+ */
+function dz_get_don_payment_methods() {
+	return array(
+		'banque' => array(
+			'label' => __( 'Virement bancaire', 'diocese-ziguinchor' ),
+			'icon'  => 'bi-bank',
+		),
+		'mobile' => array(
+			'label' => __( 'Mobile Money', 'diocese-ziguinchor' ),
+			'icon'  => 'bi-phone',
+		),
+		'especes' => array(
+			'label' => __( 'Espèces', 'diocese-ziguinchor' ),
+			'icon'  => 'bi-cash-coin',
+		),
+		'autre' => array(
+			'label' => __( 'Autre', 'diocese-ziguinchor' ),
+			'icon'  => 'bi-heart',
+		),
+	);
+}
+
+function dz_get_don_icon_class( $method ) {
+	$methods = dz_get_don_payment_methods();
+	return isset( $methods[ $method ] ) ? $methods[ $method ]['icon'] : 'bi-heart';
+}
+
+/**
+ * Donation modalities repeater on page-dons.php (SPEC.md §3: "champs ACF
+ * pour les modalités (RIB, Mobile Money, etc.)"). No online payment
+ * integration — see BUGS_AND_ROADMAP.md.
+ */
+function dz_register_dons_field_group() {
+	if ( ! function_exists( 'acf_add_local_field_group' ) ) {
+		return;
+	}
+
+	$dz_method_choices = array();
+	foreach ( dz_get_don_payment_methods() as $value => $method ) {
+		$dz_method_choices[ $value ] = $method['label'];
+	}
+
+	acf_add_local_field_group(
+		array(
+			'key'      => 'group_dz_page_dons',
+			'title'    => __( 'Page "Dons" — modalités', 'diocese-ziguinchor' ),
+			'fields'   => array(
+				array(
+					'key'          => 'field_dz_dons_modalites',
+					'label'        => __( 'Modalités de don', 'diocese-ziguinchor' ),
+					'name'         => 'dz_dons_modalites',
+					'type'         => 'repeater',
+					'instructions' => __( 'Ex. RIB bancaire, numéro Orange Money/Wave...', 'diocese-ziguinchor' ),
+					'min'          => 0,
+					'layout'       => 'block',
+					'button_label' => __( 'Ajouter une modalité', 'diocese-ziguinchor' ),
+					'sub_fields'   => array(
+						array(
+							'key'     => 'field_dz_dons_modalite_type',
+							'label'   => __( 'Type', 'diocese-ziguinchor' ),
+							'name'    => 'dz_dons_modalite_type',
+							'type'    => 'select',
+							'choices' => $dz_method_choices,
+							'required' => 1,
+						),
+						array(
+							'key'      => 'field_dz_dons_modalite_titre',
+							'label'    => __( 'Titre', 'diocese-ziguinchor' ),
+							'name'     => 'dz_dons_modalite_titre',
+							'type'     => 'text',
+							'required' => 1,
+						),
+						array(
+							'key'      => 'field_dz_dons_modalite_details',
+							'label'    => __( 'Détails', 'diocese-ziguinchor' ),
+							'name'     => 'dz_dons_modalite_details',
+							'type'     => 'textarea',
+							'rows'     => 4,
+							'required' => 1,
+						),
+					),
+				),
+			),
+			'location' => array(
+				array(
+					array(
+						'param'    => 'page_template',
+						'operator' => '==',
+						'value'    => 'page-dons.php',
+					),
+				),
+			),
+		)
+	);
+}
+add_action( 'acf/init', 'dz_register_dons_field_group' );

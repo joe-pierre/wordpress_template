@@ -4880,3 +4880,52 @@ step number instead of an icon glyph in .feature-icon.
   font-weight: 700;
   color: var(--accent-color);
 }
+
+/*--------------------------------------------------------------
+# Diocèse de Ziguinchor — Formulaire Contact Form 7 (page-contact.php)
+Baseline styling for CF7's own default markup (.wpcf7-form-control,
+wrapped in <p> tags), so the form looks acceptable even before a true
+Bootstrap floating-label form is hand-built in the CF7 admin — see
+DECISIONS.md. The .form-floating .form-control rules already above this
+block still apply and take over once fields are wrapped that way.
+--------------------------------------------------------------*/
+.contact .form-container .wpcf7-form p {
+  margin-bottom: 20px;
+}
+
+.contact .form-container .wpcf7-form-control:not([type="submit"]) {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--default-color), transparent 80%);
+  padding: 12px 20px;
+  background-color: var(--surface-color);
+  color: var(--default-color);
+  transition: all 0.3s ease;
+}
+
+.contact .form-container .wpcf7-form-control:not([type="submit"]):focus {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-color), transparent 85%);
+  border-color: color-mix(in srgb, var(--accent-color), transparent 40%);
+  outline: none;
+}
+
+.contact .form-container input.wpcf7-form-control[type="submit"] {
+  background: linear-gradient(145deg, var(--accent-color), color-mix(in srgb, var(--accent-color), #1a4372 30%));
+  color: var(--contrast-color);
+  border: none;
+  padding: 15px 25px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.contact .form-container .wpcf7-not-valid-tip {
+  color: #c0392b;
+  font-size: 13px;
+  margin-top: 5px;
+}
+
+.contact .form-container .wpcf7-response-output {
+  border-radius: 12px;
+  margin-top: 20px;
+}
