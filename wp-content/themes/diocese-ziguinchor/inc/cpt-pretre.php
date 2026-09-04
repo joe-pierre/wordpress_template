@@ -44,3 +44,53 @@ function dz_register_cpt_pretre() {
 	);
 }
 add_action( 'init', 'dz_register_cpt_pretre' );
+
+/**
+ * Directory listing sorted alphabetically by name, more usable than the
+ * post-type archive's date-based default for a clergy directory.
+ */
+function dz_pretre_archive_query( $query ) {
+	if ( is_admin() || ! $query->is_main_query() ) {
+		return;
+	}
+
+	if ( is_post_type_archive( 'pretre' ) ) {
+		$query->set( 'orderby', 'title' );
+		$query->set( 'order', 'ASC' );
+	}
+}
+add_action( 'pre_get_posts', 'dz_pretre_archive_query' );
+
+/**
+ * French label for a `pretre_fonction` choice (see acf-json/group_dz_cpt_pretre.json).
+ *
+ * @param string $fonction
+ * @return string
+ */
+function dz_get_pretre_fonction_label( $fonction ) {
+	$dz_labels = array(
+		'cure'    => __( 'Curé', 'diocese-ziguinchor' ),
+		'vicaire' => __( 'Vicaire', 'diocese-ziguinchor' ),
+		'diacre'  => __( 'Diacre', 'diocese-ziguinchor' ),
+		'autre'   => __( 'Autre', 'diocese-ziguinchor' ),
+	);
+
+	return isset( $dz_labels[ $fonction ] ) ? $dz_labels[ $fonction ] : '';
+}
+
+/**
+ * French label for a `pretre_statut` choice (see acf-json/group_dz_cpt_pretre.json).
+ *
+ * @param string $statut
+ * @return string
+ */
+function dz_get_pretre_statut_label( $statut ) {
+	$dz_labels = array(
+		'en_fonction'      => __( 'En fonction', 'diocese-ziguinchor' ),
+		'retraite'         => __( 'Retraité', 'diocese-ziguinchor' ),
+		'en_formation'     => __( 'En formation', 'diocese-ziguinchor' ),
+		'sans_affectation' => __( 'Sans affectation', 'diocese-ziguinchor' ),
+	);
+
+	return isset( $dz_labels[ $statut ] ) ? $dz_labels[ $statut ] : '';
+}

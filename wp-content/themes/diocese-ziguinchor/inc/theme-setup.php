@@ -73,6 +73,27 @@ function dz_get_page_url_by_template( $template ) {
 }
 
 /**
+ * Reads an ACF field on any post, without fataling if ACF is not active.
+ * Use this (rather than get_field() directly) for every CPT relation/field
+ * read in templates, per CONVENTIONS.md — a missing/incomplete field must
+ * never trigger a PHP error.
+ *
+ * @param string   $selector ACF field name.
+ * @param int|null $post_id  Post ID, defaults to the current post.
+ * @param mixed    $default  Value returned when ACF is inactive or the field is empty.
+ * @return mixed
+ */
+function dz_get_field( $selector, $post_id = null, $default = null ) {
+	if ( ! function_exists( 'get_field' ) ) {
+		return $default;
+	}
+
+	$value = get_field( $selector, $post_id );
+
+	return ( null === $value || false === $value || '' === $value ) ? $default : $value;
+}
+
+/**
  * Estimated reading time for a post, in whole minutes (minimum 1).
  *
  * @param int $post_id

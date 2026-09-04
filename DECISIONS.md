@@ -222,6 +222,39 @@
 
 ---
 
+## [CHOIX] `.paroisse-card` créée sur mesure, `.team`/`.contact` réutilisées telles quelles
+
+**Contexte :** Le template source ne contient aucun gabarit visuel équivalent à une fiche/carte de paroisse. En revanche, `about.html` a une section "Team" (`.team .team-member`) qui correspond visuellement à une fiche prêtre, et `contact.html` a des tuiles d'information + une carte Google Maps embarquée (`.contact .info-card`, `.contact .map-container`) qui correspondent exactement à un bloc "coordonnées de paroisse".
+**Symptôme / Problème :** CONVENTIONS.md demande à la fois de conserver la nomenclature du template pour toute section réutilisée telle quelle, et de suivre le même style (`kebab-case`, ex. `.paroisse-card`) pour toute nouvelle section métier qui n'a pas d'équivalent.
+**Cause / Alternatives :** (a) forcer la réutilisation d'une classe existante sans rapport visuel (ex. `.blog-card`, scoping `#featured-posts`) pour la carte d'annuaire des paroisses ; (b) créer une nouvelle classe `.paroisse-card` minimale, cohérente avec les variables CSS déjà définies (`--heading-color`, `--accent-color`, `--surface-color`), uniquement là où aucun composant existant ne correspond.
+**Fix / Décision :** Option (b) pour `card-paroisse.php` (nouvelle classe `.paroisse-card`, ajoutée en fin de `assets/css/main.css` du thème). Pour tout le reste des gabarits Paroisses/Prêtres, réutilisation à l'identique des classes existantes : `.team`/`.team-member`/`.member-image`/`.member-info`/`.social-overlay` (fiche et annuaire des prêtres), `.contact`/`.contact-info-panel`/`.info-card`/`.map-container` (coordonnées + carte de la paroisse), `.author-profile`/`.author-card`/`.designation`/`.author-content` (fiche prêtre individuelle, réutilisation de la page "Author Profile" du template — une fiche de prêtre a la même forme qu'un profil d'auteur : photo, nom, rôle, biographie, contact).
+**Leçon :** Chercher d'abord un composant visuel existant qui correspond structurellement (même sans rapport sémantique avec son nom d'origine) avant de créer une nouvelle classe ; ne créer du CSS neuf que pour ce qui n'a vraiment aucun équivalent.
+**Statut :** 🔵 Choix assumé
+
+---
+
+## [CHOIX] Carte de localisation en simple `iframe` `google.com/maps?q=lat,lng&output=embed`, sans clé API
+
+**Contexte :** Le champ ACF `paroisse_localisation` (type `google_map`) fournit une latitude/longitude par paroisse ; `contact.html` intègre une carte via une URL d'embed Google Maps `.../maps/embed?pb=...` généré depuis l'interface "Partager > Intégrer une carte" de Google, propre à un lieu précis et non reproductible dynamiquement à partir d'une simple latitude/longitude.
+**Symptôme / Problème :** Le format d'embed `pb=` du template source est un blob encodé propre à un lieu, non générable dynamiquement pour chaque paroisse depuis ses seules coordonnées GPS. Un embed JavaScript "propre" (Google Maps JavaScript API) nécessiterait une clé API à configurer et facturer, hors périmètre technique de cette tâche.
+**Cause / Alternatives :** (a) Google Maps JavaScript API avec clé API (facturation, configuration wp-config additionnelle) ; (b) format d'URL d'embed simplifié `https://www.google.com/maps?q={lat},{lng}&output=embed`, sans clé API, fonctionnant directement dans une balise `<iframe>`.
+**Fix / Décision :** Option (b) — voir `single-paroisse.php`. Le bloc carte ne s'affiche que si latitude et longitude sont toutes les deux renseignées (vérification avant affichage, cf. CONVENTIONS.md §Validation).
+**Leçon :** Un embed Google Maps basique par coordonnées ne nécessite pas de clé API ; la réserver pour plus tard uniquement si un besoin de carte interactive plus riche (marqueurs multiples, style personnalisé) apparaît.
+**Statut :** 🔵 Choix assumé
+
+---
+
+## [CHOIX] `archive-pretre.php` créé (annuaire des prêtres), absent de SPEC.md §5 mais requis par SPEC.md §11 et TODO.md
+
+**Contexte :** SPEC.md §5 (architecture) ne liste pas `archive-pretre.php` dans l'arborescence, alors que SPEC.md §11 (écrans) prévoit explicitement "Prêtres (liste + détail) — annuaire du clergé" et TODO.md Phase 5 mentionne `archive-pretre.php`.
+**Symptôme / Problème :** Suivre littéralement l'arborescence de SPEC.md §5 laisserait les prêtres sans page de liste, alors que l'annuaire du clergé est un écran explicitement prévu ailleurs dans le même document.
+**Cause / Alternatives :** (a) ignorer l'écart et ne pas créer `archive-pretre.php` ; (b) le créer, en le signalant comme un oubli probable de la section architecture plutôt qu'un choix de scope délibéré.
+**Fix / Décision :** Option (b) — déjà anticipé dans DECISIONS.md (Tâche 3) et TODO.md. `has_archive => true` était déjà actif sur le CPT `pretre` depuis la Tâche 3 ; seul le fichier de template manquait.
+**Leçon :** SPEC.md §5 n'est pas exhaustif ; croiser avec §11 (Écrans) et TODO.md avant de conclure qu'un gabarit n'est pas nécessaire.
+**Statut :** ✅ Résolu
+
+---
+
 ## [CHOIX] Modèle de décision — copier ce format pour les prochaines entrées
 
 **Contexte :** ...

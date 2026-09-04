@@ -1,6 +1,10 @@
 <?php
 /**
- * Paroisse directory/listing template.
+ * Pretre (clergy) directory/listing template.
+ *
+ * Not listed in SPEC.md §5's file tree, but required by TODO.md Phase 5 and
+ * SPEC.md §11 ("Prêtres — liste + détail — annuaire du clergé") — see
+ * DECISIONS.md.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -13,23 +17,23 @@ get_template_part(
 	'template-parts/page-title',
 	null,
 	array(
-		'title'      => __( 'Nos paroisses', 'diocese-ziguinchor' ),
-		'breadcrumb' => __( 'Paroisses', 'diocese-ziguinchor' ),
+		'title'      => __( 'Nos prêtres', 'diocese-ziguinchor' ),
+		'breadcrumb' => __( 'Prêtres', 'diocese-ziguinchor' ),
 	)
 );
 ?>
 
-<section id="paroisses" class="paroisses section">
+<section id="team" class="team section">
 	<div class="container" data-aos="fade-up" data-aos-delay="100">
 		<?php if ( have_posts() ) : ?>
-			<div class="row gy-4">
+			<div class="row g-4">
 				<?php
 				while ( have_posts() ) :
 					the_post();
 					?>
-					<div class="col-lg-4 col-md-6">
-						<?php get_template_part( 'template-parts/card-paroisse' ); ?>
-					</div>
+					<div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+						<?php get_template_part( 'template-parts/card-pretre' ); ?>
+					</div><!-- End Team Member -->
 					<?php
 				endwhile;
 				?>
@@ -47,7 +51,7 @@ get_template_part(
 				?>
 			</div>
 		<?php else : ?>
-			<p><?php esc_html_e( 'Aucune paroisse pour le moment.', 'diocese-ziguinchor' ); ?></p>
+			<p><?php esc_html_e( 'Aucun prêtre pour le moment.', 'diocese-ziguinchor' ); ?></p>
 		<?php endif; ?>
 	</div>
 </section>

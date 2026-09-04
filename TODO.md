@@ -49,11 +49,11 @@
 
 ## Phase 5 — Gabarits métier (Paroisses, Prêtres, Événements, Sacrements)
 
-- [ ] `single-paroisse.php` + `archive-paroisse.php` (annuaire + fiche paroisse)
-- [ ] `single-pretre.php` + `archive-pretre.php` (annuaire + fiche prêtre)
+- [x] `single-paroisse.php` + `archive-paroisse.php` (annuaire + fiche paroisse — coordonnées, horaires, carte, curé/vicaires)
+- [x] `single-pretre.php` + `archive-pretre.php` (annuaire + fiche prêtre — fonction, ordination, paroisse d'affectation)
 - [ ] `single-evenement.php` + `archive-evenement.php` (agenda, filtré sur événements à venir — voir SPEC.md §4)
 - [ ] `single-sacrement.php` (liste des sacrements, pas forcément d'archive si peu nombreux)
-- [ ] Template-parts réutilisables : `card-paroisse.php`, `card-pretre.php`, `card-evenement.php` (`card-article.php` fait, Phase 4)
+- [ ] Template-parts réutilisables : `card-evenement.php` (`card-article.php`, `card-paroisse.php`, `card-pretre.php` faits)
 
 ## Phase 6 — Formulaires & sécurité
 

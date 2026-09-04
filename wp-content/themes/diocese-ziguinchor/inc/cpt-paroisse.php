@@ -44,3 +44,50 @@ function dz_register_cpt_paroisse() {
 	);
 }
 add_action( 'init', 'dz_register_cpt_paroisse' );
+
+/**
+ * Directory listing sorted alphabetically by name, more usable than the
+ * post-type archive's date-based default for a parish directory.
+ */
+function dz_paroisse_archive_query( $query ) {
+	if ( is_admin() || ! $query->is_main_query() ) {
+		return;
+	}
+
+	if ( is_post_type_archive( 'paroisse' ) ) {
+		$query->set( 'orderby', 'title' );
+		$query->set( 'order', 'ASC' );
+	}
+}
+add_action( 'pre_get_posts', 'dz_paroisse_archive_query' );
+
+/**
+ * Clergy assigned to a paroisse, optionally filtered by function
+ * (see field_dz_pretre_fonction: cure/vicaire/diacre/autre).
+ *
+ * Reads the `paroisse_pretres` relationship field, which ACF keeps in sync
+ * with each pretre's own `pretre_paroisse` field (bidirectional relation,
+ * see DECISIONS.md) — this is the single source of truth for "who serves
+ * this parish", there is no separately maintained list.
+ *
+ * @param int    $paroisse_id
+ * @param string $fonction Optional. 'cure', 'vicaire', 'diacre', 'autre'. Empty returns all.
+ * @return WP_Post[]
+ */
+function dz_get_paroisse_clergy( $paroisse_id, $fonction = '' ) {
+	$dz_pretre_ids = dz_get_field( 'paroisse_pretres', $paroisse_id, array() );
+	$dz_clergy     = array();
+
+	foreach ( (array) $dz_pretre_ids as $dz_pretre_id ) {
+		if ( '' !== $fonction && $fonction !== dz_get_field( 'pretre_fonction', $dz_pretre_id ) ) {
+			continue;
+		}
+
+		$dz_pretre = get_post( $dz_pretre_id );
+		if ( $dz_pretre ) {
+			$dz_clergy[] = $dz_pretre;
+		}
+	}
+
+	return $dz_clergy;
+}
