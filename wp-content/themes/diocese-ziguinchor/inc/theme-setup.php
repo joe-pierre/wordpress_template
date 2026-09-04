@@ -71,3 +71,15 @@ function dz_get_page_url_by_template( $template ) {
 
 	return $pages ? get_permalink( $pages[0] ) : home_url( '/' );
 }
+
+/**
+ * Estimated reading time for a post, in whole minutes (minimum 1).
+ *
+ * @param int $post_id
+ * @return int
+ */
+function dz_get_reading_time( $post_id ) {
+	$word_count = str_word_count( wp_strip_all_tags( get_post_field( 'post_content', $post_id ) ) );
+
+	return max( 1, (int) ceil( $word_count / 200 ) );
+}

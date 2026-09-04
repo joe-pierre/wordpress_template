@@ -34,7 +34,7 @@
 
 ## Phase 4 — Gabarits de pages
 
-- [ ] `front-page.php` — accueil (hero slider limité à 5 slides + actualités à la une + accès rapides)
+- [x] `front-page.php` — hero slider (repeater ACF `dz_hero_slides`, max 5) + actualités à la une (`WP_Query` sur `post_a_la_une`) ; accès rapides (Paroisses/Prêtres/Sacrements/Dons) pas encore fait — hors périmètre de cette passe, à ajouter avec `category-section`/`latest-posts`
 - [ ] `page-about.php` — À propos du diocèse (badges compteurs PureCounter dynamiques)
 - [ ] `page-contact.php` — formulaire Contact Form 7 intégré au design du template + carte
 - [ ] `page-dons.php` — modalités de don (v1 informative, cf. Phase 0)

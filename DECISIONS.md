@@ -143,6 +143,39 @@
 
 ---
 
+## [CHOIX] Slides du hero ajoutées à la page d'options "Réglages du thème" plutôt qu'à un objet Page
+
+**Contexte :** Le repeater ACF des slides du hero (décision "Hero slider... limité à 5 slides") doit être rattaché quelque part pour être édité par un rédacteur.
+**Symptôme / Problème :** Une règle de localisation ACF `page_type == front_page` ne fonctionne que si les réglages de lecture WordPress pointent vers une page statique précise ; si le site utilise "Vos derniers articles" comme page d'accueil (ou change de configuration plus tard), le champ deviendrait invisible dans l'admin alors que `front-page.php` continue de s'afficher.
+**Cause / Alternatives :** (a) champ rattaché à une page spécifique via une règle de localisation `page_type == front_page` ; (b) champ ajouté à la page d'options globale déjà créée en Tâche 2 ("Réglages du thème"), nouvel onglet "Page d'accueil".
+**Fix / Décision :** Option (b) — `field_dz_hero_slides` dans `group_dz_theme_settings` (`inc/acf-fields.php`), lu via `dz_get_option( 'dz_hero_slides' )`. Reste disponible quel que soit le réglage de lecture WordPress, et cohérent avec le principe déjà établi (logo, réseaux sociaux, footer) : la configuration de la structure du site passe par cette page d'options unique.
+**Leçon :** Ne pas coupler un champ ACF à un objet Page quand le contenu est en réalité une configuration de gabarit (`front-page.php`), pas un contenu éditorial de page.
+**Statut :** 🔵 Choix assumé
+
+---
+
+## [CHOIX] Slides du hero simplifiées (pas de méta auteur/date/temps de lecture/vues)
+
+**Contexte :** Le balisage `blog-hero-item` du template d'origine affiche, pour chaque slide, un auteur, une date, un temps de lecture et un nombre de vues — pertinent pour un article de blog, pas pour une bannière d'accueil institutionnelle.
+**Symptôme / Problème :** Reproduire ces 4 champs sur chaque slide obligerait un rédacteur à saisir un "auteur" et des "vues" fictifs pour une bannière annonçant, par exemple, une visite pastorale — une charge de saisie sans aucune valeur pour le diocèse.
+**Cause / Alternatives :** (a) répliquer fidèlement tous les champs meta du template de démo ; (b) ne garder que ce qui a un sens pour une bannière (image, badge, titre, lien optionnel).
+**Fix / Décision :** Option (b). Le repeater `dz_hero_slides` ne contient que `dz_hero_slide_image`, `dz_hero_slide_badge`, `dz_hero_slide_title`, `dz_hero_slide_link_label` et `dz_hero_slide_link_url`. Le balisage visuel (`.blog-hero-item`, `.blog-hero-content`, `.category`, `.read-more`) est conservé à l'identique ; seul le contenu `.meta` (auteur/date/temps de lecture/vues) du template de démo est abandonné.
+**Leçon :** Réutiliser le gabarit visuel du template ne veut pas dire répliquer tous ses champs de contenu factices — adapter le modèle de données au besoin métier réel (voir aussi la décision sur les champs natifs des CPT).
+**Statut :** 🔵 Choix assumé
+
+---
+
+## [CHOIX] `front-page.php` limité au hero + "à la une" pour cette passe
+
+**Contexte :** `index.html` contient 4 sections (`blog-hero`, `featured-posts`, `category-section`, `latest-posts`) ; la tâche demandait explicitement de convertir "hero slider + section Featured Posts".
+**Symptôme / Problème :** `category-section` et `latest-posts` n'ont pas d'équivalent métier défini dans SPEC.md (pas de notion de "catégories mises en avant" ni de liste "derniers articles" décrite pour l'accueil), et les "accès rapides" (Paroisses/Prêtres/Sacrements/Dons) mentionnés dans SPEC.md §11 ne sont pas non plus présents dans le template d'origine.
+**Cause / Alternatives :** (a) implémenter toutes les sections d'un coup, en improvisant un modèle de données pour celles qui n'ont pas de spec précise ; (b) livrer exactement le périmètre demandé (hero + à la une) et laisser `category-section`, `latest-posts` et les accès rapides pour une itération dédiée, une fois leur contenu métier précisé.
+**Fix / Décision :** Option (b). `front-page.php` ne contient que les deux sections demandées. `TODO.md` note explicitement ce qui reste à faire sur l'accueil.
+**Leçon :** Ne pas anticiper un contenu non spécifié : mieux vaut livrer un périmètre clair et le signaler que d'improviser une structure de données pour une section dont le besoin réel n'est pas encore connu.
+**Statut :** 🔵 Choix assumé
+
+---
+
 ## [CHOIX] Modèle de décision — copier ce format pour les prochaines entrées
 
 **Contexte :** ...
