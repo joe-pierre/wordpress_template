@@ -12,6 +12,8 @@ define( 'DZ_THEME_DIR', get_template_directory() );
 define( 'DZ_THEME_URI', get_template_directory_uri() );
 
 require_once DZ_THEME_DIR . '/inc/theme-setup.php';
+require_once DZ_THEME_DIR . '/inc/class-dz-walker-nav-menu.php';
+require_once DZ_THEME_DIR . '/inc/acf-fields.php';
 
 /**
  * Enqueue vendor and theme front-end assets (Bootstrap, Bootstrap Icons, AOS,

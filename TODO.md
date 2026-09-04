@@ -17,10 +17,10 @@
 
 ## Phase 2 — Header / Footer / Navigation
 
-- [ ] Convertir le header commun en `header.php` (`wp_nav_menu()` pour le menu principal)
-- [ ] Implémenter le Walker custom pour le menu à 2 niveaux (voir DECISIONS.md — simplification du Deep Dropdown)
-- [ ] Convertir le footer commun en `footer.php` (liens footer via menu WP ou ACF Options, réseaux sociaux via champs ACF Options)
-- [ ] Créer la page d'options ACF "Réglages du thème" (logo, réseaux sociaux, coordonnées, footer)
+- [x] Convertir le header commun en `header.php` (`wp_nav_menu()` pour le menu principal)
+- [x] Implémenter le Walker custom pour le menu à 2 niveaux (voir DECISIONS.md — simplification du Deep Dropdown) — `inc/class-dz-walker-nav-menu.php`
+- [x] Convertir le footer commun en `footer.php` (liens footer via ACF Options, réseaux sociaux via champs ACF Options)
+- [x] Créer la page d'options ACF "Réglages du thème" (logo, réseaux sociaux, coordonnées, footer) — `inc/acf-fields.php`, slug `dz-theme-settings`
 
 ## Phase 3 — Custom Post Types & ACF
 

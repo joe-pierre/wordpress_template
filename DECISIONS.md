@@ -77,6 +77,39 @@
 
 ---
 
+## [CHOIX] Double garde-fou pour la limite de profondeur du menu (2 niveaux)
+
+**Contexte :** La décision "Simplifier le menu de navigation à 2 niveaux" (ci-dessus) fixe la règle métier ; la Tâche 2 demande explicitement un `Walker_Nav_Menu` custom pour l'appliquer.
+**Symptôme / Problème :** `wp_nav_menu( array( 'depth' => 2, ... ) )` seul suffit déjà techniquement à empêcher WordPress Core de descendre à un 3ᵉ niveau ; construire aussi la logique dans le Walker est redondant en théorie.
+**Cause / Alternatives :** (a) se reposer uniquement sur l'argument `depth` de `wp_nav_menu()` ; (b) appliquer la limite aussi dans `start_lvl()`/`start_el()` du Walker custom.
+**Fix / Décision :** Les deux : `depth => 2` **et** un Walker (`DZ_Walker_Nav_Menu`, `inc/class-dz-walker-nav-menu.php`) qui refuse explicitement de générer le 3ᵉ niveau, quelle que soit la valeur de `depth` passée par erreur plus tard. Le Walker reproduit aussi le balisage exact du template d'origine (span + icône `bi-chevron-down` sur les éléments avec sous-menu, classe `dropdown` sur le `<li>`, classe `active` sur le lien courant) nécessaire au JS (`main.js`) et au CSS (`main.css`) existants.
+**Leçon :** Quand une règle métier est actée (2 niveaux max), l'appliquer à la fois par configuration et par code rend l'erreur de configuration future inoffensive.
+**Statut :** ✅ Résolu (testé avec un jeu de données synthétique à 3 niveaux : le 3ᵉ niveau n'apparaît jamais dans la sortie)
+
+---
+
+## [CHOIX] Une seule liste "Réseaux sociaux" partagée entre header et footer
+
+**Contexte :** Dans le template d'origine, le header affiche 4 icônes sociales (Twitter, Facebook, Instagram, LinkedIn) et le footer en affiche 5 différentes (Facebook, Instagram, LinkedIn, Twitter, Dribbble), toutes en `href="#"` factices — aucune des deux listes n'a de sens métier propre.
+**Symptôme / Problème :** Répliquer deux listes différentes forcerait à créer deux champs ACF répéteurs distincts (un pour le header, un pour le footer) pour un contenu qui, dans la réalité du diocèse, est le même (les comptes officiels du diocèse).
+**Cause / Alternatives :** (a) deux champs répéteurs ACF séparés (fidélité totale au template de démo) ; (b) un seul champ répéteur `dz_social_links` sur la page d'options, réutilisé dans les deux emplacements via `template-parts/social-links.php`.
+**Fix / Décision :** Option (b). Un seul repeater `dz_social_links` (choix de plateforme + URL), rendu par un template-part commun appelé avec une classe de conteneur différente (`header-social-links` vs `social-links mt-4`) pour conserver le style visuel de chaque emplacement.
+**Leçon :** Ne pas dupliquer un champ ACF quand la donnée réelle (les comptes sociaux du diocèse) est unique, même si le template de démo affichait deux listes différentes sans rapport.
+**Statut :** 🔵 Choix assumé
+
+---
+
+## [CHOIX] Colonnes de liens du footer limitées à 3 (repeater ACF `max: 3`)
+
+**Contexte :** Le footer du template affiche 3 colonnes de liens (`Company`/`Services`/`Support`) dans une grille Bootstrap `col-6 col-md-4` × 3 à l'intérieur d'un `col-lg-6`.
+**Symptôme / Problème :** Un repeater ACF `dz_footer_columns` sans limite permettrait à un rédacteur d'ajouter une 4ᵉ colonne ou plus, cassant la mise en page (la grille n'est prévue que pour 3).
+**Cause / Alternatives :** Repeater sans `max` vs. avec `max: 3`, à l'image de la décision déjà prise pour le hero slider (`max: 5`).
+**Fix / Décision :** `max: 3` sur `dz_footer_columns` (`inc/acf-fields.php`). Chaque colonne a elle-même un sous-repeater `dz_footer_column_links` sans limite (une liste de liens dans une colonne ne casse pas la grille, seule la largeur en colonnes est contrainte).
+**Leçon :** Même logique que le hero slider : anticiper les contraintes de mise en page Bootstrap dès la définition des champs ACF plutôt que de les découvrir après un problème d'affichage.
+**Statut :** 🔵 Choix assumé
+
+---
+
 ## [CHOIX] Modèle de décision — copier ce format pour les prochaines entrées
 
 **Contexte :** ...
