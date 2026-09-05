@@ -150,7 +150,7 @@
 **Cause / Alternatives :** (a) champ rattaché à une page spécifique via une règle de localisation `page_type == front_page` ; (b) champ ajouté à la page d'options globale déjà créée en Tâche 2 ("Réglages du thème"), nouvel onglet "Page d'accueil".
 **Fix / Décision :** Option (b) — `field_dz_hero_slides` dans `group_dz_theme_settings` (`inc/acf-fields.php`), lu via `dz_get_option( 'dz_hero_slides' )`. Reste disponible quel que soit le réglage de lecture WordPress, et cohérent avec le principe déjà établi (logo, réseaux sociaux, footer) : la configuration de la structure du site passe par cette page d'options unique.
 **Leçon :** Ne pas coupler un champ ACF à un objet Page quand le contenu est en réalité une configuration de gabarit (`front-page.php`), pas un contenu éditorial de page.
-**Statut :** 🔵 Choix assumé
+**Statut :** ⚠️ Remplacée — voir "`group_dz_front_hero` remplace `dz_hero_slides`..." plus bas : une consigne ultérieure a explicitement demandé de rattacher le hero à la page d'accueil malgré la limite décrite ici.
 
 ---
 
@@ -159,9 +159,9 @@
 **Contexte :** Le balisage `blog-hero-item` du template d'origine affiche, pour chaque slide, un auteur, une date, un temps de lecture et un nombre de vues — pertinent pour un article de blog, pas pour une bannière d'accueil institutionnelle.
 **Symptôme / Problème :** Reproduire ces 4 champs sur chaque slide obligerait un rédacteur à saisir un "auteur" et des "vues" fictifs pour une bannière annonçant, par exemple, une visite pastorale — une charge de saisie sans aucune valeur pour le diocèse.
 **Cause / Alternatives :** (a) répliquer fidèlement tous les champs meta du template de démo ; (b) ne garder que ce qui a un sens pour une bannière (image, badge, titre, lien optionnel).
-**Fix / Décision :** Option (b). Le repeater `dz_hero_slides` ne contient que `dz_hero_slide_image`, `dz_hero_slide_badge`, `dz_hero_slide_title`, `dz_hero_slide_link_label` et `dz_hero_slide_link_url`. Le balisage visuel (`.blog-hero-item`, `.blog-hero-content`, `.category`, `.read-more`) est conservé à l'identique ; seul le contenu `.meta` (auteur/date/temps de lecture/vues) du template de démo est abandonné.
+**Fix / Décision :** Option (b). Le repeater (renommé `dz_front_hero_slides` dans `group_dz_front_hero`, voir la décision "`group_dz_front_hero` remplace `dz_hero_slides`...") ne contient que image, titre, sous-titre/texte libre et lien optionnel (`dz_front_hero_slide_image`/`_titre`/`_texte`/`_lien`) — pas de badge de catégorie ni de méta factice. Le balisage visuel (`.blog-hero-item`, `.blog-hero-content`, `.read-more`) est conservé à l'identique ; seul le contenu `.meta` (auteur/date/temps de lecture/vues) du template de démo est abandonné.
 **Leçon :** Réutiliser le gabarit visuel du template ne veut pas dire répliquer tous ses champs de contenu factices — adapter le modèle de données au besoin métier réel (voir aussi la décision sur les champs natifs des CPT).
-**Statut :** 🔵 Choix assumé
+**Statut :** 🔵 Choix assumé — noms de champs mis à jour lors du remplacement par `group_dz_front_hero`, principe inchangé
 
 ---
 
@@ -353,6 +353,28 @@
 **Fix / Décision :** `paroisse` → 21, `pretre` → 22, `evenement` → 23, `sacrement` → 24 (créneaux libres entre "Pages" (20) et "Commentaires" (25), voir `inc/cpt-*.php`).
 **Leçon :** Vérifier la liste des `menu_position` réservées par WordPress Core avant d'enregistrer un CPT (5, 10, 20, 25, 60, 65, 70, 75, 80, 99).
 **Statut :** ✅ Résolu
+
+---
+
+## [CHOIX] `group_dz_front_hero` remplace `dz_hero_slides` : le hero repasse sur la page d'accueil, à la demande explicite du client
+
+**Contexte :** La Tâche 4 avait délibérément mis le repeater des slides du hero sur la page d'options "Réglages du thème" (`dz_hero_slides`, dans `group_dz_theme_settings`) plutôt que sur l'objet Page servant de page d'accueil, précisément pour ne pas dépendre du réglage "Vos derniers articles" vs. "Une page statique" dans Réglages > Lecture (voir la décision "Slides du hero ajoutées à la page d'options..."). Une nouvelle consigne demande explicitement de créer `group_dz_front_hero`, "associé à la page d'accueil".
+**Symptôme / Problème :** Cette consigne contredit directement le choix de la Tâche 4. Conformément à CLAUDE.md ("vérifier qu'une nouvelle tâche ne contredit pas une entrée de DECISIONS.md ... et l'inscrire comme nouvelle décision si le contexte a changé"), le changement est appliqué mais documenté ici plutôt que fait silencieusement.
+**Cause / Alternatives :** (a) garder `dz_hero_slides` sur la page d'options ; (b) créer `group_dz_front_hero`, localisé via la règle ACF native `page_type == front_page` (cible la page définie comme page d'accueil statique dans Réglages > Lecture, quel que soit son ID).
+**Fix / Décision :** Option (b), à la demande explicite et documentée du client. `dz_hero_slides` et l'onglet "Page d'accueil" sont retirés de `group_dz_theme_settings` (Tâche 4) ; `group_dz_front_hero` (repeater `dz_front_hero_slides`, max 5 : image, titre, sous-titre/texte, lien optionnel) est ajouté avec la règle `page_type == front_page`. La limite de la Tâche 4 reste vraie et est traitée comme un état vide géré, pas comme une erreur : `dz_get_front_hero_slides()` (`inc/acf-fields.php`) renvoie un tableau vide si Réglages > Lecture n'est pas configuré sur "Une page statique" (ou si aucune page n'y est assignée), et `template-parts/hero-slider.php` n'affiche alors simplement pas la section — cohérent avec la consigne "état vide propre, pas de section cassée".
+**Leçon :** Quand une consigne ultérieure contredit explicitement une décision déjà actée, l'appliquer si elle est explicite et volontaire, mais toujours documenter la substitution (raison de l'ancien choix, raison du nouveau) plutôt que de laisser DECISIONS.md désynchronisé du code.
+**Statut :** 🔵 Choix assumé — remplace la décision "Slides du hero ajoutées à la page d'options..." (Tâche 4)
+
+---
+
+## [CHOIX] "Featured Posts" de l'accueil garde son propre balisage (`.blog-card`), sans réutiliser `card-article.php`
+
+**Contexte :** Consigne : réutiliser `template-parts/card-article.php` pour la boucle "à la une" de l'accueil "si disponible".
+**Symptôme / Problème :** `card-article.php` (Tâche 5) utilise le balisage `.post-img`/`.post-category`/`.title`/`.post-meta`, conçu pour la grille statique d'`archive.php`/`search.php`. La section "Featured Posts" de `index.html` utilise un balisage entièrement différent (`.blog-card`/`.blog-image`/`.category-badge`/`.blog-content`/`.blog-footer`/`.reading-time`) à l'intérieur d'un slider Swiper, avec son propre CSS scopé sous `#featured-posts .blog-card` — les classes de `card-article.php` n'ont aucune règle CSS dans ce contexte et s'afficheraient sans style.
+**Cause / Alternatives :** (a) forcer `card-article.php` dans le slider "à la une" au prix d'un rendu cassé (aucun CSS ne correspond) ; (b) garder le balisage `.blog-card` déjà en place dans `front-page.php` (Tâche 4), qui reproduit fidèlement `index.html` et utilise déjà des données réelles (`WP_Query` sur `post_a_la_une`, auteur/date/extrait/temps de lecture réels).
+**Fix / Décision :** Option (b) — la clause "si disponible" de la consigne est lue littéralement : le template-part n'est pas réellement réutilisable ici sans casser l'affichage, donc il n'est pas forcé. Pas de changement de code sur cette section (déjà conforme depuis la Tâche 4), seule la clarification est actée ici.
+**Leçon :** "Réutiliser un template-part si disponible" ne veut pas dire l'imposer partout où un contenu de même nature (ici : un article) apparaît — seulement là où le balisage/CSS visés correspondent réellement à la section reconvertie.
+**Statut :** 🔵 Choix assumé
 
 ---
 

@@ -34,7 +34,7 @@
 
 ## Phase 4 — Gabarits de pages
 
-- [x] `front-page.php` — hero slider (repeater ACF `dz_hero_slides`, max 5) + actualités à la une (`WP_Query` sur `post_a_la_une`) ; accès rapides (Paroisses/Prêtres/Sacrements/Dons) pas encore fait — hors périmètre de cette passe, à ajouter avec `category-section`/`latest-posts`
+- [x] `front-page.php` — hero slider (repeater ACF `dz_front_hero_slides`, max 5, groupe `group_dz_front_hero` attaché à la page d'accueil statique — remplace `dz_hero_slides` de la page d'options, voir DECISIONS.md) + actualités à la une (`WP_Query` sur `post_a_la_une`) ; états vides gérés proprement pour les deux sections ; accès rapides (Paroisses/Prêtres/Sacrements/Dons) pas encore fait — hors périmètre de cette passe, à ajouter avec `category-section`/`latest-posts`
 - [x] `page-about.php` — chiffres clés (badges PureCounter) administrables via ACF (`page_template == page-about.php`), contenu principal via `the_content()`
 - [x] `page-contact.php` — coordonnées/réseaux (déjà sur la page d'options, Tâche 2) + carte Google Maps (adresse géocodée) + point de montage Contact Form 7 via `the_content()` (plugin/formulaire à installer en Phase 6)
 - [x] `page-dons.php` — modalités de don en repeater ACF (RIB, Mobile Money...), 100% informatif, aucune intégration de paiement (voir BUGS_AND_ROADMAP.md)

@@ -4929,3 +4929,15 @@ block still apply and take over once fields are wrapped that way.
   border-radius: 12px;
   margin-top: 20px;
 }
+
+/*--------------------------------------------------------------
+# Diocèse de Ziguinchor — Sous-titre du hero (template-parts/hero-slider.php)
+The source template only ever showed a short ".category" badge here; the
+"sous-titre / texte" ACF field is free text, so a plain paragraph is used
+instead (color/centering already inherited from .blog-hero-content).
+--------------------------------------------------------------*/
+.blog-hero .blog-hero-content p {
+  font-size: 18px;
+  margin-bottom: 30px;
+  opacity: 0.9;
+}

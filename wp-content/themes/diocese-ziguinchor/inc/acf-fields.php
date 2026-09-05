@@ -105,60 +105,6 @@ function dz_register_options_field_group() {
 					'preview_size'  => 'medium',
 				),
 				array(
-					'key'   => 'field_dz_tab_home',
-					'label' => __( 'Page d\'accueil', 'diocese-ziguinchor' ),
-					'type'  => 'tab',
-				),
-				array(
-					'key'          => 'field_dz_hero_slides',
-					'label'        => __( 'Slides du hero', 'diocese-ziguinchor' ),
-					'name'         => 'dz_hero_slides',
-					'type'         => 'repeater',
-					'instructions' => __( 'Limité à 5 slides pour préserver les performances de la page d\'accueil (voir DECISIONS.md).', 'diocese-ziguinchor' ),
-					'min'          => 0,
-					'max'          => 5,
-					'layout'       => 'block',
-					'button_label' => __( 'Ajouter un slide', 'diocese-ziguinchor' ),
-					'sub_fields'   => array(
-						array(
-							'key'           => 'field_dz_hero_slide_image',
-							'label'         => __( 'Image', 'diocese-ziguinchor' ),
-							'name'          => 'dz_hero_slide_image',
-							'type'          => 'image',
-							'required'      => 1,
-							'return_format' => 'url',
-							'preview_size'  => 'medium',
-						),
-						array(
-							'key'   => 'field_dz_hero_slide_badge',
-							'label' => __( 'Badge (catégorie)', 'diocese-ziguinchor' ),
-							'name'  => 'dz_hero_slide_badge',
-							'type'  => 'text',
-							'instructions' => __( 'Court libellé affiché au-dessus du titre, ex. "Actualité", "Événement".', 'diocese-ziguinchor' ),
-						),
-						array(
-							'key'      => 'field_dz_hero_slide_title',
-							'label'    => __( 'Titre', 'diocese-ziguinchor' ),
-							'name'     => 'dz_hero_slide_title',
-							'type'     => 'text',
-							'required' => 1,
-						),
-						array(
-							'key'   => 'field_dz_hero_slide_link_label',
-							'label' => __( 'Texte du lien', 'diocese-ziguinchor' ),
-							'name'  => 'dz_hero_slide_link_label',
-							'type'  => 'text',
-							'instructions' => __( 'Par défaut : "En savoir plus".', 'diocese-ziguinchor' ),
-						),
-						array(
-							'key'   => 'field_dz_hero_slide_link_url',
-							'label' => __( 'Lien', 'diocese-ziguinchor' ),
-							'name'  => 'dz_hero_slide_link_url',
-							'type'  => 'url',
-						),
-					),
-				),
-				array(
 					'key'   => 'field_dz_tab_social',
 					'label' => __( 'Réseaux sociaux', 'diocese-ziguinchor' ),
 					'type'  => 'tab',
@@ -293,6 +239,101 @@ function dz_register_options_field_group() {
 	);
 }
 add_action( 'acf/init', 'dz_register_options_field_group' );
+
+/**
+ * Hero slider on the homepage (index.html's ".blog-hero" section), attached
+ * to whichever page is set as the site's static front page (Settings >
+ * Reading), rather than to the "Réglages du thème" options page — see
+ * DECISIONS.md ("group_dz_front_hero remplace dz_hero_slides").
+ */
+function dz_register_front_hero_field_group() {
+	if ( ! function_exists( 'acf_add_local_field_group' ) ) {
+		return;
+	}
+
+	acf_add_local_field_group(
+		array(
+			'key'      => 'group_dz_front_hero',
+			'title'    => __( 'Accueil — Hero', 'diocese-ziguinchor' ),
+			'fields'   => array(
+				array(
+					'key'          => 'field_dz_front_hero_slides',
+					'label'        => __( 'Slides', 'diocese-ziguinchor' ),
+					'name'         => 'dz_front_hero_slides',
+					'type'         => 'repeater',
+					'instructions' => __( 'Limité à 5 slides pour préserver les performances de la page d\'accueil (voir DECISIONS.md).', 'diocese-ziguinchor' ),
+					'min'          => 0,
+					'max'          => 5,
+					'layout'       => 'block',
+					'button_label' => __( 'Ajouter un slide', 'diocese-ziguinchor' ),
+					'sub_fields'   => array(
+						array(
+							'key'           => 'field_dz_front_hero_slide_image',
+							'label'         => __( 'Image', 'diocese-ziguinchor' ),
+							'name'          => 'dz_front_hero_slide_image',
+							'type'          => 'image',
+							'required'      => 1,
+							'return_format' => 'url',
+							'preview_size'  => 'medium',
+						),
+						array(
+							'key'      => 'field_dz_front_hero_slide_titre',
+							'label'    => __( 'Titre', 'diocese-ziguinchor' ),
+							'name'     => 'dz_front_hero_slide_titre',
+							'type'     => 'text',
+							'required' => 1,
+						),
+						array(
+							'key'          => 'field_dz_front_hero_slide_texte',
+							'label'        => __( 'Sous-titre / texte', 'diocese-ziguinchor' ),
+							'name'         => 'dz_front_hero_slide_texte',
+							'type'         => 'textarea',
+							'rows'         => 2,
+							'instructions' => __( 'Optionnel, court texte affiché sous le titre.', 'diocese-ziguinchor' ),
+						),
+						array(
+							'key'          => 'field_dz_front_hero_slide_lien',
+							'label'        => __( 'Lien', 'diocese-ziguinchor' ),
+							'name'         => 'dz_front_hero_slide_lien',
+							'type'         => 'url',
+							'instructions' => __( 'Optionnel. Affiche un bouton "En savoir plus" pointant vers ce lien.', 'diocese-ziguinchor' ),
+						),
+					),
+				),
+			),
+			'location' => array(
+				array(
+					array(
+						'param'    => 'page_type',
+						'operator' => '==',
+						'value'    => 'front_page',
+					),
+				),
+			),
+		)
+	);
+}
+add_action( 'acf/init', 'dz_register_front_hero_field_group' );
+
+/**
+ * Hero slides repeater value, or an empty array when the site has no
+ * static front page configured (Settings > Reading) or no slides have
+ * been entered yet — front-page.php degrades to no hero section either way.
+ *
+ * @return array
+ */
+function dz_get_front_hero_slides() {
+	if ( 'page' !== get_option( 'show_on_front' ) ) {
+		return array();
+	}
+
+	$dz_front_page_id = (int) get_option( 'page_on_front' );
+	if ( ! $dz_front_page_id ) {
+		return array();
+	}
+
+	return dz_get_field( 'dz_front_hero_slides', $dz_front_page_id, array() );
+}
 
 /**
  * "Chiffres clés" counter badges on page-about.php (see about.html's

@@ -13,7 +13,7 @@ get_template_part(
 	'template-parts/hero-slider',
 	null,
 	array(
-		'slides' => dz_get_option( 'dz_hero_slides', array() ),
+		'slides' => dz_get_front_hero_slides(),
 	)
 );
 

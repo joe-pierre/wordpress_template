@@ -3,7 +3,7 @@
  * Homepage hero slider, called from front-page.php.
  *
  * @param array $args {
- *     @type array $slides The "dz_hero_slides" repeater value (see inc/acf-fields.php).
+ *     @type array $slides The "dz_front_hero_slides" repeater value (see inc/acf-fields.php).
  * }
  */
 
@@ -43,17 +43,17 @@ if ( ! $dz_hero_slides ) {
 				<?php foreach ( $dz_hero_slides as $dz_slide ) : ?>
 					<div class="swiper-slide">
 						<div class="blog-hero-item">
-							<?php if ( ! empty( $dz_slide['dz_hero_slide_image'] ) ) : ?>
-								<img src="<?php echo esc_url( $dz_slide['dz_hero_slide_image'] ); ?>" alt="<?php echo esc_attr( $dz_slide['dz_hero_slide_title'] ); ?>" class="img-fluid">
+							<?php if ( ! empty( $dz_slide['dz_front_hero_slide_image'] ) ) : ?>
+								<img src="<?php echo esc_url( $dz_slide['dz_front_hero_slide_image'] ); ?>" alt="<?php echo esc_attr( $dz_slide['dz_front_hero_slide_titre'] ); ?>" class="img-fluid">
 							<?php endif; ?>
 							<div class="blog-hero-content">
-								<?php if ( ! empty( $dz_slide['dz_hero_slide_badge'] ) ) : ?>
-									<span class="category"><?php echo esc_html( $dz_slide['dz_hero_slide_badge'] ); ?></span>
+								<h1><?php echo esc_html( $dz_slide['dz_front_hero_slide_titre'] ); ?></h1>
+								<?php if ( ! empty( $dz_slide['dz_front_hero_slide_texte'] ) ) : ?>
+									<p><?php echo esc_html( $dz_slide['dz_front_hero_slide_texte'] ); ?></p>
 								<?php endif; ?>
-								<h1><?php echo esc_html( $dz_slide['dz_hero_slide_title'] ); ?></h1>
-								<?php if ( ! empty( $dz_slide['dz_hero_slide_link_url'] ) ) : ?>
-									<a href="<?php echo esc_url( $dz_slide['dz_hero_slide_link_url'] ); ?>" class="read-more">
-										<?php echo esc_html( ! empty( $dz_slide['dz_hero_slide_link_label'] ) ? $dz_slide['dz_hero_slide_link_label'] : __( 'En savoir plus', 'diocese-ziguinchor' ) ); ?> <i class="bi bi-arrow-right"></i>
+								<?php if ( ! empty( $dz_slide['dz_front_hero_slide_lien'] ) ) : ?>
+									<a href="<?php echo esc_url( $dz_slide['dz_front_hero_slide_lien'] ); ?>" class="read-more">
+										<?php esc_html_e( 'En savoir plus', 'diocese-ziguinchor' ); ?> <i class="bi bi-arrow-right"></i>
 									</a>
 								<?php endif; ?>
 							</div>
