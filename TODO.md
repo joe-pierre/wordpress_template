@@ -69,7 +69,8 @@
 - [x] `archive.php` — depuis `category.html` (boucle + pagination native + sidebar `template-parts/sidebar-blog.php`)
 - [x] `search.php` — depuis `search-results.html` (boucle + pagination native, sans sidebar comme dans la source)
 - [x] `author.php` — depuis `author-profile.html` (données réelles de l'auteur WP, voir DECISIONS.md)
-- [ ] `404.php`
+- [x] `404.php` — depuis `404.html` (icône, code, titre, texte, recherche connectée à la vraie recherche WordPress, retour à l'accueil) ; était un stub vide, corrigé au PROMPT 12 (voir `BUGS_AND_ROADMAP.md`)
+- [x] `index.php` (gabarit de secours WordPress générique, minimal et sans hypothèse de type de contenu) ; était un stub vide, corrigé au PROMPT 12 (voir `BUGS_AND_ROADMAP.md`)
 - [x] `comments.php` + `searchform.php` créés (non listés dans SPEC.md §5, nécessaires pour des commentaires/une recherche natifs fonctionnels — voir DECISIONS.md)
 - [x] `template-parts/card-article.php` (partagé entre `archive.php` et `search.php`) et `template-parts/page-title.php` (bannière titre + fil d'Ariane, partagée par tous les gabarits de contenu)
 
@@ -96,7 +97,8 @@
 
 ## Phase 8 — QA & mise en production
 
-- [ ] Checklist QA responsive (mobile/tablette/desktop) sur chaque gabarit
+- [x] Revue design globale de tous les gabarits (PROMPT 12) — cohérence titres/fils d'ariane, absence de Lorem Ipsum/placeholder du template source, classes de grille Bootstrap (`col-lg-4 col-md-6` uniforme sur les 11 archives, `col-lg-8/col-lg-4` uniforme sur les fiches — écart `col-lg-7/col-lg-5` de `single-paroisse.php` justifié par sa grille de clergé, pas une incohérence), présence de `data-aos`, menu mobile non dupliqué hors `header.php`. Revue au niveau du code uniquement (grep systématique + relecture) : pas d'installation WordPress réelle dans ce dépôt pour un rendu/test visuel complet (voir `DECISIONS.md` PROMPT 17 pour la même limite déjà rencontrée) — 2 gabarits stub (`404.php`, `index.php`) et 1 écart d'animation (`page-contact.php`) trouvés et corrigés, voir `BUGS_AND_ROADMAP.md`
+- [ ] Checklist QA responsive (mobile/tablette/desktop) sur chaque gabarit — en conditions réelles (navigateur), pas seulement la revue de code du PROMPT 12 ci-dessus
 - [ ] Vérification `WP_DEBUG` sans notice/warning sur une vraie installation WordPress (revue statique du code déjà faite en Tâche 9 — reste à confirmer en conditions réelles : aucun environnement WordPress actif dans ce dépôt pour l'exécuter)
 - [ ] Test du formulaire de contact en conditions réelles
 - [ ] Vérification des performances (poids des sliders/images, lazy loading)

@@ -34,7 +34,7 @@ while ( have_posts() ) :
 
 	<!-- Contact Section -->
 	<section id="contact" class="contact section">
-		<div class="container">
+		<div class="container" data-aos="fade-up" data-aos-delay="100">
 			<div class="contact-wrapper">
 
 				<div class="contact-info-panel">
