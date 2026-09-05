@@ -52,13 +52,38 @@ Le site doit être utilisable par des **rédacteurs non techniques** (secrétari
 ### Page "Dons"
 Pas de CPT : une page statique (`page-dons.php`) avec champs ACF pour les modalités (RIB, Mobile Money, etc.) et éventuellement un formulaire Contact Form 7 dédié. Intégration d'un prestataire de paiement en ligne **hors périmètre v1** (à inscrire en ROADMAP).
 
+### Custom Post Types organisationnels (ajoutés suite à `Arborescence_PDF.pdf` et `NOMINATIONS_..._2027.pdf` — voir `DECISIONS.md` "Un Custom Post Type séparé par grande rubrique organisationnelle")
+
+Un CPT par grande rubrique de l'arborescence, tous avec le même socle de champs ACF : `description` (WYSIWYG), `responsable` (texte libre ou relation vers `pretre`), repeater `membres` (nom, rôle/fonction).
+
+| CPT (slug) | Rubrique de l'arborescence | Champs spécifiques en plus du socle |
+|---|---|---|
+| `conseil` | Les Conseils de l'évêque (Conseil épiscopal, presbytéral, Collège des consulteurs, Affaires économiques, Pastoral Diocésain) | — |
+| `service_diocesain` | Services diocésains (Économat, Caritas, ODEC, Apostolat des Laïcs, Coopération Missionnaire, Exorcisme, Cérémoniaires, Formation et Recherche, Communication, Pèlerinages) | repeater `sous_structures` (nom, responsable) pour les entités rattachées type Hôtel Carabane, Librairie Djibékel, Imprimerie du Sud |
+| `commission_diocesaine` | Commissions diocésaines (Catéchèse, Cellule d'écoute, Écologie intégrale, Dialogue œcuménique, Justice et Paix, Pastorale de la Famille, Liturgie, Pastorale de la Santé, Pastorale des Vocations, Textes liturgiques en langues locales) | — |
+| `mouvement` | Mouvements d'Action Catholique (Coordination des Jeunes, CV/AV, JAC/UJRCS/MARCS, JOC, JEC, Scouts et Guides) | champ `aumonier` (relation `pretre`) |
+| `association` | Associations et Groupes d'Apostolat (UDAFC/Z, Légion de Marie, Coordination des Chorales, Renouveau Charismatique, Vie Montante, Équipes Enseignantes, Forces de Défense et Sécurité) | — |
+| `aumonerie` | Aumôneries (scolaires, universitaires, santé, maisons d'arrêt) | taxonomie `type_aumonerie` (scolaire / universitaire / santé / carcérale) |
+| `etablissement` | Enseignements diocésains (DIDEC, Séminaires et Maisons de formation, Collèges Diocésains, Enseignement Supérieur) | champ `type_etablissement` (select), `contact` |
+| `ancien_eveque` | À propos du diocèse > Archives > Les différents évêques | photo, période (dates début/fin), biographie |
+
+### Taxonomies additionnelles
+
+- `doyenne` sur le CPT `paroisse` (remplace la piste `secteur_pastoral` ci-dessus, désormais confirmée par l'arborescence : rubrique "Doyennés et Paroisses")
+- `evenement_type` sur le CPT `evenement` (valeurs : Diocésain / Évêque) pour distinguer "Agenda Diocésain" et "Agenda de l'évêque" sans dupliquer le CPT
+- Catégories natives supplémentaires sur les Actualités (`post`) : Homélies (déjà en place), Cathéchèses, Communiqués, Nécrologie, Vatican, Diocèse
+
+### Pages statiques simples (gabarit `page.php`, pas de CPT dédié)
+
+Mot de l'évêque, Contacts, Évêché, Chancellerie, Historique, L'évêque, Cartographie du diocèse (carte embarquée), Vie Consacrée, Prières, Pèlerinages Nationaux, Pèlerinages Diocésains, Devenir bénévole (avec formulaire Contact Form 7 dédié), Secrétariat diocésain. *(Economat n'est pas dupliqué ici : déjà couvert par une entrée du CPT `service_diocesain`.)*
+
 ## 4. Règles métier critiques
 
 - Un **prêtre** peut être rattaché à **une seule paroisse principale** (relation simple) ; gérer les cas de prêtres sans affectation (ex. retraités, en formation) via un statut ACF plutôt qu'une relation vide.
 - Les **événements passés** ne doivent plus apparaître dans les listings "à venir" (filtrage par date dans la requête, pas de suppression).
 - Le **hero slider de la page d'accueil** est limité à **5 slides maximum** administrables (repeater ACF avec `max: 5`) pour préserver les performances et éviter les abus éditoriaux.
 - Les **actualités "à la une"** (slider `featured-posts`) sont sélectionnées manuellement par les rédacteurs (champ ACF "Mettre à la une" sur l'article), pas automatiquement par date, pour laisser le contrôle éditorial.
-- Le **menu de navigation** est limité à **2 niveaux de profondeur** (voir DECISIONS.md — simplification du "Deep Dropdown" à 3 niveaux du template d'origine).
+- Le **menu de navigation** suit désormais un **mega-menu hybride** : panneau large en colonnes pour les rubriques riches (À propos du diocèse, Services et Commissions, Apostolat des Laïques, Vie de Foi), dropdown simple à 1 niveau pour les rubriques légères (Les Conseils de l'évêque, Personnel apostolique, Soutenir le diocèse) — remplace la règle "2 niveaux de profondeur" ; voir `DECISIONS.md` "Mega-menu hybride".
 - Le formulaire de contact envoie un e-mail à une adresse configurable dans les réglages (pas codée en dur), et affiche un message de confirmation sans rechargement de page (AJAX, géré par Contact Form 7).
 
 ## 5. Architecture code
@@ -135,27 +160,36 @@ Pistes à garder en tête pour ne pas fermer de portes dans l'architecture :
 
 ## 10. Identité visuelle
 
-**À définir avec le client (Diocèse de Ziguinchor).** Le template d'origine utilise une palette neutre bleu/gris (variables CSS `--accent-color`, `--heading-color`, etc. dans `main.css`). Éléments à collecter avant la phase de personnalisation visuelle :
-- Logo officiel du diocèse (vectoriel si possible)
-- Couleurs institutionnelles (souvent liturgiques : blanc, or, violet/pourpre selon les diocèses)
-- Typographies imposées par une charte existante, sinon conserver Roboto/Montserrat/Raleway du template
-- Photos officielles (cathédrale, évêque, paroisses) pour remplacer les visuels de démo
+**Reçue — voir `logo-diocese-ziguinchor.png` et `Copie_de_Armoiries_Diocèse_de_Ziguinchor.pdf`.**
 
-*(Statut : TODO — bloquant pour la phase de personnalisation CSS, non bloquant pour la structure PHP/CPT)*
+- **Logo** : les armoiries officielles du diocèse (écu ogival, croix dorée à double traverse, tiare épiscopale, colombe, épis de riz, pirogue), entourées de l'inscription "SIGILLUM DIOECESIS ZIGUINCHORENSIS" et de l'année MCMLV (1955, érection canonique).
+- **Palette de couleurs** extraite des armoiries, à reporter dans les variables CSS du thème (`--accent-color`, `--heading-color`, etc. dans `assets/css/main.css`) :
+  - **Bleu/azur** (fond de l'écu — paix, fidélité, symbole marial) : couleur principale
+  - **Or/jaune** (croix, épis de riz — vie, bénédiction, autorité spirituelle) : couleur secondaire/accent
+  - **Vert** (croix fleuries du pourtour — évangélisation, espérance) : couleur tertiaire, à usage ponctuel (badges, états de succès)
+- **Typographies** : rien d'imposé par une charte transmise — conserver Roboto/Montserrat/Raleway du template en v1.
+- **Contenu éditorial réutilisable** : le document de présentation des armoiries fournit une explication détaillée de chaque symbole, exploitable pour "À propos > Historique" ou une sous-page "Nos armoiries".
+- **Photos officielles** (cathédrale, évêque, paroisses) : toujours à collecter — reste un point ouvert.
+
+*(Statut : logo et couleurs disponibles, implémentation dans `main.css` restante — voir `DESIGN_PROMPTS.md` Prompt 12bis)*
 
 ## 11. Écrans
 
-Correspondance gabarit WordPress ↔ page du template d'origine, voir tableau détaillé en section 5 (Architecture code). Résumé fonctionnel :
-1. **Accueil** — hero slider + actualités à la une + accès rapides (Paroisses / Prêtres / Sacrements / Dons)
-2. **À propos du diocèse** — historique, mot de l'évêque, chiffres clés (compteurs)
-3. **Actualités** (liste + détail) — actualités diocésaines par catégorie
-4. **Paroisses** (liste + détail) — annuaire des paroisses
-5. **Prêtres** (liste + détail) — annuaire du clergé
-6. **Sacrements** (liste + détail) — démarches par sacrement
-7. **Événements** (liste + détail) — agenda diocésain
-8. **Dons** — modalités de soutien
-9. **Contact** — formulaire + carte + coordonnées
-10. **Recherche** / **404**
+Arborescence réelle du site (`Arborescence_PDF.pdf`), 9 rubriques principales — remplace le résumé fonctionnel simplifié ci-dessous, conservé barré pour traçabilité :
+
+1. **Accueil** — hero slider + actualités à la une + accès rapides ; sous-pages : Mot de l'évêque, Contacts, Évêché, Chancellerie
+2. **À propos du diocèse** — Historique, L'évêque, Cartographie du diocèse, Doyennés et Paroisses (`paroisse` + taxonomie `doyenne`), Archives (Histoire du diocèse, Les différents évêques → CPT `ancien_eveque`), Homélies (catégorie), Cathéchèses (catégorie)
+3. **Les Conseils de l'évêque** — CPT `conseil`
+4. **Personnel apostolique** — Ministres Consacrés (CPT `pretre`), Vie Consacrée (page)
+5. **Services et Commissions** — CPT `service_diocesain` et `commission_diocesaine`
+6. **Enseignements diocésains** — CPT `etablissement`
+7. **Apostolat des Laïques** — Structure du diocèse (page), CPT `mouvement`, `association`, `aumonerie`
+8. **Vie de Foi** — Actualités (`post` + catégories : Vatican, Diocèse, Communiqués, Nécrologie), Agenda Diocésain et Agenda de l'évêque (`evenement` + taxonomie `evenement_type`)
+9. **Soutenir le diocèse** — Prières, Pèlerinages Nationaux/Diocésains, Devenir bénévole, Faire un don (`page-dons.php`), Secrétariat diocésain, Economat (lien vers la fiche `service_diocesain` correspondante)
+
+Plus, hors arborescence numérotée : **Contact** (formulaire + carte), **Sacrements** (CPT `sacrement`, rattachement dans le menu encore à confirmer avec le diocèse — absent du PDF reçu), **Recherche** / **404**.
+
+~~Résumé fonctionnel simplifié (dépassé) : Accueil, À propos, Actualités, Paroisses, Prêtres, Sacrements, Événements, Dons, Contact, Recherche/404~~
 
 ## 12. Tâches
 

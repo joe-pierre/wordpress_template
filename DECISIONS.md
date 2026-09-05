@@ -378,7 +378,27 @@
 
 ---
 
-## [CHOIX] Modèle de décision — copier ce format pour les prochaines entrées
+## [CHOIX] Mega-menu hybride — remplace la décision "menu à 2 niveaux" et son implémentation (Walker + double garde-fou)
+
+**Contexte :** Réception après coup de `Arborescence_PDF.pdf`, la vraie carte du site voulue par le diocèse (non disponible au moment des décisions "Simplifier le menu de navigation à 2 niveaux" et "Double garde-fou pour la limite de profondeur du menu", ci-dessus). Cette arborescence compte 9 rubriques principales, certaines avec jusqu'à 9 enfants et un 3ᵉ niveau réel (ex. "À propos du diocèse" > "Archives" > "Histoire du diocèse" / "Les différents évêques").
+**Symptôme / Problème :** Les deux décisions ci-dessus ont été prises et implémentées (avec tests) *avant* que la vraie arborescence du client soit connue, sur la base du menu générique du template ("Deep Dropdown" à 3 niveaux sans contenu réel). Elles ne couvrent pas ce cas réel, et un simple retour à "3 niveaux en cascade" poserait un problème d'usage (survol perdu au trackpad, empilement d'accordéons imbriqués sur mobile pour les rubriques les plus riches).
+**Cause / Alternatives :** (a) étendre `DZ_Walker_Nav_Menu` (`inc/class-dz-walker-nav-menu.php`) à 3 niveaux de dropdowns en cascade ; (b) mega-menu partout ; (c) mega-menu (panneau large en colonnes, affichant enfants et petits-enfants à plat) uniquement pour les rubriques riches, dropdown simple à 1 niveau ailleurs.
+**Fix / Décision :** Option (c), validée par le client. **Mega-menu** pour : À propos du diocèse, Services et Commissions, Apostolat des Laïques, Vie de Foi. **Dropdown simple à 1 niveau** (réutilise le comportement déjà implémenté et testé du Walker actuel, simplement sans le 3ᵉ niveau qui n'existera jamais sur ces rubriques) pour : Les Conseils de l'évêque, Personnel apostolique, Soutenir le diocèse. `DZ_Walker_Nav_Menu` devra être étendu (pas remplacé) pour détecter les rubriques "riches" (par slug ou par un champ ACF sur l'item de menu) et déclencher le rendu mega-menu à la place du `start_lvl()` standard. **Remplace la règle métier de SPEC.md §4 "menu limité à 2 niveaux".**
+**Leçon :** Une décision de simplification prise sans le vrai plan du site doit être révisée dès que ce plan est connu, même si elle a déjà été implémentée et testée — un test qui passe ne valide que la conformité à la règle du moment, pas la pertinence de cette règle une fois de nouvelles informations disponibles.
+**Statut :** 🔵 Choix assumé — implémentation restante (voir `DESIGN_PROMPTS.md`, Prompt 17)
+
+---
+
+## [CHOIX] Un Custom Post Type séparé par grande rubrique organisationnelle (Conseils, Services, Commissions, Mouvements, Associations, Aumôneries, Enseignements)
+
+**Contexte :** `NOMINATIONS_SERVICES_COMMISSINS_AUMONERIES_2027.pdf` révèle une structure organisationnelle riche partageant un même schéma (responsable + membres) sur plusieurs rubriques distinctes de `Arborescence_PDF.pdf` : Les Conseils de l'évêque, Services diocésains, Commissions diocésaines, Mouvements d'Action Catholique, Associations et Groupes d'Apostolat, Aumôneries, Enseignements diocésains.
+**Symptôme / Problème :** Il fallait choisir entre un seul CPT générique avec taxonomie de type, un CPT par rubrique, ou de simples pages statiques — aucun des 4 CPT existants (`paroisse`, `pretre`, `evenement`, `sacrement`) ne couvre ce besoin.
+**Cause / Alternatives :** Un CPT générique unique aurait limité le nombre de types de contenu à enregistrer, au prix d'une taxonomie de type à gérer en plus et d'un écran d'archive générique moins parlant pour les rédacteurs (qui verraient un seul menu "Organes diocésains" au lieu d'un menu par rubrique reconnaissable).
+**Fix / Décision :** Le client a choisi un **CPT séparé par grande rubrique** : `conseil`, `service_diocesain`, `commission_diocesaine`, `mouvement`, `association`, `aumonerie` (+ taxonomie `type_aumonerie` : scolaire/universitaire/santé/carcérale), `etablissement`. Plus le CPT `ancien_eveque` pour "Archives > Les différents évêques". Socle de champs ACF commun à créer : description (WYSIWYG), responsable (texte ou relation vers `pretre` en réutilisant le pattern bidirectionnel déjà en place pour paroisse↔prêtre si pertinent), repeater `membres` (nom, rôle). Voir `SPEC.md` §3 pour le détail par CPT. Pour les `menu_position`, appliquer la même vérification déjà faite pour les 4 CPT existants (créneaux réservés WordPress Core : 5, 10, 20, 25, 60, 65, 70, 75, 80, 99) — les positions 26 à 32 sont libres et suffisent aux 8 nouveaux CPT.
+**Leçon :** Quand l'arborescence du site distingue clairement des rubriques dans sa navigation, refléter cette distinction dans les CPT facilite la vie des rédacteurs, même si cela duplique un peu de structure technique — cohérent avec la logique déjà suivie pour les 4 CPT existants du projet.
+**Statut :** 🔵 Choix assumé — implémentation restante (voir `DESIGN_PROMPTS.md`, Prompts 13 à 16)
+
+---
 
 **Contexte :** ...
 **Symptôme / Problème :** ...

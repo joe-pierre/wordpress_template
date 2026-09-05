@@ -2,10 +2,26 @@
 
 ## Phase 0 — Cadrage (préalable, non technique)
 
-- [ ] Collecter le logo, la charte graphique et les couleurs institutionnelles du diocèse
-- [ ] Confirmer la structure organisationnelle (secteurs pastoraux / doyennés existent-ils ?)
+- [x] Collecter le logo, la charte graphique et les couleurs institutionnelles du diocèse (armoiries reçues, voir `SPEC.md` §10)
+- [x] Confirmer la structure organisationnelle (doyennés confirmés via l'arborescence — taxonomie `doyenne` sur `paroisse`, remplace `secteur_pastoral`)
 - [ ] Confirmer le périmètre "Dons" v1 (juste informatif, ou paiement en ligne dès le lancement ?)
-- [ ] Obtenir les textes et photos réels (historique du diocèse, mot de l'évêque, liste des paroisses/prêtres)
+- [ ] Obtenir les photos officielles réelles (cathédrale, évêque, paroisses) — textes déjà en partie disponibles (armoiries, nominations, calendrier)
+- [x] Obtenir la vraie arborescence du site (`Arborescence_PDF.pdf`) — a entraîné une révision du menu (mega-menu hybride) et du modèle de données, voir `DECISIONS.md`
+- [ ] Clarifier le rattachement de la rubrique "Sacrements" dans l'arborescence officielle (absente du PDF reçu — proposition : sous "Vie de Foi", à valider avec le diocèse)
+
+## Phase 1bis — Nouveaux Custom Post Types organisationnels et mega-menu (suite à l'arborescence réelle et à la circulaire de nominations)
+
+- [ ] Enregistrer les CPT `conseil`, `service_diocesain`, `commission_diocesaine`, `mouvement`, `association`, `aumonerie`, `etablissement`, `ancien_eveque` (voir `SPEC.md` §3), `menu_position` 26 à 32 pour éviter la collision déjà documentée avec les créneaux réservés WordPress Core
+- [ ] Créer les groupes ACF communs (description, responsable, repeater membres) + champs spécifiques par CPT
+- [ ] Créer la taxonomie `type_aumonerie` (scolaire/universitaire/santé/carcérale)
+- [ ] Créer la taxonomie `doyenne` sur `paroisse` et l'assigner aux paroisses existantes
+- [ ] Créer la taxonomie `evenement_type` (Diocésain/Évêque) sur `evenement`
+- [ ] Créer les catégories manquantes sur les Actualités : Cathéchèses, Communiqués, Nécrologie, Vatican, Diocèse (Homélies déjà en place)
+- [ ] Étendre `DZ_Walker_Nav_Menu` (déjà en place, Phase 2) pour supporter le mega-menu hybride sur les 4 rubriques riches, tout en gardant le comportement dropdown 1 niveau déjà testé pour les rubriques légères — voir `DECISIONS.md` "Mega-menu hybride"
+- [ ] Saisir le contenu réel de la circulaire de nominations dans les nouveaux CPT (Économat, Caritas, ODEC, mouvements, associations, aumôneries...)
+- [ ] Importer le calendrier diocésain 2026-2027 dans le CPT `evenement`
+- [ ] Appliquer la palette de couleurs des armoiries (bleu/or/vert) dans `assets/css/main.css`
+- [ ] Intégrer le logo/armoiries officiel dans la page d'options "Réglages du thème" (déjà existante, Phase 2) + favicon
 
 ## Phase 1 — Socle du thème
 
