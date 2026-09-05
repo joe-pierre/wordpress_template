@@ -23,10 +23,11 @@
 - [ ] Saisir le contenu réel (responsable + membres) des entrées `conseil`/`service_diocesain`/`commission_diocesaine`/`mouvement`/`association`/`aumonerie`/`etablissement` depuis `NOMINATIONS_SERVICES_COMMISSIONS_AUMONERIES_2027.pdf` — **bloqué : ce PDF n'est pas présent dans ce dépôt**, seul un brouillon structurel (`bin/seed-cpt-organisation.php`, statut `draft`, champs responsable/membres vides) a pu être créé à titre de test des gabarits, pour l'instant limité aux 3 CPT du Prompt 13
 - [ ] Saisir le contenu réel des entrées `ancien_eveque` (photo, période, biographie de chaque évêque) — nécessite les archives historiques du diocèse, non fournies dans ce dépôt
 - [x] Créer la taxonomie `type_aumonerie` (scolaire/universitaire/santé/carcérale) — `inc/cpt-aumonerie.php`, termes fixes pré-créés à l'`init`, filtrage de l'archive via `?type_aumonerie=<slug>` (pas de route d'archive de taxonomie dédiée, voir `DECISIONS.md`)
-- [ ] Créer la taxonomie `doyenne` sur `paroisse` et l'assigner aux paroisses existantes
-- [ ] Créer la taxonomie `evenement_type` (Diocésain/Évêque) sur `evenement`
-- [ ] Créer les catégories manquantes sur les Actualités : Cathéchèses, Communiqués, Nécrologie, Vatican, Diocèse (Homélies déjà en place)
+- [x] Créer la taxonomie `doyenne` sur `paroisse` — `inc/cpt-paroisse.php`, `dz_register_taxonomy_doyenne()` (`hierarchical`, `show_ui`/`show_admin_column` → apparaît dans la métabox de l'écran d'édition d'une paroisse ; pas de termes pré-créés, liste ouverte, voir `DECISIONS.md` PROMPT 16). Assigner les paroisses existantes reste à faire (pas de contenu réel de paroisses saisi dans ce dépôt)
+- [x] Créer la taxonomie `evenement_type` (Diocésain/Évêque) sur `evenement` — `inc/cpt-evenement.php`, mêmes pattern/termes fixes que `type_aumonerie` ; `archive-evenement.php` ajoute des onglets de filtre (Tous / Agenda Diocésain / Agenda de l'évêque), `.archive-filters` (classe renommée depuis `.aumonerie-filters`, désormais partagée par les deux archives)
+- [x] Créer les catégories manquantes sur les Actualités : Cathéchèses, Communiqués, Nécrologie, Vatican, Diocèse (Homélies déjà en place) — `inc/categories-actualites.php`, même pattern de seed idempotent que les taxonomies ci-dessus
 - [ ] Étendre `DZ_Walker_Nav_Menu` (déjà en place, Phase 2) pour supporter le mega-menu hybride sur les 4 rubriques riches, tout en gardant le comportement dropdown 1 niveau déjà testé pour les rubriques légères — voir `DECISIONS.md` "Mega-menu hybride"
+- [x] Créer les pages statiques listées dans `SPEC.md` §3 (Mot de l'évêque, Contacts, Évêché, Chancellerie, Historique, L'évêque, Cartographie du diocèse, Vie Consacrée, Prières, Pèlerinages Nationaux, Pèlerinages Diocésains, Devenir bénévole, Secrétariat diocésain) — `page.php` (gabarit générique désormais implémenté) + `page-cartographie.php` (Template Name dédié, embed carte) ; contenu de test créé par `bin/seed-static-pages.php` (statut `draft`, même logique que `bin/seed-cpt-organisation.php`)
 - [ ] Saisir le contenu réel de la circulaire de nominations dans les nouveaux CPT (Économat, Caritas, ODEC, mouvements, associations, aumôneries...)
 - [ ] Importer le calendrier diocésain 2026-2027 dans le CPT `evenement`
 - [ ] Appliquer la palette de couleurs des armoiries (bleu/or/vert) dans `assets/css/main.css`
@@ -63,7 +64,7 @@
 - [x] `page-about.php` — chiffres clés (badges PureCounter) administrables via ACF (`page_template == page-about.php`), contenu principal via `the_content()`
 - [x] `page-contact.php` — coordonnées/réseaux (déjà sur la page d'options, Tâche 2) + carte Google Maps (adresse géocodée) + point de montage Contact Form 7 via `the_content()` (plugin/formulaire à installer en Phase 6)
 - [x] `page-dons.php` — modalités de don en repeater ACF (RIB, Mobile Money...), 100% informatif, aucune intégration de paiement (voir BUGS_AND_ROADMAP.md)
-- [ ] `page.php` — gabarit générique pour pages simples
+- [x] `page.php` — gabarit générique pour pages simples (voir `DECISIONS.md` PROMPT 16) ; `page-cartographie.php` ajouté en complément (Template Name dédié, embed carte)
 - [x] `single.php` — depuis `blog-details.html` (hero + contenu natif + partage + tags + auteur + commentaires natifs)
 - [x] `archive.php` — depuis `category.html` (boucle + pagination native + sidebar `template-parts/sidebar-blog.php`)
 - [x] `search.php` — depuis `search-results.html` (boucle + pagination native, sans sidebar comme dans la source)

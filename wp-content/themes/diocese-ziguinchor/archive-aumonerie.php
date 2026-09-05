@@ -37,7 +37,7 @@ $dz_type_terms    = get_terms(
 <section id="aumoneries" class="aumoneries section">
 	<div class="container" data-aos="fade-up" data-aos-delay="100">
 		<?php if ( $dz_type_terms && ! is_wp_error( $dz_type_terms ) ) : ?>
-			<ul class="nav nav-pills aumonerie-filters justify-content-center mb-4">
+			<ul class="nav nav-pills archive-filters justify-content-center mb-4">
 				<li class="nav-item">
 					<a class="nav-link<?php echo '' === $dz_current_type ? ' active' : ''; ?>" href="<?php echo esc_url( $dz_archive_link ); ?>">
 						<?php esc_html_e( 'Toutes', 'diocese-ziguinchor' ); ?>

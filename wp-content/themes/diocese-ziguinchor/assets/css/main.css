@@ -4211,6 +4211,18 @@ section,
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
 }
 
+/* page-cartographie.php: same .map-container look as .contact's, but taller
+   and standalone (this page has no .contact two-column wrapper to size it
+   against — see DECISIONS.md PROMPT 16). */
+.cartographie .map-container {
+  width: 100%;
+  height: 500px;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+  margin-top: 2rem;
+}
+
 .contact .form-container {
   background-color: var(--surface-color);
   border-radius: 20px;
@@ -5016,17 +5028,19 @@ section background.
   margin-right: 6px;
 }
 
-.aumonerie-filters .nav-link {
+/* Nav-pills filter tabs, shared by archive-aumonerie.php (type_aumonerie)
+   and archive-evenement.php (evenement_type) — see DECISIONS.md PROMPT 14/16. */
+.archive-filters .nav-link {
   color: var(--default-color);
   border-radius: 50px;
   padding: 8px 20px;
 }
 
-.aumonerie-filters .nav-link:hover {
+.archive-filters .nav-link:hover {
   color: var(--accent-color);
 }
 
-.aumonerie-filters .nav-link.active {
+.archive-filters .nav-link.active {
   background-color: var(--accent-color);
   color: var(--contrast-color);
 }

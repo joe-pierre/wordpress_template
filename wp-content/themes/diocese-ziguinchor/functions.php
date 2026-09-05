@@ -26,6 +26,7 @@ require_once DZ_THEME_DIR . '/inc/cpt-association.php';
 require_once DZ_THEME_DIR . '/inc/cpt-aumonerie.php';
 require_once DZ_THEME_DIR . '/inc/cpt-etablissement.php';
 require_once DZ_THEME_DIR . '/inc/cpt-ancien_eveque.php';
+require_once DZ_THEME_DIR . '/inc/categories-actualites.php';
 
 /**
  * Enqueue vendor and theme front-end assets (Bootstrap, Bootstrap Icons, AOS,

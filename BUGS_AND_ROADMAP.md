@@ -20,3 +20,4 @@ Idées identifiées pendant le cadrage, volontairement hors périmètre de la v1
 - **Espace intranet clergé** : zone réservée aux prêtres/secrétariat (hors périmètre site public)
 - **Application mobile ou widget externe** : nécessiterait d'exposer les CPT via la WP REST API (voir `SPEC.md` §7 — l'architecture actuelle ne ferme pas cette porte)
 - **Recherche géographique de paroisses** : carte interactive avec géolocalisation, si le nombre de paroisses le justifie
+- **Cartographie du diocèse enrichie** : `page-cartographie.php` (PROMPT 16) n'affiche pour l'instant qu'un simple embed Google Maps de l'adresse générale du diocèse, en attendant des données géographiques plus précises (SPEC.md §3) — à terme, une carte affichant un marqueur par paroisse (en s'appuyant sur `paroisse_localisation`, déjà saisi par paroisse, voir `acf-json/group_dz_cpt_paroisse.json`)

@@ -46,10 +46,86 @@ function dz_register_cpt_evenement() {
 add_action( 'init', 'dz_register_cpt_evenement' );
 
 /**
+ * evenement_type taxonomy (PROMPT 16, SPEC.md §3/§8) — fixed 2-value
+ * classification (Diocésain/Évêque), same reasoning as `type_aumonerie`:
+ * hierarchical (checkbox UI) with its terms pre-seeded so editors only ever
+ * pick between the two, and no dedicated archive route (`rewrite => false`)
+ * — filtering happens on archive-evenement.php itself via
+ * `?evenement_type=<slug>` (see dz_evenement_archive_query() below and the
+ * filter tabs there), not a separate taxonomy archive template.
+ */
+function dz_register_taxonomy_evenement_type() {
+	$labels = array(
+		'name'          => _x( "Types d'événement", 'Taxonomy general name', 'diocese-ziguinchor' ),
+		'singular_name' => _x( "Type d'événement", 'Taxonomy singular name', 'diocese-ziguinchor' ),
+		'search_items'  => __( 'Rechercher un type', 'diocese-ziguinchor' ),
+		'all_items'     => __( 'Tous les types', 'diocese-ziguinchor' ),
+		'edit_item'     => __( 'Modifier le type', 'diocese-ziguinchor' ),
+		'update_item'   => __( 'Mettre à jour le type', 'diocese-ziguinchor' ),
+		'add_new_item'  => __( 'Ajouter un type', 'diocese-ziguinchor' ),
+		'new_item_name' => __( 'Nom du nouveau type', 'diocese-ziguinchor' ),
+		'menu_name'     => __( "Types d'événement", 'diocese-ziguinchor' ),
+	);
+
+	register_taxonomy(
+		'evenement_type',
+		array( 'evenement' ),
+		array(
+			'labels'            => $labels,
+			'hierarchical'      => true,
+			'public'            => true,
+			'show_ui'           => true,
+			'show_admin_column' => true,
+			'show_in_rest'      => true,
+			'rewrite'           => false,
+		)
+	);
+}
+add_action( 'init', 'dz_register_taxonomy_evenement_type' );
+
+/**
+ * Seeds the 2 fixed evenement_type terms (Diocésain/Évêque — SPEC.md §3),
+ * same idempotent pattern as dz_seed_type_aumonerie_terms().
+ */
+function dz_seed_evenement_type_terms() {
+	$dz_terms = array(
+		'diocesain' => __( 'Diocésain', 'diocese-ziguinchor' ),
+		'eveque'    => __( 'Évêque', 'diocese-ziguinchor' ),
+	);
+
+	foreach ( $dz_terms as $dz_slug => $dz_name ) {
+		if ( ! term_exists( $dz_slug, 'evenement_type' ) ) {
+			wp_insert_term( $dz_name, 'evenement_type', array( 'slug' => $dz_slug ) );
+		}
+	}
+}
+add_action( 'init', 'dz_seed_evenement_type_terms', 11 );
+
+/**
+ * Filter-tab label for an evenement_type term slug — "Agenda Diocésain" /
+ * "Agenda de l'évêque" (SPEC.md §3/§8 exact wording), used by
+ * archive-evenement.php. Not just "Diocésain"/"Évêque" + a generic "Agenda "
+ * prefix: "de l'évêque" doesn't inflect the same way as "Diocésain" does.
+ *
+ * @param string $slug
+ * @return string
+ */
+function dz_get_evenement_type_archive_label( $slug ) {
+	$dz_labels = array(
+		'diocesain' => __( 'Agenda Diocésain', 'diocese-ziguinchor' ),
+		'eveque'    => __( "Agenda de l'évêque", 'diocese-ziguinchor' ),
+	);
+
+	return isset( $dz_labels[ $slug ] ) ? $dz_labels[ $slug ] : '';
+}
+
+/**
  * Restricts the evenement archive to upcoming/ongoing events (SPEC.md §4:
  * past events are filtered out of the query, never deleted), ordered
- * soonest-first. Does not affect wp-admin, where editors must still see
- * past events to manage them.
+ * soonest-first, and — when `?evenement_type=<slug>` is present (see the
+ * filter tabs in archive-evenement.php) — to that single evenement_type term.
+ * Does not affect wp-admin, where editors must still see past events to
+ * manage them.
  */
 function dz_evenement_archive_query( $query ) {
 	if ( is_admin() || ! $query->is_main_query() ) {
@@ -87,6 +163,21 @@ function dz_evenement_archive_query( $query ) {
 		$query->set( 'meta_key', 'evenement_date_debut' );
 		$query->set( 'orderby', 'meta_value' );
 		$query->set( 'order', 'ASC' );
+
+		if ( ! empty( $_GET['evenement_type'] ) ) {
+			$dz_evenement_type = sanitize_title( wp_unslash( $_GET['evenement_type'] ) );
+
+			$query->set(
+				'tax_query',
+				array(
+					array(
+						'taxonomy' => 'evenement_type',
+						'field'    => 'slug',
+						'terms'    => $dz_evenement_type,
+					),
+				)
+			);
+		}
 	}
 }
 add_action( 'pre_get_posts', 'dz_evenement_archive_query' );
