@@ -1,0 +1,37 @@
+{
+    "key": "group_dz_nav_menu_item",
+    "title": "Élément de menu — Méga-menu",
+    "fields": [
+        {
+            "key": "field_dz_nav_item_megamenu",
+            "label": "Afficher en méga-menu",
+            "name": "dz_nav_item_megamenu",
+            "type": "true_false",
+            "instructions": "Uniquement pertinent sur un élément de premier niveau ayant des sous-éléments (les 4 rubriques riches de l'arborescence : À propos du diocèse, Services et Commissions, Apostolat des Laïques, Vie de Foi — voir DECISIONS.md \"Mega-menu hybride\"). Laissé décoché, l'élément garde le dropdown standard à 1 niveau.",
+            "message": "",
+            "default_value": 0,
+            "ui": 1,
+            "ui_on_text": "",
+            "ui_off_text": ""
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "nav_menu_item",
+                "operator": "==",
+                "value": "all"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Bascule ACF sur chaque élément du menu principal (écran wp-admin > Apparence > Menus), lue par DZ_Walker_Nav_Menu::start_el() pour choisir entre le méga-menu (panneau large en colonnes) et le dropdown standard — voir SPEC.md §11 et DECISIONS.md \"Mega-menu hybride\".",
+    "show_in_rest": 0,
+    "modified": 1788779248
+}

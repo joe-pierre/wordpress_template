@@ -36,7 +36,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 						'theme_location' => 'primary',
 						'container'      => false,
 						'items_wrap'     => '<ul>%3$s</ul>',
-						'depth'          => 2,
+						// Depth 3, not 2: méga-menu rubrics need their
+						// grandchildren (depth 2) walked — DZ_Walker_Nav_Menu
+						// itself still suppresses depth 2 for the light
+						// dropdowns, see its class docblock and DECISIONS.md
+						// "Mega-menu hybride" (PROMPT 17).
+						'depth'          => 3,
 						'walker'         => new DZ_Walker_Nav_Menu(),
 						'fallback_cb'    => false,
 					)

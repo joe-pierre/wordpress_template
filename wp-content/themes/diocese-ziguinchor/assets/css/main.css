@@ -444,6 +444,212 @@ h6 {
 }
 
 /*--------------------------------------------------------------
+# Mega-menu (méga-menu hybride)
+--------------------------------------------------------------
+
+Two triggers coexist on a top-level item with children:
+- .dropdown            -> unchanged simple dropdown (hover on desktop,
+                          .toggle-dropdown click accordion on mobile).
+- .mega-menu-parent    -> new wide panel (this section), click/tap-driven
+                          at every width, closed by default via
+                          [.active/.dropdown-active], toggled by the exact
+                          same .toggle-dropdown click handler already used
+                          for the simple dropdown (main.js) plus a second
+                          handler bound to the whole trigger link (not just
+                          the chevron) so the "click the menu item itself"
+                          requirement holds too — see DECISIONS.md
+                          "Mega-menu hybride" (PROMPT 17).
+
+.mega-menu-parent deliberately does NOT inherit the generic ".navmenu li
+{ position: relative }" rule above: its panel positions itself against
+".navmenu > ul"'s own container (header.php's ".container.position-relative"
+already wraps the whole nav), so it spans that full content width rather
+than the narrow ~200px a simple dropdown uses. --------------------------------------------------------------*/
+.navmenu .mega-menu-parent {
+  position: static;
+}
+
+.navmenu .mega-menu {
+  display: none;
+}
+
+.navmenu .mega-menu.dropdown-active {
+  display: block;
+}
+
+@media (min-width: 1200px) {
+  .navmenu .mega-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    background: var(--nav-dropdown-background-color);
+    border-radius: 4px;
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.12);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity 0.3s, transform 0.3s, visibility 0.3s;
+  }
+
+  .navmenu .mega-menu.dropdown-active {
+    display: block;
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .navmenu .mega-menu-inner {
+    padding: 30px 0;
+  }
+
+  .navmenu .mega-menu-columns {
+    display: flex;
+    flex-wrap: wrap;
+    /* Override the generic ".navmenu ul { align-items: center }" above:
+       columns hold a different number of sublist items each, so centering
+       would misalign their headings against each other — see
+       DECISIONS.md "Mega-menu hybride" (PROMPT 17). */
+    align-items: flex-start;
+  }
+
+  .navmenu .mega-menu-column {
+    padding: 0 15px;
+    margin-bottom: 20px;
+    min-width: 0;
+  }
+
+  .navmenu .mega-menu-column-title {
+    display: block;
+    padding: 0 0 10px !important;
+    font-weight: 700;
+    color: var(--heading-color) !important;
+    text-transform: uppercase;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid color-mix(in srgb, var(--default-color), transparent 90%);
+  }
+
+  .navmenu .mega-menu-sublist {
+    /* Override the generic ".navmenu ul { display: flex }" above: this is
+       a plain stacked list of flat grandchildren, not a row. */
+    display: block;
+    margin: 10px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .navmenu .mega-menu-sublist li {
+    min-width: 0;
+  }
+
+  .navmenu .mega-menu-sublist a {
+    padding: 6px 0 !important;
+    font-size: 14px;
+    text-transform: none;
+    color: var(--nav-dropdown-color);
+  }
+
+  .navmenu .mega-menu-sublist a:hover {
+    color: var(--nav-dropdown-hover-color);
+  }
+
+  /* mega-menu-parent's own chevron: rotate on open, same visual cue as the
+     mobile accordion chevron below, instead of the desktop dropdown's
+     "no rotation, hover reveal" (irrelevant here — this is click-driven).
+     ".active" lands on the trigger <a> itself, not the <li> — same element
+     main.js's existing .toggle-dropdown handler already targets. */
+  .navmenu .mega-menu-parent > a.active i {
+    transform: rotate(180deg);
+  }
+}
+
+/* Navmenu - Mobile: mega-menu collapses into the same stacked accordion the
+   simple dropdown already uses, not nested dropdowns (SPEC PROMPT 17 §3) —
+   .mega-menu-column's Bootstrap col-md-3 only takes effect at >=1200px
+   above, so below that it's already a full-width stacked block by default;
+   the overrides below just strip the desktop panel's own positioning/
+   container chrome, which would otherwise fight the off-canvas nav's. */
+@media (max-width: 1199px) {
+  .navmenu .mega-menu {
+    position: static;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .navmenu .mega-menu-inner {
+    padding: 0;
+    max-width: none;
+  }
+
+  /* .mega-menu-columns and .mega-menu-sublist are both plain <ul> elements,
+     so the generic ".navmenu ul { position: absolute; inset: ...; background:
+     ...; box-shadow: ...; z-index: ... }" above — meant for the slide-out
+     panel's own outer <ul> — otherwise applies to them too and turns them
+     into stray floating overlays. Full reset, not just `display`, which was
+     the only property caught on the first pass here — see DECISIONS.md
+     "Mega-menu hybride" (PROMPT 17). */
+  .navmenu .mega-menu-columns,
+  .navmenu .mega-menu-sublist {
+    position: static;
+    inset: auto;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+    z-index: auto;
+    overflow: visible;
+  }
+
+  .navmenu .mega-menu-columns {
+    display: block;
+  }
+
+  .navmenu .mega-menu-column {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    flex: none;
+    padding: 0;
+    margin: 0 20px;
+    border-top: 1px solid color-mix(in srgb, var(--default-color), transparent 90%);
+  }
+
+  .navmenu .mega-menu-column:first-child {
+    border-top: none;
+  }
+
+  .navmenu .mega-menu-column-title {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    opacity: 0.8;
+  }
+
+  .navmenu .mega-menu-sublist {
+    /* Same override as the desktop block above: the generic
+       ".navmenu ul { display: none }" mobile rule otherwise wins here too,
+       since it's what a *closed* dropdown's own nested <ul> needs — this
+       sublist is never independently toggled, it must stay visible
+       whenever its column is (i.e. whenever the whole mega-menu is). */
+    display: block;
+    margin: 0 0 10px;
+    padding: 0;
+    list-style: none;
+  }
+
+  .navmenu .mega-menu-sublist a {
+    padding: 8px 10px !important;
+    font-size: 15px;
+    font-weight: 400 !important;
+  }
+}
+
+/*--------------------------------------------------------------
 # Global Footer
 --------------------------------------------------------------*/
 .footer {

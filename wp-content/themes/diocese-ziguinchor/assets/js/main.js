@@ -30,8 +30,19 @@
 
   /**
    * Hide mobile nav on same-page/hash links
+   *
+   * Skips mega-menu trigger links (top-level <a> directly inside a
+   * .mega-menu-parent <li>): those get their own click handler below that
+   * opens the panel in place instead of navigating, and needs to run
+   * without this handler closing the whole mobile nav out from under it
+   * first (this one is bound earlier, so it would otherwise fire first —
+   * see DECISIONS.md "Mega-menu hybride", PROMPT 17). Links *inside* an
+   * open mega-menu panel are unaffected and still close the mobile nav
+   * normally once clicked.
    */
   document.querySelectorAll('#navmenu a').forEach(navmenu => {
+    if (navmenu.parentElement.classList.contains('mega-menu-parent')) return;
+
     navmenu.addEventListener('click', () => {
       if (document.querySelector('.mobile-nav-active')) {
         mobileNavToogle();
@@ -50,6 +61,53 @@
       this.parentNode.nextElementSibling.classList.toggle('dropdown-active');
       e.stopImmediatePropagation();
     });
+  });
+
+  /**
+   * Mega-menu (méga-menu hybride, see DZ_Walker_Nav_Menu / DECISIONS.md
+   * "Mega-menu hybride" PROMPT 17): opened by clicking/tapping anywhere on
+   * the trigger link, not just its chevron — unlike the simple dropdown
+   * above (hover on desktop, chevron-only tap on mobile). Reuses the exact
+   * same [.active on the link] / [.dropdown-active on the panel] pair the
+   * simple dropdown's own handler already toggles, so both end up in the
+   * same state whichever element (chevron or link) is actually clicked —
+   * see the CSS comments in main.css for why that pairing matters.
+   */
+  function closeAllMegaMenus() {
+    document.querySelectorAll('.navmenu .mega-menu-parent > a.active').forEach(link => {
+      link.classList.remove('active');
+      link.nextElementSibling.classList.remove('dropdown-active');
+    });
+  }
+
+  document.querySelectorAll('.navmenu .mega-menu-parent > a').forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      const isOpen = this.classList.contains('active');
+      closeAllMegaMenus();
+      if (!isOpen) {
+        this.classList.add('active');
+        this.nextElementSibling.classList.add('dropdown-active');
+      }
+      e.stopImmediatePropagation();
+    });
+  });
+
+  // Escape closes any open mega-menu and returns focus to its trigger.
+  document.addEventListener('keydown', function(e) {
+    if (e.key !== 'Escape') return;
+    const openTrigger = document.querySelector('.navmenu .mega-menu-parent > a.active');
+    if (!openTrigger) return;
+    closeAllMegaMenus();
+    openTrigger.focus();
+  });
+
+  // Click outside the nav also closes it — the panel has no other obvious
+  // dismiss affordance once opened by click (unlike the hover dropdown).
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('#navmenu')) {
+      closeAllMegaMenus();
+    }
   });
 
   /**
