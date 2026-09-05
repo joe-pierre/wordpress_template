@@ -1,0 +1,74 @@
+{
+    "key": "group_dz_cpt_organisation_socle",
+    "title": "Organisation diocésaine — socle commun",
+    "fields": [
+        {
+            "key": "field_dz_org_responsable",
+            "label": "Responsable",
+            "name": "org_responsable",
+            "type": "text",
+            "instructions": "Nom du responsable (prêtre ou laïc). Champ texte libre, sans relation obligatoire vers la fiche d'un prêtre — voir DECISIONS.md.",
+            "required": 0
+        },
+        {
+            "key": "field_dz_org_membres",
+            "label": "Membres",
+            "name": "org_membres",
+            "type": "repeater",
+            "required": 0,
+            "layout": "table",
+            "button_label": "Ajouter un membre",
+            "min": 0,
+            "max": 0,
+            "sub_fields": [
+                {
+                    "key": "field_dz_org_membre_nom",
+                    "label": "Nom",
+                    "name": "org_membre_nom",
+                    "type": "text",
+                    "required": 1
+                },
+                {
+                    "key": "field_dz_org_membre_role",
+                    "label": "Rôle / fonction",
+                    "name": "org_membre_role",
+                    "type": "text",
+                    "required": 0
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "conseil"
+            }
+        ],
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "service_diocesain"
+            }
+        ],
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "commission_diocesaine"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Socle de champs commun aux CPT organisationnels conseil/service_diocesain/commission_diocesaine (voir SPEC.md §3 et DECISIONS.md). La description elle-même utilise l'éditeur natif (the_content()), pas un champ ACF — même logique que paroisse/pretre/evenement/sacrement.",
+    "show_in_rest": 0,
+    "modified": 1788606448
+}

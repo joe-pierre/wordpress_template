@@ -18,6 +18,9 @@ require_once DZ_THEME_DIR . '/inc/cpt-paroisse.php';
 require_once DZ_THEME_DIR . '/inc/cpt-pretre.php';
 require_once DZ_THEME_DIR . '/inc/cpt-evenement.php';
 require_once DZ_THEME_DIR . '/inc/cpt-sacrement.php';
+require_once DZ_THEME_DIR . '/inc/cpt-conseil.php';
+require_once DZ_THEME_DIR . '/inc/cpt-service_diocesain.php';
+require_once DZ_THEME_DIR . '/inc/cpt-commission_diocesaine.php';
 
 /**
  * Enqueue vendor and theme front-end assets (Bootstrap, Bootstrap Icons, AOS,

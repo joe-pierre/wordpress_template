@@ -400,6 +400,50 @@
 
 ---
 
+## [CHOIX] Socle ACF des CPT organisationnels en un seul groupe partagé (`group_dz_cpt_organisation_socle`), pas dupliqué par CPT
+
+**Contexte :** PROMPT 13 enregistre les 3 premiers CPT organisationnels (`conseil`, `service_diocesain`, `commission_diocesaine`), qui partagent exactement le même socle de champs (responsable, repeater membres) d'après `SPEC.md` §3 et la décision "Un Custom Post Type séparé par grande rubrique organisationnelle". 5 autres CPT du même socle suivront (Prompts 14-15).
+**Symptôme / Problème :** Créer un groupe ACF séparé par CPT (`group_dz_cpt_conseil`, `group_dz_cpt_service_diocesain`, ...) dupliquerait 3 fois (bientôt 8) des champs strictement identiques — toute évolution du socle (ex. ajouter un champ "mandat/durée") demanderait de répéter la modification dans chaque fichier JSON.
+**Cause / Alternatives :** (a) un groupe ACF par CPT, fidèle à la granularité "un fichier JSON par CPT" déjà en place pour paroisse/pretre/evenement/sacrement ; (b) un seul groupe socle (`group_dz_cpt_organisation_socle`), avec des règles de localisation `post_type == X` combinées en OR pour les CPT concernés, plus un groupe séparé et minimal par CPT uniquement pour ses champs réellement spécifiques (ex. `service_diocesain_sous_structures`).
+**Fix / Décision :** Option (b). `acf-json/group_dz_cpt_organisation_socle.json` (champs `org_responsable`, repeater `org_membres`) cible `conseil` OR `service_diocesain` OR `commission_diocesaine` ; `acf-json/group_dz_cpt_service_diocesain.json` ne contient que le repeater `service_diocesain_sous_structures`. Les noms de champs du socle ne sont pas préfixés par un nom de CPT (`org_*`, pas `conseil_responsable`) puisqu'ils ne sont précisément pas propres à un seul CPT — lecture assumée de la règle de nommage de `CONVENTIONS.md` ("préfixés par le nom du CPT **quand ambigu**") : ici le préfixe `org_` lève l'ambiguïté autrement, sans répéter le nom de chaque CPT. Étendre ce même groupe (ajout de règles de localisation) sera le point d'entrée pour `mouvement`/`association`/`aumonerie`/`etablissement` (Prompts 14-15) ; `ancien_eveque` n'a pas ce socle (champs propres : photo, période, biographie, voir `SPEC.md` §3) et aura son propre groupe.
+**Leçon :** Quand plusieurs CPT partagent un socle de champs identique par construction (pas par coïncidence), un seul groupe ACF avec des règles de localisation combinées évite la duplication de configuration, même si les CPT eux-mêmes restent enregistrés séparément (cohérent avec le principe déjà appliqué : ne pas dupliquer un champ déjà existant).
+**Statut :** 🔵 Choix assumé
+
+---
+
+## [CHOIX] `responsable` en simple champ texte, pas de relation obligatoire vers `pretre`
+
+**Contexte :** `SPEC.md` §3 décrit le champ comme "texte libre ou relation vers pretre" ; la décision "Un Custom Post Type séparé..." envisageait de réutiliser le pattern bidirectionnel paroisse↔pretre "si pertinent".
+**Symptôme / Problème :** Contrairement à une paroisse (toujours desservie par un clergé), un conseil/service/commission diocésain peut être dirigé par un laïc (ex. un économat tenu par un laïc, une commission animée par un responsable non-prêtre) — forcer une relation `post_object` vers le CPT `pretre` échouerait ou obligerait à créer une fiche `pretre` factice pour un responsable laïc.
+**Cause / Alternatives :** (a) champ `relationship`/`post_object` vers `pretre`, bidirectionnel comme paroisse↔pretre ; (b) simple champ texte libre (`org_responsable`), qui couvre indifféremment clergé et laïcs, sans synchronisation à maintenir.
+**Fix / Décision :** Option (b). Pas de champ relationnel en v1 pour ce socle : `org_responsable` est un champ texte (voir `acf-json/group_dz_cpt_organisation_socle.json`). Aucun besoin métier documenté de lister, côté fiche d'un prêtre, tous les organes qu'il dirige (contrairement à "quelle paroisse dessert ce prêtre", qui est une question réelle posée par `SPEC.md` §4) — si ce besoin apparaît, une relation pourra être ajoutée en complément du texte libre, pas à sa place.
+**Leçon :** Le pattern bidirectionnel de paroisse↔pretre est justifié par un besoin métier précis (un prêtre dessert une seule paroisse, affichée des deux côtés) ; ne pas le reproduire par réflexe partout où un "responsable" apparaît si le texte libre couvre déjà tous les cas réels (y compris les responsables laïcs).
+**Statut :** 🔵 Choix assumé — à revoir si le diocèse confirme que tous les responsables de ces 3 CPT sont systématiquement des prêtres déjà fichés
+
+---
+
+## [CHOIX] `.organisation-card` créée sur mesure pour la grille d'archive ; `.info-card` écarté
+
+**Contexte :** Les archives `archive-conseil.php`/`archive-service_diocesain.php`/`archive-commission_diocesaine.php` ont besoin d'une carte de grille, comme `.paroisse-card`/`.evenement-card` avant elles (Tâches 6-7).
+**Symptôme / Problème :** `.info-card` (déjà réutilisé 3 fois pour les tuiles de coordonnées/paroisse référente) semblait à première vue un candidat naturel de réutilisation. Mais son CSS (`.contact .info-card`) n'a de sens que posé sur le fond dégradé sombre de `.contact-info-panel` (fond blanc semi-transparent 10%, texte `--contrast-color` clair) : utilisé seul sur le fond clair d'une grille d'archive, il serait quasiment illisible (texte clair sur fond quasi blanc).
+**Cause / Alternatives :** (a) forcer `.info-card` en dehors de son panneau sombre d'origine ; (b) créer `.organisation-card`, sur le même moule que `.paroisse-card` (photo optionnelle en haut, corps avec titre + méta), avec un bloc icône de repli quand la photo est absente (`photo optionnelle`, contrairement à paroisse/événement où l'image est quasi systématique).
+**Fix / Décision :** Option (b) — `template-parts/card-organisation.php`, classe `.organisation-card` ajoutée à la suite de `.evenement-card` dans `assets/css/main.css` du thème. `.info-card` reste réservé à son usage actuel : une tuile à l'intérieur d'un `.contact-info-panel` (paroisse, prêtre, sacrement, et maintenant le bloc "Responsable" de `template-parts/organisation-composition.php`, qui respecte ce même couplage).
+**Leçon :** Avant de réutiliser un composant existant, vérifier aussi le contexte visuel dont il dépend (fond de section, couleur de texte), pas seulement sa structure HTML — un composant qui "a la bonne forme" peut rester inutilisable hors de son fond d'origine.
+**Statut :** 🔵 Choix assumé
+
+---
+
+## [CHOIX] Contenu de test des CPT organisationnels limité à des brouillons structurels — noms réels non saisis (PDF absent du dépôt)
+
+**Contexte :** PROMPT 13 demande de saisir au moins une entrée par CPT à partir de `NOMINATIONS_SERVICES_COMMISSIONS_AUMONERIES_2027.pdf` (ex. Conseil épiscopal, Économat diocésain).
+**Symptôme / Problème :** Ce PDF n'est physiquement présent nulle part dans ce dépôt (vérifié) ; son contenu détaillé (noms et rôles réels des responsables/membres) n'est connu qu'au travers du résumé déjà consigné dans `SPEC.md`/`DECISIONS.md` (noms des rubriques uniquement, ex. "Économat, Caritas, ODEC..."), pas les personnes qui les dirigent.
+**Cause / Alternatives :** (a) inventer des noms de responsables/membres plausibles pour peupler l'exemple ; (b) créer uniquement la structure (titre réel de la rubrique, statut brouillon, note éditoriale explicite "à compléter"), en laissant vide tout champ qui exposerait une donnée personnelle non vérifiée.
+**Fix / Décision :** Option (b), pour rester conforme à SPEC.md §9 (pas de contenu mensonger en production) et par prudence générale sur l'exactitude de données nominatives concernant une institution réelle. `bin/seed-cpt-organisation.php` (nouveau, hors du thème — script `wp eval-file` à exécuter une fois un WordPress réel disponible, cf. TODO.md Phase 8) crée 3 entrées en statut `draft` : "Conseil épiscopal" (`conseil`), "Économat" (`service_diocesain`, avec une sous-structure "Hôtel Carabane" — nom réel documenté dans `SPEC.md` §3, pas inventé), "Catéchèse" (`commission_diocesaine`) ; les champs `org_responsable`/`org_membres`/`service_diocesain_sous_structure_responsable` restent vides plutôt que remplis de noms fictifs. Objectif atteint : vérifier que les gabarits `single-*.php`/`archive-*.php` fonctionnent avec du vrai contenu WordPress, sans publier de fausses informations nominatives.
+**Leçon :** "Saisir un contenu de test à partir d'un document source" suppose que ce document soit réellement accessible ; à défaut, mieux vaut un brouillon honnête et incomplet qu'un exemple plausible mais inventé sur une institution réelle.
+**Statut :** 🔵 Choix assumé — à compléter dès que `NOMINATIONS_SERVICES_COMMISSIONS_AUMONERIES_2027.pdf` est fourni dans le dépôt
+
+---
+
 **Contexte :** ...
 **Symptôme / Problème :** ...
 **Cause / Alternatives :** ...
