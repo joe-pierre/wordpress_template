@@ -12,13 +12,15 @@
 ## Phase 1bis — Nouveaux Custom Post Types organisationnels et mega-menu (suite à l'arborescence réelle et à la circulaire de nominations)
 
 - [x] Enregistrer les CPT `conseil` (`menu_position` 26), `service_diocesain` (27), `commission_diocesaine` (28) — `inc/cpt-conseil.php`, `inc/cpt-service_diocesain.php`, `inc/cpt-commission_diocesaine.php` (voir `SPEC.md` §3, `DECISIONS.md` PROMPT 13)
-- [ ] Enregistrer les CPT restants `mouvement`, `association`, `aumonerie`, `etablissement`, `ancien_eveque` (voir `SPEC.md` §3), `menu_position` 29 à 33 (suite des créneaux libres après 26-28, toujours hors des créneaux réservés WordPress Core)
+- [x] Enregistrer les CPT `mouvement` (`menu_position` 29), `association` (30), `aumonerie` (31) — `inc/cpt-mouvement.php`, `inc/cpt-association.php`, `inc/cpt-aumonerie.php` (voir `SPEC.md` §3, `DECISIONS.md` PROMPT 14)
+- [ ] Enregistrer les CPT restants `etablissement`, `ancien_eveque` (voir `SPEC.md` §3), `menu_position` 32-33 (Prompt 15)
 - [x] Créer le groupe ACF socle commun (responsable, repeater membres) partagé entre `conseil`/`service_diocesain`/`commission_diocesaine` — `acf-json/group_dz_cpt_organisation_socle.json` ; description = éditeur natif (`the_content()`), pas de champ ACF dédié, voir `DECISIONS.md`
 - [x] Champ spécifique `sous_structures` pour `service_diocesain` — `acf-json/group_dz_cpt_service_diocesain.json`
-- [ ] Étendre le groupe socle (règles de localisation) + créer les champs spécifiques restants une fois `mouvement`/`association`/`aumonerie`/`etablissement`/`ancien_eveque` enregistrés (Prompts 14-15)
+- [x] Étendre le groupe socle (règles de localisation) à `mouvement`/`association`/`aumonerie` + champ spécifique `mouvement_aumonier` (relation `pretre`, non bidirectionnelle) — `acf-json/group_dz_cpt_mouvement.json` (voir `DECISIONS.md` PROMPT 14). Restent `etablissement`/`ancien_eveque` (Prompt 15)
 - [x] Créer les couples `single-{cpt}.php`/`archive-{cpt}.php` pour `conseil`, `service_diocesain`, `commission_diocesaine` + template-parts partagés `card-organisation.php`/`organisation-composition.php`
-- [ ] Saisir le contenu réel (responsable + membres) des entrées `conseil`/`service_diocesain`/`commission_diocesaine` depuis `NOMINATIONS_SERVICES_COMMISSIONS_AUMONERIES_2027.pdf` — **bloqué : ce PDF n'est pas présent dans ce dépôt**, seul un brouillon structurel (`bin/seed-cpt-organisation.php`, statut `draft`, champs responsable/membres vides) a pu être créé à titre de test des gabarits
-- [ ] Créer la taxonomie `type_aumonerie` (scolaire/universitaire/santé/carcérale)
+- [x] Créer les couples `single-{cpt}.php`/`archive-{cpt}.php` pour `mouvement`, `association`, `aumonerie`, en réutilisant les mêmes template-parts — `archive-aumonerie.php` ajoute des onglets de filtre par `type_aumonerie`
+- [ ] Saisir le contenu réel (responsable + membres) des entrées `conseil`/`service_diocesain`/`commission_diocesaine`/`mouvement`/`association`/`aumonerie` depuis `NOMINATIONS_SERVICES_COMMISSIONS_AUMONERIES_2027.pdf` — **bloqué : ce PDF n'est pas présent dans ce dépôt**, seul un brouillon structurel (`bin/seed-cpt-organisation.php`, statut `draft`, champs responsable/membres vides) a pu être créé à titre de test des gabarits, pour l'instant limité aux 3 CPT du Prompt 13
+- [x] Créer la taxonomie `type_aumonerie` (scolaire/universitaire/santé/carcérale) — `inc/cpt-aumonerie.php`, termes fixes pré-créés à l'`init`, filtrage de l'archive via `?type_aumonerie=<slug>` (pas de route d'archive de taxonomie dédiée, voir `DECISIONS.md`)
 - [ ] Créer la taxonomie `doyenne` sur `paroisse` et l'assigner aux paroisses existantes
 - [ ] Créer la taxonomie `evenement_type` (Diocésain/Évêque) sur `evenement`
 - [ ] Créer les catégories manquantes sur les Actualités : Cathéchèses, Communiqués, Nécrologie, Vatican, Diocèse (Homélies déjà en place)

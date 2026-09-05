@@ -59,6 +59,27 @@
                 "operator": "==",
                 "value": "commission_diocesaine"
             }
+        ],
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "mouvement"
+            }
+        ],
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "association"
+            }
+        ],
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "aumonerie"
+            }
         ]
     ],
     "menu_order": 0,
@@ -68,7 +89,7 @@
     "instruction_placement": "label",
     "hide_on_screen": "",
     "active": true,
-    "description": "Socle de champs commun aux CPT organisationnels conseil/service_diocesain/commission_diocesaine (voir SPEC.md §3 et DECISIONS.md). La description elle-même utilise l'éditeur natif (the_content()), pas un champ ACF — même logique que paroisse/pretre/evenement/sacrement.",
+    "description": "Socle de champs commun aux CPT organisationnels conseil/service_diocesain/commission_diocesaine/mouvement/association/aumonerie (voir SPEC.md §3 et DECISIONS.md). La description elle-même utilise l'éditeur natif (the_content()), pas un champ ACF — même logique que paroisse/pretre/evenement/sacrement.",
     "show_in_rest": 0,
-    "modified": 1788606448
+    "modified": 1788692848
 }

@@ -5015,3 +5015,18 @@ section background.
   color: var(--accent-color);
   margin-right: 6px;
 }
+
+.aumonerie-filters .nav-link {
+  color: var(--default-color);
+  border-radius: 50px;
+  padding: 8px 20px;
+}
+
+.aumonerie-filters .nav-link:hover {
+  color: var(--accent-color);
+}
+
+.aumonerie-filters .nav-link.active {
+  background-color: var(--accent-color);
+  color: var(--contrast-color);
+}

@@ -444,6 +444,28 @@
 
 ---
 
+## [CHOIX] `mouvement_aumonier` en relation `post_object` simple, non bidirectionnelle
+
+**Contexte :** PROMPT 14 enregistre `mouvement`/`association`/`aumonerie` sur le même socle que PROMPT 13 (`group_dz_cpt_organisation_socle`), plus le champ `aumonier` (relation `pretre`) sur `mouvement` explicitement demandé par `SPEC.md` §3 — contrairement à `org_responsable`, qui reste volontairement un texte libre (voir "`responsable` en simple champ texte" ci-dessus).
+**Symptôme / Problème :** Le pattern bidirectionnel paroisse↔prêtre (`field_dz_pretre_paroisse` / `field_dz_paroisse_pretres`) existe déjà dans le thème ; fallait-il le reproduire ici, en ajoutant un champ miroir (ex. `pretre_aumonerie_mouvements`) sur `group_dz_cpt_pretre.json` ?
+**Cause / Alternatives :** (a) relation bidirectionnelle comme paroisse↔prêtre, avec un champ `relationship` ajouté côté fiche prêtre listant les mouvements dont il est aumônier ; (b) relation `post_object` simple côté `mouvement` uniquement, sans rien changer à `group_dz_cpt_pretre.json`.
+**Fix / Décision :** Option (b) — `field_dz_mouvement_aumonier` (`acf-json/group_dz_cpt_mouvement.json`), `post_object` vers `pretre`, valeur unique, sans `bidirectional`. Même raisonnement que la décision "`responsable` en simple champ texte" : aucun besoin métier documenté de lister, côté fiche d'un prêtre, les mouvements dont il est aumônier (contrairement à "quelle paroisse dessert ce prêtre", posé par `SPEC.md` §4). `SPEC.md` §3 demande une relation (donc pas de simple texte, un aumônier est toujours un prêtre fiché), mais pas de synchronisation à double sens.
+**Leçon :** "Relation vers `pretre`" ne veut pas automatiquement dire "bidirectionnelle" : le pattern paroisse↔prêtre reste réservé aux cas où une question réelle se pose des deux côtés de la relation.
+**Statut :** 🔵 Choix assumé — à revoir si le diocèse demande un jour "quels mouvements cet aumônier encadre-t-il ?" côté fiche prêtre
+
+---
+
+## [CHOIX] `type_aumonerie` : taxonomie hiérarchique à termes fixes pré-créés, filtrage d'archive sans route de taxonomie dédiée
+
+**Contexte :** PROMPT 14 demande la taxonomie `type_aumonerie` (scolaire/universitaire/santé/carcérale) sur `aumonerie`, avec une archive filtrable par ce type.
+**Symptôme / Problème :** Trois choix à trancher : (1) taxonomie hiérarchique (façon catégorie, cases à cocher) ou façon étiquette (texte libre) ; (2) termes créés à la main par un rédacteur ou pré-remplis par le thème ; (3) filtrage via la route native `/type_aumonerie/<slug>/` (nécessitant un gabarit `taxonomy-type_aumonerie.php` dédié) ou via un paramètre sur `archive-aumonerie.php` existant.
+**Cause / Alternatives :** Une taxonomie façon étiquette laisserait un rédacteur créer des variantes du même type (ex. "Santé" vs "santé" vs "Hôpitaux") ; une route de taxonomie native sans gabarit dédié retomberait sur `archive.php` (gabarit blog générique, cartes `.card-article`), rompant la cohérence visuelle demandée ("réutilise le style de carte déjà en place").
+**Fix / Décision :** Taxonomie hiérarchique (`hierarchical => true`, UI à cases à cocher comme les catégories natives) avec ses 4 termes (`scolaire`, `universitaire`, `sante`, `carcerale`) pré-créés par `dz_seed_type_aumonerie_terms()` (hook `init`, idempotent via `term_exists()`) — un rédacteur ne peut donc que cocher parmi ces 4 termes, jamais en inventer un nouveau. Pas de route d'archive dédiée (`rewrite => false`) : le filtrage se fait sur `archive-aumonerie.php` lui-même via `?type_aumonerie=<slug>` (liens d'onglets `nav-pills`, nouvelle classe `.aumonerie-filters` dans `main.css`) et `dz_aumonerie_archive_query()` (`pre_get_posts`, même pattern que `dz_evenement_archive_query()` déjà en place pour l'agenda), pour que toute vue filtrée ou non passe par le même gabarit et la même `.organisation-card`.
+**Leçon :** Une taxonomie à valeurs fixes et peu nombreuses (type/catégorie métier, pas un tag libre) gagne à être pré-remplie plutôt que laissée vide pour le rédacteur — cohérent avec l'esprit "pas de code en dur, mais pas non plus de saisie libre là où une valeur métier est fermée par nature".
+**Statut :** 🔵 Choix assumé
+
+---
+
 **Contexte :** ...
 **Symptôme / Problème :** ...
 **Cause / Alternatives :** ...

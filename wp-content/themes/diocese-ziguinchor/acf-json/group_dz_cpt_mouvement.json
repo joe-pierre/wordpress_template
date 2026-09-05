@@ -1,0 +1,38 @@
+{
+    "key": "group_dz_cpt_mouvement",
+    "title": "Mouvement — champ spécifique",
+    "fields": [
+        {
+            "key": "field_dz_mouvement_aumonier",
+            "label": "Aumônier",
+            "name": "mouvement_aumonier",
+            "type": "post_object",
+            "instructions": "Prêtre nommé aumônier de ce mouvement. Relation simple, non bidirectionnelle vers pretre — contrairement à paroisse↔pretre, aucun besoin métier documenté d'afficher côté fiche prêtre la liste des mouvements dont il est aumônier (voir DECISIONS.md).",
+            "required": 0,
+            "post_type": [
+                "pretre"
+            ],
+            "return_format": "id",
+            "ui": 1
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "mouvement"
+            }
+        ]
+    ],
+    "menu_order": 1,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Champ spécifique au CPT mouvement, en complément du socle commun (group_dz_cpt_organisation_socle) — voir SPEC.md §3.",
+    "show_in_rest": 0,
+    "modified": 1788692848
+}
