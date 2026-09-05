@@ -3,7 +3,8 @@
  * Page title + breadcrumb banner, shared by every inner page template.
  *
  * @param array $args {
- *     @type string $title      Heading text (required).
+ *     @type string $title      Heading text (required). May contain safe inline markup
+ *                              (e.g. from get_the_archive_title()) — sanitized with wp_kses_post().
  *     @type string $subtitle   Optional paragraph under the heading.
  *     @type string $breadcrumb Optional current-page breadcrumb label. Defaults to $title.
  * }
@@ -22,7 +23,7 @@ $dz_breadcrumb = isset( $args['breadcrumb'] ) ? $args['breadcrumb'] : $dz_title;
 		<div class="container">
 			<div class="row d-flex justify-content-center text-center">
 				<div class="col-lg-8">
-					<h1 class="heading-title"><?php echo esc_html( $dz_title ); ?></h1>
+					<h1 class="heading-title"><?php echo wp_kses_post( $dz_title ); ?></h1>
 					<?php if ( $dz_subtitle ) : ?>
 						<p class="mb-0"><?php echo esc_html( $dz_subtitle ); ?></p>
 					<?php endif; ?>
