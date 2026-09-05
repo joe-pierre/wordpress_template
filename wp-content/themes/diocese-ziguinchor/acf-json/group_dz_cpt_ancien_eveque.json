@@ -1,0 +1,44 @@
+{
+    "key": "group_dz_cpt_ancien_eveque",
+    "title": "Ancien évêque",
+    "fields": [
+        {
+            "key": "field_dz_ancien_eveque_date_debut",
+            "label": "Début du mandat",
+            "name": "ancien_eveque_date_debut",
+            "type": "date_picker",
+            "instructions": "Utilisé pour trier automatiquement l'archive par ordre chronologique plutôt que par date de publication (voir DECISIONS.md).",
+            "required": 1,
+            "display_format": "d/m/Y",
+            "return_format": "Y-m-d"
+        },
+        {
+            "key": "field_dz_ancien_eveque_date_fin",
+            "label": "Fin du mandat",
+            "name": "ancien_eveque_date_fin",
+            "type": "date_picker",
+            "required": 0,
+            "display_format": "d/m/Y",
+            "return_format": "Y-m-d"
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "ancien_eveque"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Champs de la fiche ancien évêque (voir SPEC.md §3). Pas le socle organisationnel (pas de responsable/membres pour ce CPT, voir DECISIONS.md) : la photo utilise la mise en avant WordPress (featured image) et la biographie l'éditeur natif (the_content()), même logique que les autres CPT du thème, pas de champ ACF dédié pour ces deux-là.",
+    "show_in_rest": 0,
+    "modified": 1788779248
+}

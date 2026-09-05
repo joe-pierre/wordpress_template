@@ -1,0 +1,50 @@
+{
+    "key": "group_dz_cpt_etablissement",
+    "title": "Établissement — champs spécifiques",
+    "fields": [
+        {
+            "key": "field_dz_type_etablissement",
+            "label": "Type d'établissement",
+            "name": "type_etablissement",
+            "type": "select",
+            "required": 1,
+            "choices": {
+                "didec": "DIDEC",
+                "seminaire_maison_formation": "Séminaire / Maison de formation",
+                "college_diocesain": "Collège diocésain",
+                "enseignement_superieur": "Enseignement supérieur"
+            },
+            "default_value": "",
+            "allow_null": 0,
+            "multiple": 0,
+            "ui": 0
+        },
+        {
+            "key": "field_dz_etablissement_contact",
+            "label": "Contact",
+            "name": "etablissement_contact",
+            "type": "text",
+            "instructions": "Personne ou moyen de contact pour cet établissement (nom, téléphone, e-mail...). Champ libre, sans format imposé — contrairement à paroisse/prêtre (voir DECISIONS.md).",
+            "required": 0
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "etablissement"
+            }
+        ]
+    ],
+    "menu_order": 1,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Champs spécifiques au CPT etablissement, en complément du socle commun (group_dz_cpt_organisation_socle) — voir SPEC.md §3.",
+    "show_in_rest": 0,
+    "modified": 1788779248
+}

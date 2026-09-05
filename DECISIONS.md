@@ -396,7 +396,7 @@
 **Cause / Alternatives :** Un CPT générique unique aurait limité le nombre de types de contenu à enregistrer, au prix d'une taxonomie de type à gérer en plus et d'un écran d'archive générique moins parlant pour les rédacteurs (qui verraient un seul menu "Organes diocésains" au lieu d'un menu par rubrique reconnaissable).
 **Fix / Décision :** Le client a choisi un **CPT séparé par grande rubrique** : `conseil`, `service_diocesain`, `commission_diocesaine`, `mouvement`, `association`, `aumonerie` (+ taxonomie `type_aumonerie` : scolaire/universitaire/santé/carcérale), `etablissement`. Plus le CPT `ancien_eveque` pour "Archives > Les différents évêques". Socle de champs ACF commun à créer : description (WYSIWYG), responsable (texte ou relation vers `pretre` en réutilisant le pattern bidirectionnel déjà en place pour paroisse↔prêtre si pertinent), repeater `membres` (nom, rôle). Voir `SPEC.md` §3 pour le détail par CPT. Pour les `menu_position`, appliquer la même vérification déjà faite pour les 4 CPT existants (créneaux réservés WordPress Core : 5, 10, 20, 25, 60, 65, 70, 75, 80, 99) — les positions 26 à 32 sont libres et suffisent aux 8 nouveaux CPT.
 **Leçon :** Quand l'arborescence du site distingue clairement des rubriques dans sa navigation, refléter cette distinction dans les CPT facilite la vie des rédacteurs, même si cela duplique un peu de structure technique — cohérent avec la logique déjà suivie pour les 4 CPT existants du projet.
-**Statut :** 🔵 Choix assumé — implémentation restante (voir `DESIGN_PROMPTS.md`, Prompts 13 à 16)
+**Statut :** 🔵 Choix assumé — 8 CPT enregistrés (Prompts 13-15) ; reste `DESIGN_PROMPTS.md` Prompt 16 (taxonomies transverses `doyenne`/`evenement_type` + catégories Actualités)
 
 ---
 
@@ -463,6 +463,28 @@
 **Fix / Décision :** Taxonomie hiérarchique (`hierarchical => true`, UI à cases à cocher comme les catégories natives) avec ses 4 termes (`scolaire`, `universitaire`, `sante`, `carcerale`) pré-créés par `dz_seed_type_aumonerie_terms()` (hook `init`, idempotent via `term_exists()`) — un rédacteur ne peut donc que cocher parmi ces 4 termes, jamais en inventer un nouveau. Pas de route d'archive dédiée (`rewrite => false`) : le filtrage se fait sur `archive-aumonerie.php` lui-même via `?type_aumonerie=<slug>` (liens d'onglets `nav-pills`, nouvelle classe `.aumonerie-filters` dans `main.css`) et `dz_aumonerie_archive_query()` (`pre_get_posts`, même pattern que `dz_evenement_archive_query()` déjà en place pour l'agenda), pour que toute vue filtrée ou non passe par le même gabarit et la même `.organisation-card`.
 **Leçon :** Une taxonomie à valeurs fixes et peu nombreuses (type/catégorie métier, pas un tag libre) gagne à être pré-remplie plutôt que laissée vide pour le rédacteur — cohérent avec l'esprit "pas de code en dur, mais pas non plus de saisie libre là où une valeur métier est fermée par nature".
 **Statut :** 🔵 Choix assumé
+
+---
+
+## [CHOIX] `etablissement_contact` en simple champ texte, pas de champs téléphone/e-mail séparés
+
+**Contexte :** PROMPT 15 enregistre `etablissement` sur le socle organisationnel + deux champs spécifiques : `type_etablissement` (select) et `contact`. `paroisse`/`pretre` ont déjà chacun deux champs dédiés `telephone`/`email` pour leurs coordonnées.
+**Symptôme / Problème :** `SPEC.md` §3 ne nomme qu'un seul champ, `contact`, pour `etablissement` — contrairement à `paroisse_telephone`/`paroisse_email` qui sont explicitement deux champs distincts dans la même spec.
+**Cause / Alternatives :** (a) reproduire le couple `telephone`/`email` de paroisse/prêtre par cohérence de structure ; (b) un seul champ texte libre `etablissement_contact`, fidèle à la formulation exacte de `SPEC.md` §3.
+**Fix / Décision :** Option (b) — `field_dz_etablissement_contact` (`acf-json/group_dz_cpt_etablissement.json`), type `text`, sans format imposé (peut contenir un nom de correspondant, un téléphone, un e-mail, ou une combinaison). `SPEC.md` ne distingue pas ici téléphone et e-mail comme il le fait pour paroisse/prêtre ; forcer cette même structure aurait ajouté une contrainte de saisie non demandée (voir la logique déjà suivie pour `org_responsable`, un texte libre plutôt qu'une relation non demandée).
+**Leçon :** Ne pas généraliser un pattern de champ (ici `telephone`/`email` séparés) à un nouveau CPT simplement parce qu'il existe déjà ailleurs dans le thème — suivre la formulation du besoin telle que `SPEC.md` la donne pour ce CPT précis.
+**Statut :** 🔵 Choix assumé — à revoir si les rédacteurs demandent un format de coordonnées structuré (tri, lien `tel:`/`mailto:` cliquable) pour `etablissement`
+
+---
+
+## [CHOIX] `ancien_eveque` hors du socle organisationnel ; tri d'archive chronologique ascendant (plus ancien en premier)
+
+**Contexte :** PROMPT 15 enregistre `ancien_eveque` pour "Archives > Les différents évêques" (photo, période, biographie), avec une exigence explicite : l'archive doit être triée par date de début de mandat, pas par date de publication WordPress.
+**Symptôme / Problème :** Deux décisions à trancher : (1) `ancien_eveque` partage-t-il le socle `responsable`/`membres` comme les 7 autres CPT organisationnels ? (2) "trié... chronologique" veut-il dire du plus ancien mandat au plus récent (ASC), ou l'inverse (DESC, le mandat le plus récent en tête, plus courant pour une page "Archives" consultée de nos jours) ?
+**Cause / Alternatives :** Pour (1) : `SPEC.md` §3 décrit `ancien_eveque` avec des champs propres (photo, période, biographie) sans mentionner responsable/membres, contrairement aux 7 autres lignes du même tableau — confirmé par la décision "Socle ACF des CPT organisationnels..." ci-dessus, qui l'exclut déjà explicitement du socle. Pour (2) : "chronologique" est lu ici dans son sens le plus littéral (suite historique, du plus ancien au plus récent), plutôt que "les plus récents d'abord" (habituel pour un fil d'actualité, mais pas pour une frise historique).
+**Fix / Décision :** Pas de `group_dz_cpt_organisation_socle` pour `ancien_eveque` — groupe dédié `acf-json/group_dz_cpt_ancien_eveque.json` avec seulement `ancien_eveque_date_debut` (obligatoire, sert au tri) et `ancien_eveque_date_fin` (optionnel). Photo = image mise en avant (featured image, comme `pretre`/`conseil`...), biographie = `the_content()` (éditeur natif, même logique que tous les autres CPT du thème). Tri d'archive : `dz_ancien_eveque_archive_query()` (`inc/cpt-ancien_eveque.php`, hook `pre_get_posts`, même pattern que `dz_evenement_archive_query()`/`dz_pretre_archive_query()` déjà en place) — `meta_key => ancien_eveque_date_debut`, `orderby => meta_value`, `order => ASC`.
+**Leçon :** Un mot comme "chronologique" a deux lectures usuelles opposées (frise historique vs fil d'actualité) ; le choix ASC ici est documenté précisément pour pouvoir être inversé en une ligne (`order => DESC`) si le client, en recette, attend plutôt "l'évêque le plus récent en premier".
+**Statut :** 🔵 Choix assumé — sens du tri (ASC) à confirmer en recette avec le diocèse
 
 ---
 
