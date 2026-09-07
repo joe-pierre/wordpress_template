@@ -103,3 +103,13 @@
 - [ ] Test du formulaire de contact en conditions réelles
 - [ ] Vérification des performances (poids des sliders/images, lazy loading)
 - [ ] Mise en production
+
+## Phase 9 — Import de contenu réel (`CONTENT_PROMPTS.md`)
+
+- [x] PROMPT 0 — Mécanisme d'import réutilisable : dossier `inc/import/` (`data-hero.php`, `data-calendrier.php`, `data-nominations.php` — tableaux PHP vides pour l'instant, aucune logique, voir chaque fichier) + page d'outil admin "Réglages > Import contenu diocèse" (`inc/import/import-tools.php`, `add_options_page`, capability `manage_options`, nonce par bouton, POST-redirect-GET) + idempotence via meta `_dz_import_source_id` (`dz_import_find_existing_post()`/`dz_import_mark_imported()`). Vérifié au préalable : Prompts 13 à 16 de `DESIGN_PROMPTS.md` bien terminés (CPT organisationnels + taxonomies déjà enregistrés). Voir `DECISIONS.md`.
+- [ ] PROMPT 1 — Hero page d'accueil (4 images `assets/img/eveque/` → `assets/seed-images/hero/`, sideload média, repeater `dz_front_hero_slides`)
+- [ ] PROMPT 2 — Calendrier diocésain 2026-2027 → CPT `evenement`
+- [ ] PROMPT 3 — Circulaire de nominations → `service_diocesain`/`commission_diocesaine`/`mouvement`/`association`
+- [ ] PROMPT 4 — Aumôneries et enseignements diocésains → `aumonerie`/`etablissement`
+- [ ] PROMPT 5 — Contenu "À propos" et armoiries
+- [ ] PROMPT 6 — Vérification finale de l'idempotence, exclusion des données personnelles sensibles, bilan import automatique vs. saisie manuelle restante
