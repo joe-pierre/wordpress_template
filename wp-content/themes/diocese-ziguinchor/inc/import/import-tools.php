@@ -344,9 +344,52 @@ function dz_import_run_hero() {
 }
 
 /**
- * Imports the diocesan calendar as `evenement` posts. Full logic added in
- * CONTENT_PROMPTS.md PROMPT 2; for now this safely reports that
- * inc/import/data-calendrier.php has nothing to import yet.
+ * Finds an existing `paroisse` post whose title matches (case/whitespace
+ * insensitive — PDF transcriptions and wp-admin entries won't always agree
+ * on casing) the given lieu text, for dz_import_run_calendrier()'s
+ * "evenement_paroisse relation when the lieu names a known parish, free
+ * text otherwise" rule (CONTENT_PROMPTS.md PROMPT 2, point 4).
+ *
+ * @param string $title
+ * @return int 0 if no paroisse matches, otherwise its post ID.
+ */
+function dz_import_find_paroisse_by_title( $title ) {
+	$dz_needle = mb_strtolower( trim( $title ) );
+
+	if ( '' === $dz_needle ) {
+		return 0;
+	}
+
+	$dz_paroisses = get_posts(
+		array(
+			'post_type'      => 'paroisse',
+			'post_status'    => 'any',
+			'posts_per_page' => -1,
+			'fields'         => 'all',
+		)
+	);
+
+	foreach ( $dz_paroisses as $dz_paroisse ) {
+		if ( mb_strtolower( trim( $dz_paroisse->post_title ) ) === $dz_needle ) {
+			return (int) $dz_paroisse->ID;
+		}
+	}
+
+	return 0;
+}
+
+/**
+ * Imports the diocesan calendar as `evenement` posts (one per
+ * inc/import/data-calendrier.php entry). `evenement_type` defaults to
+ * "diocesain" unless the entry explicitly says otherwise (CONTENT_PROMPTS.md
+ * PROMPT 2, point 3 — e.g. the bishop's own ordination anniversary).
+ *
+ * Past events are created exactly like upcoming ones (`post_status =>
+ * publish`, no special-casing): dz_evenement_archive_query()
+ * (inc/cpt-evenement.php) already excludes past events from the public
+ * archive on its own via a date meta_query, but only for the front-end
+ * query (`is_admin()` guard) — an imported past event stays fully visible
+ * in wp-admin, satisfying PROMPT 2 point 5 without any extra code here.
  *
  * @return array{created:int,skipped:int,notes:string[]}
  */
@@ -361,11 +404,57 @@ function dz_import_run_calendrier() {
 		);
 	}
 
-	// Implémentation complète : CONTENT_PROMPTS.md PROMPT 2.
+	$dz_created = 0;
+	$dz_skipped = 0;
+	$dz_notes   = array();
+
+	foreach ( $dz_entries as $dz_entry ) {
+		if ( dz_import_find_existing_post( 'evenement', $dz_entry['source_id'] ) ) {
+			++$dz_skipped;
+			continue;
+		}
+
+		$dz_post_id = wp_insert_post(
+			array(
+				'post_type'   => 'evenement',
+				'post_title'  => wp_strip_all_tags( $dz_entry['titre'] ),
+				'post_status' => 'publish',
+			),
+			true
+		);
+
+		if ( is_wp_error( $dz_post_id ) ) {
+			$dz_notes[] = sprintf(
+				/* translators: 1: activity title, 2: error message */
+				__( "Échec de la création de l'événement « %1\$s » : %2\$s", 'diocese-ziguinchor' ),
+				$dz_entry['titre'],
+				$dz_post_id->get_error_message()
+			);
+			continue;
+		}
+
+		dz_import_mark_imported( $dz_post_id, $dz_entry['source_id'] );
+
+		update_field( 'evenement_date_debut', $dz_entry['date_debut'], $dz_post_id );
+		update_field( 'evenement_date_fin', ! empty( $dz_entry['date_fin'] ) ? $dz_entry['date_fin'] : $dz_entry['date_debut'], $dz_post_id );
+
+		$dz_paroisse_id = dz_import_find_paroisse_by_title( $dz_entry['lieu'] );
+		if ( $dz_paroisse_id ) {
+			update_field( 'evenement_paroisse', $dz_paroisse_id, $dz_post_id );
+		} else {
+			update_field( 'evenement_lieu', $dz_entry['lieu'], $dz_post_id );
+		}
+
+		$dz_type = ! empty( $dz_entry['evenement_type'] ) ? $dz_entry['evenement_type'] : 'diocesain';
+		wp_set_object_terms( $dz_post_id, $dz_type, 'evenement_type' );
+
+		++$dz_created;
+	}
+
 	return array(
-		'created' => 0,
-		'skipped' => 0,
-		'notes'   => array(),
+		'created' => $dz_created,
+		'skipped' => $dz_skipped,
+		'notes'   => $dz_notes,
 	);
 }
 
