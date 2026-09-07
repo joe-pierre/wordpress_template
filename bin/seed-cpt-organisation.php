@@ -1,9 +1,8 @@
 <?php
 /**
- * One-off seed script for PROMPT 13 — creates one demo entry per new
- * organisational CPT (conseil, service_diocesain, commission_diocesaine) so
- * the single-*.php / archive-*.php templates can be checked against real
- * WordPress content once an actual install exists.
+ * One-off seed script for PROMPT 13 — creates a demo "Conseil épiscopal"
+ * entry (CPT conseil) so single-conseil.php/archive-conseil.php can be
+ * checked against real WordPress content once an actual install exists.
  *
  * NOT a theme file — this repository has no live WordPress/MySQL instance
  * to run it against yet (see TODO.md Phase 8, DECISIONS.md). Run once with:
@@ -12,6 +11,18 @@
  *
  * from the WordPress root, after activating the diocese-ziguinchor theme
  * and ACF Pro.
+ *
+ * Originally also seeded a demo "Catéchèse" (commission_diocesaine) and
+ * "Économat" (service_diocesain) entry — removed at CONTENT_PROMPTS.md
+ * PROMPT 3, which now creates both (as "Catéchèse" and "Économat
+ * Diocésain" respectively) through the proper idempotent import tool
+ * (Réglages > Import contenu diocèse, inc/import/import-tools.php).
+ * Running both scripts against the same site would otherwise duplicate
+ * those two entries: this script's own `get_page_by_title()` idempotence
+ * check has no way to see the `_dz_import_source_id`-tagged posts the
+ * newer tool creates, and vice versa — see DECISIONS.md. `conseil` isn't
+ * covered by any CONTENT_PROMPTS.md prompt, so this script keeps that one
+ * entity as its sole remaining responsibility.
  *
  * IMPORTANT — NOMINATIONS_SERVICES_COMMISSIONS_AUMONERIES_2027.pdf (the
  * source of the real personnel names for "responsable"/"membres") is not
@@ -66,23 +77,3 @@ $dz_todo_note = __(
 );
 
 dz_seed_organisation_entry( 'conseil', __( 'Conseil épiscopal', 'diocese-ziguinchor' ), $dz_todo_note );
-dz_seed_organisation_entry( 'commission_diocesaine', __( 'Catéchèse', 'diocese-ziguinchor' ), $dz_todo_note );
-
-$dz_economat_id = dz_seed_organisation_entry( 'service_diocesain', __( 'Économat', 'diocese-ziguinchor' ), $dz_todo_note );
-
-// Structural sous-structure name is documented in SPEC.md §3 (real entity,
-// not invented); its own responsable is left blank for the same reason as
-// above.
-if ( $dz_economat_id && function_exists( 'have_rows' ) && ! have_rows( 'service_diocesain_sous_structures', $dz_economat_id ) ) {
-	update_field(
-		'service_diocesain_sous_structures',
-		array(
-			array(
-				'service_diocesain_sous_structure_nom'         => __( 'Hôtel Carabane', 'diocese-ziguinchor' ),
-				'service_diocesain_sous_structure_responsable' => '',
-			),
-		),
-		$dz_economat_id
-	);
-	echo "  + sous-structure seeded: Hôtel Carabane\n";
-}

@@ -459,10 +459,273 @@ function dz_import_run_calendrier() {
 }
 
 /**
- * Imports the nominations circular into service_diocesain/commission_
- * diocesaine/mouvement/association. Full logic (one function per CPT) added
- * in CONTENT_PROMPTS.md PROMPT 3; for now this safely reports that
- * inc/import/data-nominations.php has nothing to import yet.
+ * Finds an existing `pretre` post whose title matches (case/whitespace
+ * insensitive, same reasoning as dz_import_find_paroisse_by_title()) the
+ * given name, for the `mouvement` "aumonier" relation (CONTENT_PROMPTS.md
+ * PROMPT 3, point 3).
+ *
+ * @param string $name
+ * @return int 0 if no pretre matches, otherwise its post ID.
+ */
+function dz_import_find_pretre_by_title( $name ) {
+	$dz_needle = mb_strtolower( trim( $name ) );
+
+	if ( '' === $dz_needle ) {
+		return 0;
+	}
+
+	$dz_pretres = get_posts(
+		array(
+			'post_type'      => 'pretre',
+			'post_status'    => 'any',
+			'posts_per_page' => -1,
+			'fields'         => 'all',
+		)
+	);
+
+	foreach ( $dz_pretres as $dz_pretre ) {
+		if ( mb_strtolower( trim( $dz_pretre->post_title ) ) === $dz_needle ) {
+			return (int) $dz_pretre->ID;
+		}
+	}
+
+	return 0;
+}
+
+/**
+ * Sets the shared organisational socle fields (`org_responsable`,
+ * `org_membres` — group_dz_cpt_organisation_socle, common to all 8
+ * organisational CPTs) from an entry, if present. Shared by all four
+ * dz_import_run_nominations_*() functions below rather than repeated in
+ * each.
+ *
+ * @param int   $post_id
+ * @param array $entry
+ */
+function dz_import_apply_org_socle( $post_id, array $entry ) {
+	if ( ! empty( $entry['responsable'] ) ) {
+		update_field( 'org_responsable', $entry['responsable'], $post_id );
+	}
+
+	if ( ! empty( $entry['membres'] ) ) {
+		$dz_rows = array();
+		foreach ( $entry['membres'] as $dz_membre ) {
+			$dz_rows[] = array(
+				'org_membre_nom'  => $dz_membre['nom'],
+				'org_membre_role' => $dz_membre['role'],
+			);
+		}
+		update_field( 'org_membres', $dz_rows, $post_id );
+	}
+}
+
+/**
+ * Creates one `evenement`-style organisational post from a nominations
+ * entry (idempotence + org socle), shared by all four per-CPT import
+ * functions below. Returns 0 (and appends to $dz_notes by reference) on
+ * failure or if already imported, without creating anything.
+ *
+ * @param string   $post_type
+ * @param array    $entry
+ * @param string[] $dz_notes By reference.
+ * @return int New post ID, or 0 (already imported or failed).
+ */
+function dz_import_create_organisation_post( $post_type, array $entry, array &$dz_notes ) {
+	if ( dz_import_find_existing_post( $post_type, $entry['source_id'] ) ) {
+		return 0;
+	}
+
+	$dz_post_id = wp_insert_post(
+		array(
+			'post_type'   => $post_type,
+			'post_title'  => wp_strip_all_tags( $entry['titre'] ),
+			// Brouillon : responsable/membres pas encore transcrits du PDF
+			// (voir inc/import/data-nominations.php) — pas de contenu
+			// incomplet publié publiquement (SPEC.md §9).
+			'post_status' => 'draft',
+		),
+		true
+	);
+
+	if ( is_wp_error( $dz_post_id ) ) {
+		$dz_notes[] = sprintf(
+			/* translators: 1: entity title, 2: error message */
+			__( "Échec de la création de « %1\$s » : %2\$s", 'diocese-ziguinchor' ),
+			$entry['titre'],
+			$dz_post_id->get_error_message()
+		);
+		return 0;
+	}
+
+	dz_import_mark_imported( $dz_post_id, $entry['source_id'] );
+	dz_import_apply_org_socle( $dz_post_id, $entry );
+
+	return $dz_post_id;
+}
+
+/**
+ * PROMPT 3, section I: service_diocesain. Économat's `sous_structures`
+ * (attached committees, not separate posts — see SPEC.md §3) are set here
+ * when the entry provides them.
+ *
+ * @param array $dz_entries
+ * @return array{created:int,skipped:int,notes:string[]}
+ */
+function dz_import_run_nominations_service_diocesain( array $dz_entries ) {
+	$dz_created = 0;
+	$dz_skipped = 0;
+	$dz_notes   = array();
+
+	foreach ( $dz_entries as $dz_entry ) {
+		if ( dz_import_find_existing_post( 'service_diocesain', $dz_entry['source_id'] ) ) {
+			++$dz_skipped;
+			continue;
+		}
+
+		$dz_post_id = dz_import_create_organisation_post( 'service_diocesain', $dz_entry, $dz_notes );
+		if ( ! $dz_post_id ) {
+			continue;
+		}
+
+		if ( ! empty( $dz_entry['sous_structures'] ) ) {
+			$dz_rows = array();
+			foreach ( $dz_entry['sous_structures'] as $dz_sous_structure ) {
+				$dz_rows[] = array(
+					'service_diocesain_sous_structure_nom'         => $dz_sous_structure['nom'],
+					'service_diocesain_sous_structure_responsable' => $dz_sous_structure['responsable'],
+				);
+			}
+			update_field( 'service_diocesain_sous_structures', $dz_rows, $dz_post_id );
+		}
+
+		++$dz_created;
+	}
+
+	return array(
+		'created' => $dz_created,
+		'skipped' => $dz_skipped,
+		'notes'   => $dz_notes,
+	);
+}
+
+/**
+ * PROMPT 3, section II: commission_diocesaine — no field specific to this
+ * CPT, just the shared organisational socle.
+ *
+ * @param array $dz_entries
+ * @return array{created:int,skipped:int,notes:string[]}
+ */
+function dz_import_run_nominations_commission_diocesaine( array $dz_entries ) {
+	$dz_created = 0;
+	$dz_skipped = 0;
+	$dz_notes   = array();
+
+	foreach ( $dz_entries as $dz_entry ) {
+		if ( dz_import_find_existing_post( 'commission_diocesaine', $dz_entry['source_id'] ) ) {
+			++$dz_skipped;
+			continue;
+		}
+
+		if ( dz_import_create_organisation_post( 'commission_diocesaine', $dz_entry, $dz_notes ) ) {
+			++$dz_created;
+		}
+	}
+
+	return array(
+		'created' => $dz_created,
+		'skipped' => $dz_skipped,
+		'notes'   => $dz_notes,
+	);
+}
+
+/**
+ * PROMPT 3, section III: mouvement. `aumonier` is matched against existing
+ * `pretre` titles when the entry names one (point 3): if a matching pretre
+ * exists, `mouvement_aumonier` (a post_object relation, see
+ * acf-json/group_dz_cpt_mouvement.json) is set to it; if the entry names
+ * someone but no matching pretre fiche exists yet, nothing is set on the
+ * relation (there is no free-text fallback field on this CPT) and a note is
+ * added instead, exactly as PROMPT 3 asks ("note-le comme point à corriger
+ * dans BUGS_AND_ROADMAP.md").
+ *
+ * @param array $dz_entries
+ * @return array{created:int,skipped:int,notes:string[]}
+ */
+function dz_import_run_nominations_mouvement( array $dz_entries ) {
+	$dz_created = 0;
+	$dz_skipped = 0;
+	$dz_notes   = array();
+
+	foreach ( $dz_entries as $dz_entry ) {
+		if ( dz_import_find_existing_post( 'mouvement', $dz_entry['source_id'] ) ) {
+			++$dz_skipped;
+			continue;
+		}
+
+		$dz_post_id = dz_import_create_organisation_post( 'mouvement', $dz_entry, $dz_notes );
+		if ( ! $dz_post_id ) {
+			continue;
+		}
+
+		if ( ! empty( $dz_entry['aumonier'] ) ) {
+			$dz_pretre_id = dz_import_find_pretre_by_title( $dz_entry['aumonier'] );
+			if ( $dz_pretre_id ) {
+				update_field( 'mouvement_aumonier', $dz_pretre_id, $dz_post_id );
+			} else {
+				$dz_notes[] = sprintf(
+					/* translators: 1: chaplain name, 2: mouvement title */
+					__( 'Aumônier « %1$s » introuvable dans le CPT prêtre pour « %2$s » — relation à compléter manuellement une fois sa fiche créée.', 'diocese-ziguinchor' ),
+					$dz_entry['aumonier'],
+					$dz_entry['titre']
+				);
+			}
+		}
+
+		++$dz_created;
+	}
+
+	return array(
+		'created' => $dz_created,
+		'skipped' => $dz_skipped,
+		'notes'   => $dz_notes,
+	);
+}
+
+/**
+ * PROMPT 3, section IV: association — no field specific to this CPT, just
+ * the shared organisational socle.
+ *
+ * @param array $dz_entries
+ * @return array{created:int,skipped:int,notes:string[]}
+ */
+function dz_import_run_nominations_association( array $dz_entries ) {
+	$dz_created = 0;
+	$dz_skipped = 0;
+	$dz_notes   = array();
+
+	foreach ( $dz_entries as $dz_entry ) {
+		if ( dz_import_find_existing_post( 'association', $dz_entry['source_id'] ) ) {
+			++$dz_skipped;
+			continue;
+		}
+
+		if ( dz_import_create_organisation_post( 'association', $dz_entry, $dz_notes ) ) {
+			++$dz_created;
+		}
+	}
+
+	return array(
+		'created' => $dz_created,
+		'skipped' => $dz_skipped,
+		'notes'   => $dz_notes,
+	);
+}
+
+/**
+ * Imports the nominations circular: dispatches to one function per target
+ * CPT (CONTENT_PROMPTS.md PROMPT 3 — "un fichier data-nominations.php
+ * unique mais une fonction d'import par CPT pour rester lisible") and
+ * aggregates their results.
  *
  * @return array{created:int,skipped:int,notes:string[]}
  */
@@ -477,10 +740,32 @@ function dz_import_run_nominations() {
 		);
 	}
 
-	// Implémentation complète : CONTENT_PROMPTS.md PROMPT 3.
+	$dz_dispatch = array(
+		'service_diocesain'     => 'dz_import_run_nominations_service_diocesain',
+		'commission_diocesaine' => 'dz_import_run_nominations_commission_diocesaine',
+		'mouvement'             => 'dz_import_run_nominations_mouvement',
+		'association'           => 'dz_import_run_nominations_association',
+	);
+
+	$dz_created = 0;
+	$dz_skipped = 0;
+	$dz_notes   = array();
+
+	foreach ( $dz_dispatch as $dz_key => $dz_callback ) {
+		if ( empty( $dz_data[ $dz_key ] ) ) {
+			continue;
+		}
+
+		$dz_result = call_user_func( $dz_callback, $dz_data[ $dz_key ] );
+
+		$dz_created += $dz_result['created'];
+		$dz_skipped += $dz_result['skipped'];
+		$dz_notes    = array_merge( $dz_notes, $dz_result['notes'] );
+	}
+
 	return array(
-		'created' => 0,
-		'skipped' => 0,
-		'notes'   => array(),
+		'created' => $dz_created,
+		'skipped' => $dz_skipped,
+		'notes'   => $dz_notes,
 	);
 }
