@@ -201,10 +201,61 @@ function dz_import_find_existing_post( $post_type, $source_id ) {
 }
 
 /**
- * Imports the front-page hero slides (repeater `dz_front_hero_slides`,
- * group_dz_front_hero — see inc/acf-fields.php). Full logic (media sideload
- * + repeater population) added in CONTENT_PROMPTS.md PROMPT 1; for now this
- * safely reports that inc/import/data-hero.php has nothing to import yet.
+ * Sideloads a local file already sitting on disk (not an upload/$_FILES
+ * entry) into the media library as a real attachment, with generated
+ * metadata. media_handle_sideload()/wp_handle_sideload() COPY then DELETE
+ * whatever `tmp_name` they're given (that's correct for a genuine temp
+ * upload, but would destroy our permanent theme-bundled source file if we
+ * pointed `tmp_name` at it directly) — so this first copies the source into
+ * a real temp file via wp_tempnam() and only ever sideloads that copy.
+ *
+ * @param string $file_path   Absolute path to the source file.
+ * @param int    $post_id     Post to attach the media to.
+ * @param string $description Attachment title/description.
+ * @return int|WP_Error Attachment ID, or a WP_Error on failure.
+ */
+function dz_import_sideload_image( $file_path, $post_id, $description ) {
+	require_once ABSPATH . 'wp-admin/includes/media.php';
+	require_once ABSPATH . 'wp-admin/includes/file.php';
+	require_once ABSPATH . 'wp-admin/includes/image.php';
+
+	$dz_tmp_file = wp_tempnam( basename( $file_path ) );
+
+	if ( ! copy( $file_path, $dz_tmp_file ) ) {
+		return new WP_Error(
+			'dz_import_copy_failed',
+			sprintf(
+				/* translators: %s: source file path */
+				__( 'Impossible de copier %s vers un fichier temporaire.', 'diocese-ziguinchor' ),
+				$file_path
+			)
+		);
+	}
+
+	$dz_attachment_id = media_handle_sideload(
+		array(
+			'name'     => basename( $file_path ),
+			'tmp_name' => $dz_tmp_file,
+		),
+		$post_id,
+		$description
+	);
+
+	if ( is_wp_error( $dz_attachment_id ) && file_exists( $dz_tmp_file ) ) {
+		unlink( $dz_tmp_file );
+	}
+
+	return $dz_attachment_id;
+}
+
+/**
+ * Imports the front-page hero slides: sideloads each image into the media
+ * library, then appends a row to the `dz_front_hero_slides` repeater
+ * (group_dz_front_hero — see inc/acf-fields.php) on the static front page.
+ * Idempotence per slide (not per post — this isn't a CPT, see
+ * inc/import/data-hero.php): each repeater row carries the source slide's
+ * `source_id` in `dz_front_hero_slide_source_id`, checked against the
+ * repeater's existing rows before sideloading anything.
  *
  * @return array{created:int,skipped:int,notes:string[]}
  */
@@ -219,11 +270,76 @@ function dz_import_run_hero() {
 		);
 	}
 
-	// Implémentation complète : CONTENT_PROMPTS.md PROMPT 1.
+	if ( 'page' !== get_option( 'show_on_front' ) || ! get_option( 'page_on_front' ) ) {
+		return array(
+			'created' => 0,
+			'skipped' => 0,
+			'notes'   => array( __( "Aucune page d'accueil statique n'est configurée (Réglages > Lecture) : impossible d'importer le hero tant que group_dz_front_hero n'a pas de page à laquelle s'attacher.", 'diocese-ziguinchor' ) ),
+		);
+	}
+
+	$dz_front_page_id = (int) get_option( 'page_on_front' );
+	$dz_rows           = dz_get_field( 'dz_front_hero_slides', $dz_front_page_id, array() );
+	$dz_existing_ids   = wp_list_pluck( $dz_rows, 'dz_front_hero_slide_source_id' );
+
+	$dz_created = 0;
+	$dz_skipped = 0;
+	$dz_notes   = array();
+
+	foreach ( $dz_slides as $dz_slide ) {
+		if ( in_array( $dz_slide['source_id'], $dz_existing_ids, true ) ) {
+			++$dz_skipped;
+			continue;
+		}
+
+		$dz_image_path = DZ_THEME_DIR . '/' . ltrim( $dz_slide['image'], '/' );
+
+		if ( ! file_exists( $dz_image_path ) ) {
+			$dz_notes[] = sprintf(
+				/* translators: %s: image file path */
+				__( 'Image introuvable, slide ignoré : %s', 'diocese-ziguinchor' ),
+				$dz_slide['image']
+			);
+			continue;
+		}
+
+		$dz_attachment_id = dz_import_sideload_image( $dz_image_path, $dz_front_page_id, $dz_slide['titre'] );
+
+		if ( is_wp_error( $dz_attachment_id ) ) {
+			$dz_notes[] = sprintf(
+				/* translators: 1: image file path, 2: error message */
+				__( "Échec de l'import de l'image %1\$s : %2\$s", 'diocese-ziguinchor' ),
+				$dz_slide['image'],
+				$dz_attachment_id->get_error_message()
+			);
+			continue;
+		}
+
+		// hero-slider.php already outputs its own alt from the slide's
+		// "titre" field, not this — set for the attachment's other uses
+		// (media library, if reused elsewhere) per CONTENT_PROMPTS.md's
+		// "vrai attachment WordPress, avec métadonnées".
+		update_post_meta( $dz_attachment_id, '_wp_attachment_image_alt', $dz_slide['titre'] );
+
+		$dz_rows[] = array(
+			'dz_front_hero_slide_image'     => $dz_attachment_id,
+			'dz_front_hero_slide_titre'     => $dz_slide['titre'],
+			'dz_front_hero_slide_texte'     => $dz_slide['texte'],
+			'dz_front_hero_slide_lien'      => $dz_slide['lien'],
+			'dz_front_hero_slide_source_id' => $dz_slide['source_id'],
+		);
+
+		++$dz_created;
+	}
+
+	if ( $dz_created > 0 ) {
+		update_field( 'dz_front_hero_slides', $dz_rows, $dz_front_page_id );
+	}
+
 	return array(
-		'created' => 0,
-		'skipped' => 0,
-		'notes'   => array(),
+		'created' => $dz_created,
+		'skipped' => $dz_skipped,
+		'notes'   => $dz_notes,
 	);
 }
 

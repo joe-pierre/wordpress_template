@@ -12,6 +12,13 @@
 
 ---
 
+# IMPORT DE CONTENU — VÉRIFICATIONS (`CONTENT_PROMPTS.md`)
+
+- **[2026-09-07] Recadrage des 2 images "carrées" du hero (PROMPT 1)** — `eveque.jpg`/`benediction_par_eveque.jpg` (1080×810, ratio 1.33) sont nettement moins larges que `messe.jpg`/`consecration.jpg` (1280×575, ratio 2.23), et `.blog-hero-item img { object-fit: cover }` (bannière `height: 80vh, min-height: 600px`) recadre donc plus fort ces deux-là. Vérifié **par rendu réel** (Chrome headless, pas juste en théorie) : le fichier CSS/markup exact du thème appliqué aux 2 images, capturé à 1440×900 (desktop) et 390×844 (mobile). Résultat : le sujet principal (visage/mitre de l'évêque sur `eveque.jpg`, geste de bénédiction sur `benediction_par_eveque.jpg`) reste pleinement visible aux deux gabarits testés avec le recadrage **par défaut** (`object-position: center`, non modifié) — comparé aussi contre `object-position: center top`, qui n'apporte pas d'amélioration notable ici. **Aucun `object-position` spécifique ajouté** : le recadrage par défaut suffit sur les tailles testées. Non vérifié : les largeurs intermédiaires (tablette ~768-991px) et le rendu réel dans le slider Swiper (transitions, éventuel zoom Ken Burns) — à confirmer visuellement après déploiement sur le vrai site (voir point suivant), en particulier si le diocèse fournit un recadrage manuel différent de celui du photographe.
+- **[2026-09-07] Vérification finale du hero après déploiement (PROMPT 1, point 5)** — Aucun environnement WordPress réel dans ce dépôt (contrainte récurrente, voir `DECISIONS.md`) : impossible de charger `front-page.php` avec Swiper/AOS en conditions réelles. La logique de `dz_import_run_hero()` (idempotence, gestion d'erreur de sideload, image introuvable) a été vérifiée par un test PHP autonome simulant les fonctions WordPress/ACF (non versionné, script de session) — 11 assertions passées, y compris sur les 4 vrais fichiers image de `assets/seed-images/hero/`. **Reste à faire après déploiement réel** : cliquer "Importer le hero" dans Réglages > Import contenu diocèse, vérifier que les 4 slides apparaissent dans le slider avec le bon recadrage à toutes les tailles d'écran, et que les 4 images sont bien de vrais attachments dans la médiathèque (pas de simple copie de fichier).
+
+---
+
 # ROADMAP (idées / améliorations futures)
 
 Idées identifiées pendant le cadrage, volontairement hors périmètre de la v1 (voir `SPEC.md` §8 Extensibilité et `DECISIONS.md` pour le raisonnement) :
