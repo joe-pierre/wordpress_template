@@ -4,6 +4,8 @@
 >
 > **Contrainte technique importante à rappeler à Claude Code dans le Prompt 0** : Claude Code travaille sur le dépôt de code local, pas directement sur la base de données du site en ligne. Il ne peut donc pas "créer un article" comme le ferait un rédacteur dans l'admin. La bonne approche est de générer un **mécanisme d'import** (script exécuté une seule fois, depuis l'admin ou en ligne de commande WP-CLI si disponible sur l'hébergement) qui lit des données structurées et crée les contenus via les fonctions WordPress standard (`wp_insert_post`, `update_field` d'ACF). Une fois exécuté sur le vrai site, ce mécanisme peut être désactivé/supprimé — ce n'est pas une fonctionnalité permanente du thème.
 
+> **Documents sources disponibles dans `documents/`** (à la racine du projet) : `NOMINATIONS_SERVICES_COMMISSIONS_AUMONERIES_2027.pdf`, `CALENDRIER_DIOCESAIN_2027.pdf`, `Copie_de_Armoiries_Diocèse_de_Ziguinchor.pdf`. Avant d'utiliser les données transcrites dans ce fichier (Prompts 2, 3, 3bis, 5), si un outil d'extraction de texte PDF est disponible dans l'environnement, vérifie-les contre le PDF correspondant dans `documents/` et signale tout écart dans `BUGS_AND_ROADMAP.md` plutôt que de corriger silencieusement — ces transcriptions viennent d'une lecture manuelle du document, pas d'une extraction automatique, donc une coquille sur un nom propre est possible. Si aucun outil d'extraction n'est disponible, utilise les données telles quelles et note-le simplement.
+
 ---
 
 ## PROMPT 0 — Vérification et méthode avant import
@@ -55,6 +57,71 @@ Cette circulaire couvre 4 des 8 nouveaux CPT (voir `SPEC.md` §3 et `DECISIONS.m
 4. **`association`** (section IV) : UDAFC/Z, Légion de Marie, Coordination Diocésaine des Chorales, Comité Diocésain du Renouveau Charismatique, Vie Montante, Équipes Enseignantes, Forces de Défense et de Sécurité.
 
 Pour chaque entrée : titre = nom de l'entité, `responsable` = la première personne listée avec son rôle (souvent "Responsable" ou équivalent selon la section), repeater `membres` = toutes les autres personnes listées avec leur rôle exact tel qu'écrit dans le PDF (Adjoint, Conseillère, Secrétaire, etc.).
+
+## PROMPT 3bis — Compléter responsable et membres avec les vraies données de la circulaire
+
+Le PDF `NOMINATIONS_SERVICES_COMMISSIONS_AUMONERIES_2027.pdf` n'étant pas dans le dépôt, les 33 entités créées au Prompt 3 ont `responsable`/`membres` vides. Voici les vraies données extraites du document (Circulaire n°002/2026-2027, faite à Ziguinchor le 1er septembre 2026, signée Mgr Jean Baptiste Valter MANGA), à reporter dans `inc/import/data-nominations.php` puis réimporter (le mécanisme d'idempotence du Prompt 0 doit mettre à jour les entités déjà créées plutôt que d'en recréer — vérifie que `dz_import_find_existing_post()` gère bien la mise à jour, sinon adapte-le).
+
+### `service_diocesain`
+
+1. **Économat Diocésain** — responsable : Abbé Albert TENDENG (Économe diocésain). Membres : Rév. Mgr Fulgence COLY (Vicaire Général, chargé du Temporel et de la Pastorale sociale), M. René Lamine DIEDHIOU (Comptable), M. Pierre Anaw SAMBOU (Secrétaire).
+   - `sous_structures` (voir résolution du conflit avec `SPEC.md` §3 ci-dessous) : (A) Conseil d'Administration des Domaines agricoles diocésains — Président M. Benoît SAMBOU, avec M. Paterne DIATTA, M. Casimir Adrien SAMBOU, Abbé Prosper TENDENG, Sœur Elisa DIATTA (IFRZ) ; rattachés : C.P.R.A. d'Affiniam (Abbé Potin BADIANE) et Ferme École de Djibélor (Abbé Alfred TENDENG, Abbé Paul Ignace TENDENG, Abbé René Pierre COLY). (B) Conseil d'Administration des Unités de Production — Président M. Habib Ampa DIENG, avec Abbé Adrien Dominique BADIANE, Abbé Albert TENDENG, Mme Marie Louise FAYE, M. Emmanuel BADJI, M. Eugène NDIAYE, Mme FAURE Marise Françoise Awai TENDENG ; rattachés : Hôtel Carabane (M. Gabriel COLY, Gérant), Librairie Papeterie Djibékel (M. Raymond SAGNA, Gérant), Imprimerie du Sud/ex Néma (M. Fally SAMB, Directeur). (C) Conseil d'Administration des Instituts d'Enseignement Supérieur — Président Pr Salomon SAMBOU, avec Pr Melyan MENDY, Pr Alexandre DIATTA, Dr Alain Christian BASSENE, Dr Marie Clémence FAYE MENDY, Pr Noël Magloire MANGA, M. Paulin NZALE ; rattachés : UCAO/UUZ/ISCG (Abbé Samson Delaka KANTOUSSAN, Abbé Eugène Adigar DIATTA, Sœur Aimée DAÏSSALA WAÏTCHARI) et ISPS (Dr Abbé Michel MENDY, M. Louis BASSENE, Mme SAGNA Jeanne Odette SAMBOU, Mme Rose Gnaba SAMBOU, Mme DRAME Khoudje GOUNDIAM, Mme Viviane A. COLY, M. Denis DIASSY, Abbé Victor Bossé SAGNA). (D) Comité Diocésain d'Étude et de Suivi des Projets — Président Rév. Mgr Fulgence COLY, Secrétaire Frère Matthieu CABO (S.C.), avec Abbé Albert TENDENG, Abbé Faustin DIEME, Abbé Adrien Dominique BADIANE, Abbé Jean Pierre Amaye TENDENG (Chancelier diocésain), M. Paterne DIATTA, Mme Marie Angèle DIATTA.
+
+2. **Caritas Ziguinchor** — responsable : Abbé Adrien Dominique BADIANE (Directeur, Administration Centrale). Membres — Conseil de Gestion : Mgr Fulgence COLY, Abbé Samson D. KANTOUSSAN (Vicaire épiscopal), Abbé Albert TENDENG, Dr Prosper DIEDHIOU (président sortant), M. André Florent BASSENE, Abbé Jean Pierre Amaye TENDENG ; Administration Centrale : M. Alphonse DIEDHIOU (Chef de Bureau), M. Eusébio DASYLVA (Développement), Mme Jeanne Marie SENGHOR RAF (Finance), Mme Louise FAYE (Personnel), Abbé Joseph TENDENG (Aumônier/Urgence), Dr Abbé Michel MENDY (Référent Caritas Santé) ; Appui institutionnel : Mme Ludivine Gabrielle DIEME, M. Degolle MENDY ; Points focaux : M. Athanase DIATTA, M. Degolle MENDY, M. Antoine DIEDHIOU, M. Eusébio DASYLVA.
+
+3. **Office Diocésain de l'Enseignement Catholique (ODEC)** — responsable : Sœur Rose Mama DIOUF (IFRZ, DIDEC et Déclarant Responsable). Membres : M. Abraham SENGHOR (Conseiller pédagogique), M. Jean-Noël DIOUF (Comptable), Mme Léocadie COLY (RH), Mme Jeanne d'Arc MANGA (Secrétaire).
+
+4. **Apostolat des Laïcs – Direction des Œuvres Catholiques** — responsable : Abbé Djimoreu Antoine Alain BADIANE. Membres : Mme Gilberta DIANDY (Secrétaire) ; note : tous les prêtres aumôniers et sœurs conseillères diocésains et décanaux en sont membres de droit (mention générale du texte, ne pas lister nommément).
+
+5. **Coopération Missionnaire et OPM** — responsable : Abbé Faustin DIEME. Adjoints/membres : Abbé Achille DJIHOUNOUCK, Abbé Auguste Oscar J. SAMBOU (Délégué épiscopal Prêtres Fidei Donum en France), Père Édouard DIEDHIOU (SCH.P.).
+
+6. **Exorcisme** — responsable : Abbé Albert DIATTA, en charge des Doyennés de Ziguinchor et Brin. Pas de membres listés.
+
+7. **Cérémoniaires diocésains** — responsable : Abbé Alain Samor SAGNA (Cérémoniaire diocésain). Membre : Abbé Jean Pierre Amaye TENDENG (Adjoint).
+
+8. **Formation et Recherche** — responsable : Abbé Xavier NGANDOUL. Membres : Abbé Christian A. SAGNA, Abbé Prosper TENDENG.
+
+9. **Communication** — responsable : Abbé Jacques Aimé SAGNA. Membres : équipe de prêtres, religieux(ses) et fidèles laïcs communicateurs (mention générale, ne pas lister nommément).
+
+10. **Pèlerinages** — responsable : Abbé Djimoreu Antoine Alain BADIANE (Pèlerinages Diocésains, interdiocésains et nationaux). Délégués CINPEC (membres) : Mme Marie Clémence FAYE MENDY, M. Matthieu SAGNA.
+
+### `commission_diocesaine`
+
+1. **Catéchèse** — responsable : Abbé Prosper TENDENG. Membres : Sœur Nadine Ayosso MANGA (IFRZ), M. Charles Raoul SAGNA (Président du Bureau diocésain des catéchistes), les Aumôniers décanaux.
+2. **Cellule d'écoute et de sensibilisation** — responsable : Abbé Xavier NGANDOUL. Membres : Dr Abbé Michel MENDY, Dr Sébastien DIEME, Sœur Cécile Fabiana NDECKY (IFRZ), Sœur Concha Carmen DIATTA (Piariste), Mme SAGNA Jeanne Odette SAMBOU.
+3. **Écologie intégrale** — responsable : M. Eusébio DASYLVA. Membres : Abbé Djimoreu Antoine Alain BADIANE, Sœur Rose Mama DIOUF (IFRZ), Commissaire Régional Scout, Commissaire Régionale Guide.
+4. **Dialogue Œcuménique et Interreligieux** — responsable : Abbé Samson Delaka KANTOUSSAN (Dialogue avec la Religion Traditionnelle Africaine). Membres : Abbé Jean Augustin SAMBOU (Dialogue Œcuménique), Abbé Célestin SAGNA (Dialogue Islamo-Chrétien), Abbé Paul DIATTA, Abbé Joël Cheikh COLY.
+5. **Justice et Paix** — responsable : Abbé Camille Joseph GOMIS. Membre : Sœur Marguerite COLY (IFRZ, Adjointe).
+6. **Pastorale de la Famille** — responsable : Abbé Marius MANGA. Membres : Sœur Angèle Marie Ateho LOPY (FSCM, Adjointe), M. Lazare SAGNA.
+7. **Liturgie** — responsable : Abbé Saturnin Oscar MANGA. Membres : Abbé Alain Samor SAGNA (Cérémoniaire diocésain), Abbé Jean Pierre Amaye TENDENG (Adjoint), Sœur Thérèse TAMBA (IFRZ), Sœur Marie SYLVA (FSCM), Sœur Aimée DAÏSSALA WATCHARI (ISJ), Sœur Marie Claire DIENE (SJC).
+8. **Pastorale de la Santé** — responsable : Dr Abbé Michel MENDY. Membres : Pr Alexandre DIATTA, Pr Noël MANGA, Dr Sébastien DIEME, Dr Marc MANGA, Dr Marie Clémence FAYE MENDY, Abbé Philippe MANGA (Aumônier Hôpital de la Paix), Abbé Patrice DIATTA (Aumônier Hôpital Régional), Abbé Paulin Christian Samson COLY, Sœur Martine DIATTA (ANPSCS), Sœur Cécile DIATTA, Mme Christine MANDIAMY (District sanitaire de Ziguinchor), tous les aumôniers des hôpitaux.
+9. **Pastorale des Vocations** — responsable : Abbé Jean DIOUF. Membres : les responsables des maisons de formation, les délégués laïcs des comités de vocation paroissiaux, les séminaristes stagiaires (mentions générales).
+10. **Mise en valeur des textes liturgiques en langues locales** — responsable : Abbé Yves NDOUR. Membres : Abbé Saturnin Oscar MANGA, Abbé Victor Bossé SAGNA, M. Alain Christian BASSENE (Linguiste), M. Gustave KAMPAL (Traducteur), M. Jean Christophe DIATTA (Traducteur).
+
+### `mouvement`
+
+1. **Coordination Diocésaine des Jeunes** — aumônier : Abbé Fulgence Luc DIONE. Conseillère : Sr Massilia DIEDHIOU. Note du texte : chaque doyenné choisit son propre aumônier et sa conseillère.
+2. **CV/AV** — aumônier : Abbé Auguste Tito COLY. Adjoint : Abbé Oko Marcelin DIASSY. Conseillers : Sœur Eunice Marina Silva SEIDI (FMSS), Sœur Jessica KANTOUSSAN (FSCM), Mme DIATTA Barbara SAMBOU, M. Victor Emmanuel DIEME, M. Isidore DIATTA.
+3. **JAC/UJRCS/MARCS** — aumônier : Abbé Alfred TENDENG. Conseillère : Sœur Marie Olga DIATTA (SJC).
+4. **Jeunesse Ouvrière Catholique (JOC)** — aumônier : Abbé Alfred TENDENG. Conseillère : Sœur Yolande Georgette Marie Awa TINE (FSCM).
+5. **Jeunesse Étudiante Catholique (JEC)** — aumônier : Abbé Théodore COLY. Adjoint : Père Aly Prosper BOISSY (Omi). Conseillers : Sœur Félicité ASSINE (IFRZ), Sœur Sylvia Brigitte Ndiémé FAYE (JS), M. Laurent Armand MENDY, M. Gilbert NUNEZ, M. Gaëtan MARTIN.
+6. **Scouts et Guides** — aumônier : Abbé Éric Paulin D. BASSENE. Adjoints : Père Henry SAMBOU (SCH.P.), Abbé William COLY. Conseillers : Sœur Marie SYLVA (FSCM), Sœur Eugénie BABENE (Piariste), Mme Marie Elisabeth DIANDY, Mme Sylvie MALACK, M. Théophile SANE.
+
+Pour le champ `aumonier` (relation vers `pretre`) : cherche une correspondance par nom de famille dans le CPT `pretre` déjà existant via `dz_import_find_pretre_by_title()` (déjà écrite au Prompt 3). Comme signalé dans `BUGS_AND_ROADMAP.md`, si aucune correspondance n'est trouvée, laisse la relation vide et ajoute le nom complet en commentaire dans le contenu de la fiche plutôt que de le perdre silencieusement — c'est le vrai problème de schéma déjà relevé (pas de champ texte de repli sur `mouvement_aumonier`), à corriger si le nombre de cas sans correspondance est élevé une fois l'import fait.
+
+### `association`
+
+1. **UDAFC/Z** — aumônier : Abbé Camille Joseph GOMIS. Conseillères : Sœur Régina Marie Céline SAGNA (FSCM), Sœur Marthe Mélanie DIANDY (Piariste).
+2. **Légion de Marie** — aumônier : Abbé Jean Augustin SAMBOU. Adjoint : Abbé Edgar NDECKY. Conseillères : Sœur Marie Madeleine BADIANE (FSCM), Sœur Marie Yvonne SAMBOU (FSCM).
+3. **Coordination Diocésaine des Chorales** — aumônier : Abbé Joseph TENDENG. Adjoint : Abbé Paul DIATTA. Conseillère : Sœur Suzanne Marie MANGA (FSCM). Membres : tous les aumôniers et sœurs conseillères décanaux des chorales (mention générale — la "Coordination Décanale des Chorales" citée séparément dans l'arborescence n'a pas d'entité nommée dans la circulaire, chaque doyenné choisissant les siens : ne crée pas de fiche séparée pour elle).
+4. **Comité Diocésain du Renouveau Charismatique Catholique** — aumônier : Abbé Albert DIATTA. Adjoint : Abbé Jean Pierre Amaye TENDENG. Conseillères : Sœur Marie Agnès NGANDOUL (FSCM), Sœur Diminga MENDES (Piariste), Sœur Louise Elisabeth NDONG (SJC).
+5. **Vie Montante** — aumônier : Abbé Charles Bernard COLY. Conseiller : Frère Matthieu CABO (SC).
+6. **Équipes Enseignantes** — aumônier : Abbé Jean de Dieu SAMBOU. Conseillères : Sœur Christèle COLY (PM), Sœur Thérèse TAMBA (IFRZ), Sœur Sophie DIATTA (Piariste).
+7. **Forces de Défense et de Sécurité** — aumônier : Abbé Constant Koupaul DIEME. Adjoint : Père André Boucar SENE (Omi). Conseillères : Sœur Martine DIATTA (JS), Sœur Marie Angèle COLY (PM).
+
+### Résolution du conflit "Économat : sous-structures" signalé dans le résumé du Prompt 3
+
+Les deux niveaux sont réels et corrects, à des profondeurs différentes : les 4 conseils A-D sont le niveau direct sous l'Économat (ce que le Prompt 3 a implémenté dans `sous_structures`), et Hôtel Carabane/Librairie Djibékel/Imprimerie du Sud sont un niveau encore en dessous, rattaché au seul Conseil B (Unités de Production) — ce que `SPEC.md` §3 mentionnait de façon raccourcie sans préciser ce rattachement. **Décision à documenter dans `DECISIONS.md`** : ne pas créer un 3ᵉ niveau de repeater imbriqué (complexité disproportionnée pour 3 entités) — mentionne plutôt ces 3 entités rattachées dans le texte descriptif du sous-structure "Conseil d'Administration des Unités de Production" (champ `description` ou une simple liste en fin de texte), pas comme des lignes `sous_structures` séparées au même niveau que les 4 conseils.
 
 ## PROMPT 4 — Aumôneries et Enseignements diocésains
 

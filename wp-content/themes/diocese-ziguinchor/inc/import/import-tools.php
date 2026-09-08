@@ -124,7 +124,7 @@ function dz_import_render_admin_page() {
 	<div class="wrap">
 		<h1><?php esc_html_e( 'Import contenu diocèse', 'diocese-ziguinchor' ); ?></h1>
 		<p>
-			<?php esc_html_e( "Outil d'import ponctuel : lit les données déjà transcrites dans inc/import/data-*.php et crée le contenu WordPress correspondant. Chaque bouton peut être cliqué plusieurs fois sans risque, y compris après une nouvelle tentative suite à une correction des données : le contenu déjà importé n'est jamais dupliqué.", 'diocese-ziguinchor' ); ?>
+			<?php esc_html_e( "Outil d'import ponctuel : lit les données déjà transcrites dans inc/import/data-*.php et crée le contenu WordPress correspondant. Chaque bouton peut être cliqué plusieurs fois sans risque : le contenu déjà importé n'est jamais dupliqué — selon la source, une entrée déjà importée est soit laissée telle quelle, soit mise à jour à partir des dernières données transcrites (voir la note de chaque fonction d'import dans inc/import/import-tools.php).", 'diocese-ziguinchor' ); ?>
 		</p>
 
 		<?php if ( is_array( $dz_results ) ) : ?>
@@ -133,9 +133,10 @@ function dz_import_render_admin_page() {
 					<?php
 					echo esc_html(
 						sprintf(
-							/* translators: 1: number of items created, 2: number of items already imported (skipped) */
-							__( '%1$d élément(s) créé(s), %2$d déjà importé(s) (ignorés).', 'diocese-ziguinchor' ),
+							/* translators: 1: number of items created, 2: number of items updated, 3: number of items left untouched (already up to date) */
+							__( '%1$d élément(s) créé(s), %2$d mis à jour, %3$d laissé(s) tel(s) quel(s).', 'diocese-ziguinchor' ),
 							(int) ( $dz_results['created'] ?? 0 ),
+							(int) ( $dz_results['updated'] ?? 0 ),
 							(int) ( $dz_results['skipped'] ?? 0 )
 						)
 					);
@@ -520,69 +521,84 @@ function dz_import_apply_org_socle( $post_id, array $entry ) {
 }
 
 /**
- * Creates one `evenement`-style organisational post from a nominations
- * entry (idempotence + org socle), shared by all four per-CPT import
- * functions below. Returns 0 (and appends to $dz_notes by reference) on
- * failure or if already imported, without creating anything.
+ * Creates OR updates an organisational post from a nominations entry
+ * (title, content note, org socle), shared by all four per-CPT import
+ * functions below. **Upsert, not skip-once**, unlike
+ * dz_import_find_existing_post()'s other callers (hero/calendrier):
+ * CONTENT_PROMPTS.md PROMPT 3bis explicitly asks that re-running the import
+ * after transcribing more of the circular UPDATES the 33 entities already
+ * created (empty) at PROMPT 3, rather than leaving them untouched — see
+ * DECISIONS.md. `dz_import_find_existing_post()` itself is unchanged (still
+ * a pure "does a post with this source_id exist" lookup); only how this
+ * caller uses that answer differs.
  *
  * @param string   $post_type
  * @param array    $entry
- * @param string[] $dz_notes By reference.
- * @return int New post ID, or 0 (already imported or failed).
+ * @param string[] $dz_notes By reference; a creation failure is appended here.
+ * @return array{0:int,1:bool} [post ID (0 on failure), true if newly created / false if it already existed and was updated]
  */
-function dz_import_create_organisation_post( $post_type, array $entry, array &$dz_notes ) {
-	if ( dz_import_find_existing_post( $post_type, $entry['source_id'] ) ) {
-		return 0;
+function dz_import_upsert_organisation_post( $post_type, array $entry, array &$dz_notes ) {
+	$dz_post_id = dz_import_find_existing_post( $post_type, $entry['source_id'] );
+	$dz_is_new  = ! $dz_post_id;
+
+	if ( $dz_is_new ) {
+		$dz_post_id = wp_insert_post(
+			array(
+				'post_type'   => $post_type,
+				'post_title'  => wp_strip_all_tags( $entry['titre'] ),
+				// Brouillon : tant que responsable/membres ne sont pas
+				// confirmés à 100%, pas de contenu publié publiquement
+				// (SPEC.md §9) — un rédacteur publie lui-même une fois relu.
+				'post_status' => 'draft',
+			),
+			true
+		);
+
+		if ( is_wp_error( $dz_post_id ) ) {
+			$dz_notes[] = sprintf(
+				/* translators: 1: entity title, 2: error message */
+				__( "Échec de la création de « %1\$s » : %2\$s", 'diocese-ziguinchor' ),
+				$entry['titre'],
+				$dz_post_id->get_error_message()
+			);
+			return array( 0, false );
+		}
+
+		dz_import_mark_imported( $dz_post_id, $entry['source_id'] );
 	}
 
-	$dz_post_id = wp_insert_post(
+	// Applied whether new or pre-existing: this is the "reimport updates"
+	// behavior. Title stays in sync too (a source name can be corrected
+	// between two transcription passes, e.g. PROMPT 3's "Économat" vs.
+	// PROMPT 3bis's "Économat Diocésain").
+	wp_update_post(
 		array(
-			'post_type'   => $post_type,
-			'post_title'  => wp_strip_all_tags( $entry['titre'] ),
-			// Brouillon : responsable/membres pas encore transcrits du PDF
-			// (voir inc/import/data-nominations.php) — pas de contenu
-			// incomplet publié publiquement (SPEC.md §9).
-			'post_status' => 'draft',
-		),
-		true
+			'ID'           => $dz_post_id,
+			'post_title'   => wp_strip_all_tags( $entry['titre'] ),
+			'post_content' => ! empty( $entry['note'] ) ? wp_kses_post( $entry['note'] ) : '',
+		)
 	);
 
-	if ( is_wp_error( $dz_post_id ) ) {
-		$dz_notes[] = sprintf(
-			/* translators: 1: entity title, 2: error message */
-			__( "Échec de la création de « %1\$s » : %2\$s", 'diocese-ziguinchor' ),
-			$entry['titre'],
-			$dz_post_id->get_error_message()
-		);
-		return 0;
-	}
-
-	dz_import_mark_imported( $dz_post_id, $entry['source_id'] );
 	dz_import_apply_org_socle( $dz_post_id, $entry );
 
-	return $dz_post_id;
+	return array( $dz_post_id, $dz_is_new );
 }
 
 /**
  * PROMPT 3, section I: service_diocesain. Économat's `sous_structures`
- * (attached committees, not separate posts — see SPEC.md §3) are set here
- * when the entry provides them.
+ * (attached committees, not separate posts — see SPEC.md §3) are
+ * (re)applied here on every run, same upsert logic as the rest of the entry.
  *
  * @param array $dz_entries
- * @return array{created:int,skipped:int,notes:string[]}
+ * @return array{created:int,updated:int,skipped:int,notes:string[]}
  */
 function dz_import_run_nominations_service_diocesain( array $dz_entries ) {
 	$dz_created = 0;
-	$dz_skipped = 0;
+	$dz_updated = 0;
 	$dz_notes   = array();
 
 	foreach ( $dz_entries as $dz_entry ) {
-		if ( dz_import_find_existing_post( 'service_diocesain', $dz_entry['source_id'] ) ) {
-			++$dz_skipped;
-			continue;
-		}
-
-		$dz_post_id = dz_import_create_organisation_post( 'service_diocesain', $dz_entry, $dz_notes );
+		list( $dz_post_id, $dz_is_new ) = dz_import_upsert_organisation_post( 'service_diocesain', $dz_entry, $dz_notes );
 		if ( ! $dz_post_id ) {
 			continue;
 		}
@@ -598,12 +614,13 @@ function dz_import_run_nominations_service_diocesain( array $dz_entries ) {
 			update_field( 'service_diocesain_sous_structures', $dz_rows, $dz_post_id );
 		}
 
-		++$dz_created;
+		$dz_is_new ? ++$dz_created : ++$dz_updated;
 	}
 
 	return array(
 		'created' => $dz_created,
-		'skipped' => $dz_skipped,
+		'updated' => $dz_updated,
+		'skipped' => 0,
 		'notes'   => $dz_notes,
 	);
 }
@@ -613,110 +630,120 @@ function dz_import_run_nominations_service_diocesain( array $dz_entries ) {
  * CPT, just the shared organisational socle.
  *
  * @param array $dz_entries
- * @return array{created:int,skipped:int,notes:string[]}
+ * @return array{created:int,updated:int,skipped:int,notes:string[]}
  */
 function dz_import_run_nominations_commission_diocesaine( array $dz_entries ) {
 	$dz_created = 0;
-	$dz_skipped = 0;
+	$dz_updated = 0;
 	$dz_notes   = array();
 
 	foreach ( $dz_entries as $dz_entry ) {
-		if ( dz_import_find_existing_post( 'commission_diocesaine', $dz_entry['source_id'] ) ) {
-			++$dz_skipped;
+		list( $dz_post_id, $dz_is_new ) = dz_import_upsert_organisation_post( 'commission_diocesaine', $dz_entry, $dz_notes );
+		if ( ! $dz_post_id ) {
 			continue;
 		}
 
-		if ( dz_import_create_organisation_post( 'commission_diocesaine', $dz_entry, $dz_notes ) ) {
-			++$dz_created;
-		}
+		$dz_is_new ? ++$dz_created : ++$dz_updated;
 	}
 
 	return array(
 		'created' => $dz_created,
-		'skipped' => $dz_skipped,
+		'updated' => $dz_updated,
+		'skipped' => 0,
 		'notes'   => $dz_notes,
 	);
 }
 
 /**
- * PROMPT 3, section III: mouvement. `aumonier` is matched against existing
- * `pretre` titles when the entry names one (point 3): if a matching pretre
+ * PROMPT 3/3bis, section III: mouvement. `aumonier` is matched against
+ * existing `pretre` titles when the entry names one: if a matching pretre
  * exists, `mouvement_aumonier` (a post_object relation, see
- * acf-json/group_dz_cpt_mouvement.json) is set to it; if the entry names
- * someone but no matching pretre fiche exists yet, nothing is set on the
- * relation (there is no free-text fallback field on this CPT) and a note is
- * added instead, exactly as PROMPT 3 asks ("note-le comme point à corriger
- * dans BUGS_AND_ROADMAP.md").
+ * acf-json/group_dz_cpt_mouvement.json) is set to it. If the entry names
+ * someone but no matching pretre fiche exists yet, the relation is left
+ * unset (there is no free-text fallback field on this CPT — flagged in
+ * BUGS_AND_ROADMAP.md) but the full name is folded into the entry's `note`
+ * before it reaches dz_import_upsert_organisation_post(), so it lands in
+ * the post's own content rather than only in the transient admin notice
+ * (PROMPT 3bis: "ajoute le nom complet en commentaire dans le contenu de la
+ * fiche plutôt que de le perdre silencieusement").
  *
  * @param array $dz_entries
- * @return array{created:int,skipped:int,notes:string[]}
+ * @return array{created:int,updated:int,skipped:int,notes:string[]}
  */
 function dz_import_run_nominations_mouvement( array $dz_entries ) {
 	$dz_created = 0;
-	$dz_skipped = 0;
+	$dz_updated = 0;
 	$dz_notes   = array();
 
 	foreach ( $dz_entries as $dz_entry ) {
-		if ( dz_import_find_existing_post( 'mouvement', $dz_entry['source_id'] ) ) {
-			++$dz_skipped;
-			continue;
-		}
-
-		$dz_post_id = dz_import_create_organisation_post( 'mouvement', $dz_entry, $dz_notes );
-		if ( ! $dz_post_id ) {
-			continue;
-		}
+		$dz_pretre_id = 0;
 
 		if ( ! empty( $dz_entry['aumonier'] ) ) {
 			$dz_pretre_id = dz_import_find_pretre_by_title( $dz_entry['aumonier'] );
-			if ( $dz_pretre_id ) {
-				update_field( 'mouvement_aumonier', $dz_pretre_id, $dz_post_id );
-			} else {
+
+			if ( ! $dz_pretre_id ) {
+				$dz_missing_note = sprintf(
+					/* translators: %s: chaplain name */
+					__( 'Aumônier pressenti (fiche prêtre non trouvée dans le CPT prêtre) : %s — à relier manuellement au champ « Aumônier » une fois sa fiche créée.', 'diocese-ziguinchor' ),
+					$dz_entry['aumonier']
+				);
+				$dz_entry['note'] = trim( ( $dz_entry['note'] ?? '' ) . "\n\n" . $dz_missing_note );
+
 				$dz_notes[] = sprintf(
 					/* translators: 1: chaplain name, 2: mouvement title */
-					__( 'Aumônier « %1$s » introuvable dans le CPT prêtre pour « %2$s » — relation à compléter manuellement une fois sa fiche créée.', 'diocese-ziguinchor' ),
+					__( 'Aumônier « %1$s » introuvable dans le CPT prêtre pour « %2$s » — nom conservé dans le contenu de la fiche, relation à compléter manuellement.', 'diocese-ziguinchor' ),
 					$dz_entry['aumonier'],
 					$dz_entry['titre']
 				);
 			}
 		}
 
-		++$dz_created;
+		list( $dz_post_id, $dz_is_new ) = dz_import_upsert_organisation_post( 'mouvement', $dz_entry, $dz_notes );
+		if ( ! $dz_post_id ) {
+			continue;
+		}
+
+		if ( $dz_pretre_id ) {
+			update_field( 'mouvement_aumonier', $dz_pretre_id, $dz_post_id );
+		}
+
+		$dz_is_new ? ++$dz_created : ++$dz_updated;
 	}
 
 	return array(
 		'created' => $dz_created,
-		'skipped' => $dz_skipped,
+		'updated' => $dz_updated,
+		'skipped' => 0,
 		'notes'   => $dz_notes,
 	);
 }
 
 /**
- * PROMPT 3, section IV: association — no field specific to this CPT, just
- * the shared organisational socle.
+ * PROMPT 3, section IV: association — no field specific to this CPT
+ * (aumonier here is transcribed straight into `org_responsable`/`note`,
+ * there is no relation field for it on this CPT, unlike `mouvement`).
  *
  * @param array $dz_entries
- * @return array{created:int,skipped:int,notes:string[]}
+ * @return array{created:int,updated:int,skipped:int,notes:string[]}
  */
 function dz_import_run_nominations_association( array $dz_entries ) {
 	$dz_created = 0;
-	$dz_skipped = 0;
+	$dz_updated = 0;
 	$dz_notes   = array();
 
 	foreach ( $dz_entries as $dz_entry ) {
-		if ( dz_import_find_existing_post( 'association', $dz_entry['source_id'] ) ) {
-			++$dz_skipped;
+		list( $dz_post_id, $dz_is_new ) = dz_import_upsert_organisation_post( 'association', $dz_entry, $dz_notes );
+		if ( ! $dz_post_id ) {
 			continue;
 		}
 
-		if ( dz_import_create_organisation_post( 'association', $dz_entry, $dz_notes ) ) {
-			++$dz_created;
-		}
+		$dz_is_new ? ++$dz_created : ++$dz_updated;
 	}
 
 	return array(
 		'created' => $dz_created,
-		'skipped' => $dz_skipped,
+		'updated' => $dz_updated,
+		'skipped' => 0,
 		'notes'   => $dz_notes,
 	);
 }
@@ -727,7 +754,7 @@ function dz_import_run_nominations_association( array $dz_entries ) {
  * unique mais une fonction d'import par CPT pour rester lisible") and
  * aggregates their results.
  *
- * @return array{created:int,skipped:int,notes:string[]}
+ * @return array{created:int,updated:int,skipped:int,notes:string[]}
  */
 function dz_import_run_nominations() {
 	$dz_data = dz_import_get_nominations_data();
@@ -735,6 +762,7 @@ function dz_import_run_nominations() {
 	if ( ! array_filter( $dz_data ) ) {
 		return array(
 			'created' => 0,
+			'updated' => 0,
 			'skipped' => 0,
 			'notes'   => array( __( 'Aucune donnée dans inc/import/data-nominations.php pour le moment (voir CONTENT_PROMPTS.md PROMPT 3).', 'diocese-ziguinchor' ) ),
 		);
@@ -748,6 +776,7 @@ function dz_import_run_nominations() {
 	);
 
 	$dz_created = 0;
+	$dz_updated = 0;
 	$dz_skipped = 0;
 	$dz_notes   = array();
 
@@ -759,12 +788,14 @@ function dz_import_run_nominations() {
 		$dz_result = call_user_func( $dz_callback, $dz_data[ $dz_key ] );
 
 		$dz_created += $dz_result['created'];
+		$dz_updated += $dz_result['updated'];
 		$dz_skipped += $dz_result['skipped'];
 		$dz_notes    = array_merge( $dz_notes, $dz_result['notes'] );
 	}
 
 	return array(
 		'created' => $dz_created,
+		'updated' => $dz_updated,
 		'skipped' => $dz_skipped,
 		'notes'   => $dz_notes,
 	);
