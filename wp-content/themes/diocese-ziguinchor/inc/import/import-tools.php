@@ -33,6 +33,7 @@ require_once DZ_THEME_DIR . '/inc/import/data-hero.php';
 require_once DZ_THEME_DIR . '/inc/import/data-calendrier.php';
 require_once DZ_THEME_DIR . '/inc/import/data-nominations.php';
 require_once DZ_THEME_DIR . '/inc/import/data-aumoneries.php';
+require_once DZ_THEME_DIR . '/inc/import/data-armoiries.php';
 
 /**
  * Data source key => admin button label + dispatcher callback. The single
@@ -57,6 +58,10 @@ function dz_import_get_sources() {
 		'aumoneries'  => array(
 			'label'    => __( 'Importer les aumôneries et enseignements', 'diocese-ziguinchor' ),
 			'callback' => 'dz_import_run_aumoneries',
+		),
+		'armoiries'   => array(
+			'label'    => __( 'Importer le contenu "À propos" et les armoiries', 'diocese-ziguinchor' ),
+			'callback' => 'dz_import_run_armoiries',
 		),
 	);
 }
@@ -903,6 +908,213 @@ function dz_import_run_aumoneries() {
 	$dz_dispatch = array(
 		'aumonerie'     => 'dz_import_run_aumoneries_aumonerie',
 		'etablissement' => 'dz_import_run_aumoneries_etablissement',
+	);
+
+	$dz_created = 0;
+	$dz_updated = 0;
+	$dz_skipped = 0;
+	$dz_notes   = array();
+
+	foreach ( $dz_dispatch as $dz_key => $dz_callback ) {
+		if ( empty( $dz_data[ $dz_key ] ) ) {
+			continue;
+		}
+
+		$dz_result = call_user_func( $dz_callback, $dz_data[ $dz_key ] );
+
+		$dz_created += $dz_result['created'];
+		$dz_updated += $dz_result['updated'];
+		$dz_skipped += $dz_result['skipped'];
+		$dz_notes    = array_merge( $dz_notes, $dz_result['notes'] );
+	}
+
+	return array(
+		'created' => $dz_created,
+		'updated' => $dz_updated,
+		'skipped' => $dz_skipped,
+		'notes'   => $dz_notes,
+	);
+}
+
+/**
+ * Creates OR updates a native `page` post from an import entry (title +
+ * content, optionally a page template). Mirrors
+ * dz_import_upsert_organisation_post() (same upsert-not-skip-once semantics,
+ * same source_id idempotence) but without dz_import_apply_org_socle(): a
+ * plain `page` has no organisational socle field group to fill.
+ *
+ * @param array    $entry     {source_id, titre, content, template?}
+ * @param string[] $dz_notes  By reference; a creation failure is appended here.
+ * @return array{0:int,1:bool} [post ID (0 on failure), true if newly created / false if it already existed and was updated]
+ */
+function dz_import_upsert_page( array $entry, array &$dz_notes ) {
+	$dz_post_id = dz_import_find_existing_post( 'page', $entry['source_id'] );
+	$dz_is_new  = ! $dz_post_id;
+
+	if ( $dz_is_new ) {
+		$dz_post_id = wp_insert_post(
+			array(
+				'post_type'   => 'page',
+				'post_title'  => wp_strip_all_tags( $entry['titre'] ),
+				'post_status' => 'publish',
+			),
+			true
+		);
+
+		if ( is_wp_error( $dz_post_id ) ) {
+			$dz_notes[] = sprintf(
+				/* translators: 1: page title, 2: error message */
+				__( "Échec de la création de la page « %1\$s » : %2\$s", 'diocese-ziguinchor' ),
+				$entry['titre'],
+				$dz_post_id->get_error_message()
+			);
+			return array( 0, false );
+		}
+
+		dz_import_mark_imported( $dz_post_id, $entry['source_id'] );
+	}
+
+	wp_update_post(
+		array(
+			'ID'           => $dz_post_id,
+			'post_title'   => wp_strip_all_tags( $entry['titre'] ),
+			'post_content' => ! empty( $entry['content'] ) ? wp_kses_post( $entry['content'] ) : '',
+		)
+	);
+
+	if ( ! empty( $entry['template'] ) ) {
+		update_post_meta( $dz_post_id, '_wp_page_template', $entry['template'] );
+	}
+
+	return array( $dz_post_id, $dz_is_new );
+}
+
+/**
+ * PROMPT 5, point 1: fills the "Historique" page with the armoiries
+ * document's intro + 6-point text + conclusion (see
+ * inc/import/data-armoiries.php). bin/seed-static-pages.php no longer
+ * creates this page (see DECISIONS.md) — this is now the only source of
+ * truth for it, same as bin/seed-cpt-organisation.php's PROMPT 3bis trim.
+ *
+ * @param array $dz_entry
+ * @return array{created:int,updated:int,skipped:int,notes:string[]}
+ */
+function dz_import_run_armoiries_historique( array $dz_entry ) {
+	$dz_notes = array();
+
+	list( $dz_post_id, $dz_is_new ) = dz_import_upsert_page( $dz_entry, $dz_notes );
+
+	if ( ! $dz_post_id ) {
+		return array(
+			'created' => 0,
+			'updated' => 0,
+			'skipped' => 0,
+			'notes'   => $dz_notes,
+		);
+	}
+
+	return array(
+		'created' => $dz_is_new ? 1 : 0,
+		'updated' => $dz_is_new ? 0 : 1,
+		'skipped' => 0,
+		'notes'   => $dz_notes,
+	);
+}
+
+/**
+ * PROMPT 5, points 2-3: the dedicated "Nos armoiries" page — sideloads the
+ * crest (logo-diocese-ziguinchor.png) as the page's featured image (used as
+ * the page's main illustration by page-armoiries.php, and reused in every
+ * alternating row rather than ten fabricated close-ups — see DECISIONS.md),
+ * then fills the `dz_armoiries_symboles` repeater
+ * (group_dz_page_armoiries, inc/acf-fields.php) from the entry's `symboles`.
+ *
+ * @param array $dz_entry
+ * @return array{created:int,updated:int,skipped:int,notes:string[]}
+ */
+function dz_import_run_armoiries_page( array $dz_entry ) {
+	$dz_notes = array();
+
+	$dz_entry['template'] = 'page-armoiries.php';
+
+	list( $dz_post_id, $dz_is_new ) = dz_import_upsert_page( $dz_entry, $dz_notes );
+
+	if ( ! $dz_post_id ) {
+		return array(
+			'created' => 0,
+			'updated' => 0,
+			'skipped' => 0,
+			'notes'   => $dz_notes,
+		);
+	}
+
+	if ( ! empty( $dz_entry['image'] ) && ! has_post_thumbnail( $dz_post_id ) ) {
+		$dz_image_path = DZ_THEME_DIR . '/' . ltrim( $dz_entry['image'], '/' );
+
+		if ( ! file_exists( $dz_image_path ) ) {
+			$dz_notes[] = sprintf(
+				/* translators: %s: image file path */
+				__( 'Image des armoiries introuvable : %s', 'diocese-ziguinchor' ),
+				$dz_entry['image']
+			);
+		} else {
+			$dz_attachment_id = dz_import_sideload_image( $dz_image_path, $dz_post_id, $dz_entry['titre'] );
+
+			if ( is_wp_error( $dz_attachment_id ) ) {
+				$dz_notes[] = sprintf(
+					/* translators: 1: image file path, 2: error message */
+					__( "Échec de l'import de l'image %1\$s : %2\$s", 'diocese-ziguinchor' ),
+					$dz_entry['image'],
+					$dz_attachment_id->get_error_message()
+				);
+			} else {
+				update_post_meta( $dz_attachment_id, '_wp_attachment_image_alt', $dz_entry['titre'] );
+				set_post_thumbnail( $dz_post_id, $dz_attachment_id );
+			}
+		}
+	}
+
+	if ( ! empty( $dz_entry['symboles'] ) ) {
+		$dz_rows = array();
+		foreach ( $dz_entry['symboles'] as $dz_symbole ) {
+			$dz_rows[] = array(
+				'dz_armoiries_symbole_titre' => $dz_symbole['titre'],
+				'dz_armoiries_symbole_texte' => $dz_symbole['texte'],
+			);
+		}
+		update_field( 'dz_armoiries_symboles', $dz_rows, $dz_post_id );
+	}
+
+	return array(
+		'created' => $dz_is_new ? 1 : 0,
+		'updated' => $dz_is_new ? 0 : 1,
+		'skipped' => 0,
+		'notes'   => $dz_notes,
+	);
+}
+
+/**
+ * Imports the "À propos"/armoiries content (CONTENT_PROMPTS.md PROMPT 5):
+ * dispatches to the two functions above and aggregates their results, same
+ * pattern as dz_import_run_nominations()/dz_import_run_aumoneries().
+ *
+ * @return array{created:int,updated:int,skipped:int,notes:string[]}
+ */
+function dz_import_run_armoiries() {
+	$dz_data = dz_import_get_armoiries_data();
+
+	if ( ! array_filter( $dz_data ) ) {
+		return array(
+			'created' => 0,
+			'updated' => 0,
+			'skipped' => 0,
+			'notes'   => array( __( 'Aucune donnée dans inc/import/data-armoiries.php pour le moment (voir CONTENT_PROMPTS.md PROMPT 5).', 'diocese-ziguinchor' ) ),
+		);
+	}
+
+	$dz_dispatch = array(
+		'historique'     => 'dz_import_run_armoiries_historique',
+		'armoiries_page' => 'dz_import_run_armoiries_page',
 	);
 
 	$dz_created = 0;

@@ -72,8 +72,14 @@ dz_seed_static_page( __( "Mot de l'évêque", 'diocese-ziguinchor' ), $dz_todo_n
 dz_seed_static_page( __( 'Contacts', 'diocese-ziguinchor' ), $dz_todo_note );
 dz_seed_static_page( __( 'Évêché', 'diocese-ziguinchor' ), $dz_todo_note );
 dz_seed_static_page( __( 'Chancellerie', 'diocese-ziguinchor' ), $dz_todo_note );
-dz_seed_static_page( __( 'Historique', 'diocese-ziguinchor' ), $dz_todo_note );
 dz_seed_static_page( __( "L'évêque", 'diocese-ziguinchor' ), $dz_todo_note );
+// "Historique" is NOT seeded here (unlike PROMPT 16, which did create it):
+// CONTENT_PROMPTS.md PROMPT 5 fills it via dz_import_run_armoiries_historique()
+// (inc/import/import-tools.php), which tracks the page through the
+// `_dz_import_source_id` meta idempotence mechanism, not get_page_by_title().
+// Keeping a title-based seed here alongside that would risk creating two
+// "Historique" pages — same collision already fixed once for
+// bin/seed-cpt-organisation.php at PROMPT 3bis; see DECISIONS.md.
 
 dz_seed_static_page(
 	__( 'Cartographie du diocèse', 'diocese-ziguinchor' ),

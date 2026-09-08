@@ -509,3 +509,63 @@ function dz_register_dons_field_group() {
 	);
 }
 add_action( 'acf/init', 'dz_register_dons_field_group' );
+
+/**
+ * "Nos armoiries" symbol-by-symbol repeater on page-armoiries.php (PROMPT 5
+ * of CONTENT_PROMPTS.md — SPEC.md §5 "contenu éditorial réutilisable"). Each
+ * row alternates image/text in the template (Bootstrap's own
+ * `.flex-row-reverse`, no per-row image field: every row reuses the page's
+ * own featured image, the diocese's single real crest graphic — see
+ * DECISIONS.md).
+ */
+function dz_register_armoiries_field_group() {
+	if ( ! function_exists( 'acf_add_local_field_group' ) ) {
+		return;
+	}
+
+	acf_add_local_field_group(
+		array(
+			'key'      => 'group_dz_page_armoiries',
+			'title'    => __( 'Page "Nos armoiries" — symboles', 'diocese-ziguinchor' ),
+			'fields'   => array(
+				array(
+					'key'          => 'field_dz_armoiries_symboles',
+					'label'        => __( 'Symboles', 'diocese-ziguinchor' ),
+					'name'         => 'dz_armoiries_symboles',
+					'type'         => 'repeater',
+					'instructions' => __( "Un symbole par ligne (croix dorée, pirogue, tiare épiscopale...), affichés en alternance image/texte.", 'diocese-ziguinchor' ),
+					'min'          => 0,
+					'layout'       => 'block',
+					'button_label' => __( 'Ajouter un symbole', 'diocese-ziguinchor' ),
+					'sub_fields'   => array(
+						array(
+							'key'      => 'field_dz_armoiries_symbole_titre',
+							'label'    => __( 'Symbole', 'diocese-ziguinchor' ),
+							'name'     => 'dz_armoiries_symbole_titre',
+							'type'     => 'text',
+							'required' => 1,
+						),
+						array(
+							'key'      => 'field_dz_armoiries_symbole_texte',
+							'label'    => __( 'Description', 'diocese-ziguinchor' ),
+							'name'     => 'dz_armoiries_symbole_texte',
+							'type'     => 'textarea',
+							'rows'     => 4,
+							'required' => 1,
+						),
+					),
+				),
+			),
+			'location' => array(
+				array(
+					array(
+						'param'    => 'page_template',
+						'operator' => '==',
+						'value'    => 'page-armoiries.php',
+					),
+				),
+			),
+		)
+	);
+}
+add_action( 'acf/init', 'dz_register_armoiries_field_group' );
