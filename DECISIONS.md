@@ -732,6 +732,20 @@ Testé par un script PHP autonome (non versionné) simulant `WP_Image_Editor` (`
 
 ---
 
+## [RÉSOLU] Vérification finale complémentaire du calendrier (PROMPT 3)
+
+**Contexte :** L'audit final "idempotence + données personnelles" de `CONTENT_PROMPTS.md` PROMPT 6 a été fait avant l'import du calendrier (PROMPT 2 a été traité juste après). Les 40 événements réels n'avaient donc jamais été soumis aux deux mêmes contrôles — nécessaire pour ne pas laisser un angle mort dans un audit censé être "final".
+**Symptôme / Problème :** Aucun bug suspecté a priori (même raisonnement qu'au PROMPT 6 initial : audit de vérification, pas une réaction à un problème connu) — mais à confirmer plutôt qu'à supposer, comme demandé.
+**Cause / Alternatives :** Pour l'idempotence : relire le code une nouvelle fois suffit-il, ou faut-il une preuve d'exécution ? Le script de test autonome du PROMPT 2 (non versionné, conservé en session) permettait de relancer `dz_import_run_calendrier()` une seconde fois contre les vraies données sans tout réécrire — choisi plutôt qu'une simple relecture, pour une preuve d'exécution plutôt qu'un raisonnement seul. Pour les données personnelles : le document source (tableau Dates/Activités/Lieux) n'a par construction aucune colonne de coordonnées, mais "peu probable" n'est pas "vérifié" — même standard que le PROMPT 6 initial (retourner à la source plutôt que se fier à ce qui a été transcrit).
+**Fix / Décision :**
+1. **Idempotence — confirmée par ré-exécution.** Relance du script de test PHP autonome du PROMPT 2 (2 passages contre les 40 vraies entrées de `inc/import/data-calendrier.php`) : 1er passage 40 créés/0 ignoré, 2ᵉ passage **0 créé / 40 ignorés**, aucun doublon dans les posts simulés. Confirmé aussi par relecture du code : `dz_import_run_calendrier()` appelle `dz_import_find_existing_post( 'evenement', $dz_entry['source_id'] )` avant tout `wp_insert_post()`, avec `continue` immédiat si l'entrée existe déjà — identique à la garde déjà auditée pour les 7 autres fonctions d'import au PROMPT 6. Un second clic sur "Importer le calendrier" ne peut donc rien dupliquer.
+2. **Données personnelles — confirmé qu'il n'y en a aucune.** `grep` sur `inc/import/data-calendrier.php` (motifs e-mail/`@`, mots-clés téléphone/e-mail/courriel, format de numéro sénégalais `XX XXX XX XX`, préfixe `+221`) : aucune occurrence réelle (le seul "@" trouvé est l'annotation PHPDoc `@return`, un faux positif). Le schéma ACF de l'`evenement` (`group_dz_cpt_evenement.json` : `evenement_date_debut`/`evenement_date_fin`/`evenement_lieu`/`evenement_paroisse`/`evenement_lien_inscription`) ne comporte d'ailleurs aucun champ de contact personnel, et `dz_import_run_calendrier()` n'en renseigne aucun — structurellement, aucune coordonnée ne pourrait transiter par ce chemin même si le PDF en avait contenu. Confirmé enfin par la relecture déjà faite au PROMPT 2 (rastérisation 300dpi, page entière lue) : le tableau ne contient que Dates/Activités/Lieux, aucune colonne ni mention de contact.
+3. **`TODO.md` (Phase 9, bilan)** : le calendrier figurait déjà dans la liste "Importé automatiquement" depuis le PROMPT 2 (pas d'oubli à corriger) ; profité de cette passe pour cocher la case correspondante encore ouverte en Phase 1bis ("Importer le calendrier diocésain...") avec un renvoi vers l'entrée PROMPT 2 détaillée, cohérent avec les autres cases de Phase 1bis déjà cochées de cette façon (palette, logo).
+**Leçon :** Un audit "final" mené avant que tout le contenu prévu soit importé n'est final que pour ce qui existait à ce moment-là — toute donnée importée après coup (ici le calendrier, importé juste après le PROMPT 6) doit repasser par les mêmes contrôles plutôt que d'être considérée couverte rétroactivement.
+**Statut :** ✅ Résolu
+
+---
+
 **Contexte :** ...
 **Symptôme / Problème :** ...
 **Cause / Alternatives :** ...
