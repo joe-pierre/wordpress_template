@@ -24,6 +24,15 @@
  * covered by any CONTENT_PROMPTS.md prompt, so this script keeps that one
  * entity as its sole remaining responsibility.
  *
+ * UPDATE (TASK_PROMPTS.md "Bouton admin 'Importer le Conseil épiscopal'"):
+ * this script's `wp eval-file` invocation needs shell/WP-CLI access, which
+ * the client's actual hosting doesn't provide. The "Conseil épiscopal"
+ * entry now has its own idempotent button — 8th one on Réglages > Import
+ * contenu diocèse, dz_import_run_conseil_episcopal() in
+ * inc/import/import-tools.php — and **that admin-page path is the one
+ * actually used on this hosting**, not this script. It stays here only for
+ * any other environment that does have WP-CLI available. See DECISIONS.md.
+ *
  * IMPORTANT — NOMINATIONS_SERVICES_COMMISSIONS_AUMONERIES_2027.pdf (the
  * source of the real personnel names for "responsable"/"membres") is not
  * present in this repository, so this script deliberately does NOT invent

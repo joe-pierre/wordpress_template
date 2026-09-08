@@ -67,6 +67,10 @@ function dz_import_get_sources() {
 			'label'    => __( 'Importer le contenu "À propos" et les armoiries', 'diocese-ziguinchor' ),
 			'callback' => 'dz_import_run_armoiries',
 		),
+		'conseil_episcopal' => array(
+			'label'    => __( 'Importer le Conseil épiscopal', 'diocese-ziguinchor' ),
+			'callback' => 'dz_import_run_conseil_episcopal',
+		),
 	);
 }
 
@@ -1032,6 +1036,42 @@ function dz_import_run_nominations() {
 		'created' => $dz_created,
 		'updated' => $dz_updated,
 		'skipped' => $dz_skipped,
+		'notes'   => $dz_notes,
+	);
+}
+
+/**
+ * Creates OR updates the single "Conseil épiscopal" entry (CPT `conseil`),
+ * previously seeded only by bin/seed-cpt-organisation.php via
+ * `wp eval-file` — unusable on the client's actual hosting, which has no
+ * shell/WP-CLI access (see DECISIONS.md, incident "Disparition totale des
+ * ~33 fiches organisationnelles..."). Reuses the same upsert-by-source_id
+ * idempotence as the rest of this file (dz_import_upsert_organisation_post())
+ * rather than that script's own get_page_by_title() lookup, so this button
+ * behaves exactly like the other 7 and stays safe to click more than once.
+ * `responsable`/`membres` are deliberately left empty: NOMINATIONS_
+ * SERVICES_COMMISSIONS_AUMONERIES_2027.pdf (the source for those fields on
+ * the other organisational CPTs) doesn't cover "Les Conseils de l'évêque"
+ * at all, so there is no real name to transcribe here — same "no invented
+ * personal data" rule as bin/seed-cpt-organisation.php and SPEC.md §9.
+ *
+ * @return array{created:int,updated:int,skipped:int,notes:string[]}
+ */
+function dz_import_run_conseil_episcopal() {
+	$dz_notes = array();
+
+	$dz_entry = array(
+		'source_id' => 'conseil-episcopal',
+		'titre'     => __( 'Conseil épiscopal', 'diocese-ziguinchor' ),
+		'note'      => __( 'Fiche en cours de complétion — responsable et composition à saisir à partir de NOMINATIONS_SERVICES_COMMISSIONS_AUMONERIES_2027.pdf.', 'diocese-ziguinchor' ),
+	);
+
+	list( $dz_post_id, $dz_is_new ) = dz_import_upsert_organisation_post( 'conseil', $dz_entry, $dz_notes );
+
+	return array(
+		'created' => ( $dz_post_id && $dz_is_new ) ? 1 : 0,
+		'updated' => ( $dz_post_id && ! $dz_is_new ) ? 1 : 0,
+		'skipped' => 0,
 		'notes'   => $dz_notes,
 	);
 }
