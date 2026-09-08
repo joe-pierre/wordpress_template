@@ -216,6 +216,31 @@ function dz_import_find_existing_post( $post_type, $source_id ) {
 }
 
 /**
+ * Whether an attachment ID refers to a real, usable attachment: the post
+ * exists as type `attachment` AND its file is actually present on disk.
+ * media_handle_sideload() can return a "successful" ID that doesn't hold up
+ * to this (e.g. a partial/corrupted write, or a filesystem issue during
+ * generate_attachment_metadata()) — every import function must run this
+ * check before trusting an ID it got back, rather than assume any non-
+ * WP_Error return is safe to store (see dz_import_sideload_image() and
+ * DECISIONS.md "Validation post-sideload").
+ *
+ * @param mixed $attachment_id
+ * @return bool
+ */
+function dz_import_attachment_is_valid( $attachment_id ) {
+	$dz_id = (int) $attachment_id;
+
+	if ( $dz_id <= 0 || 'attachment' !== get_post_type( $dz_id ) ) {
+		return false;
+	}
+
+	$dz_file = get_attached_file( $dz_id );
+
+	return $dz_file && file_exists( $dz_file );
+}
+
+/**
  * Sideloads a local file already sitting on disk (not an upload/$_FILES
  * entry) into the media library as a real attachment, with generated
  * metadata. media_handle_sideload()/wp_handle_sideload() COPY then DELETE
@@ -223,6 +248,12 @@ function dz_import_find_existing_post( $post_type, $source_id ) {
  * upload, but would destroy our permanent theme-bundled source file if we
  * pointed `tmp_name` at it directly) — so this first copies the source into
  * a real temp file via wp_tempnam() and only ever sideloads that copy.
+ *
+ * The returned ID is validated with dz_import_attachment_is_valid() before
+ * being handed back: media_handle_sideload() can return an ID that isn't
+ * WP_Error yet still doesn't resolve to a real, readable file, which is
+ * exactly what would let an import function silently store an unusable
+ * reference (see DECISIONS.md "Validation post-sideload").
  *
  * @param string $file_path   Absolute path to the source file.
  * @param int    $post_id     Post to attach the media to.
@@ -256,8 +287,22 @@ function dz_import_sideload_image( $file_path, $post_id, $description ) {
 		$description
 	);
 
-	if ( is_wp_error( $dz_attachment_id ) && file_exists( $dz_tmp_file ) ) {
-		unlink( $dz_tmp_file );
+	if ( is_wp_error( $dz_attachment_id ) ) {
+		if ( file_exists( $dz_tmp_file ) ) {
+			unlink( $dz_tmp_file );
+		}
+		return $dz_attachment_id;
+	}
+
+	if ( ! dz_import_attachment_is_valid( $dz_attachment_id ) ) {
+		return new WP_Error(
+			'dz_import_sideload_unusable',
+			sprintf(
+				/* translators: %s: source file path */
+				__( "L'import de %s a été accepté par WordPress mais n'a produit aucun fichier média utilisable (vérifier les permissions du dossier uploads/).", 'diocese-ziguinchor' ),
+				$file_path
+			)
+		);
 	}
 
 	return $dz_attachment_id;
@@ -272,7 +317,16 @@ function dz_import_sideload_image( $file_path, $post_id, $description ) {
  * `source_id` in `dz_front_hero_slide_source_id`, checked against the
  * repeater's existing rows before sideloading anything.
  *
- * @return array{created:int,skipped:int,notes:string[]}
+ * A row whose image no longer resolves to a real, on-disk attachment (e.g.
+ * left over from a run where dz_import_sideload_image() failed before this
+ * function validated its result — see DECISIONS.md "Validation post-
+ * sideload") is treated as broken, not as "already imported": it is
+ * replaced in place on the next run rather than skipped forever, with no
+ * duplicate row and no mix of stale/fresh fields (the whole row is
+ * overwritten at once). If re-import fails again, the broken row is left
+ * untouched and reported so it's never silently swapped for an empty one.
+ *
+ * @return array{created:int,updated:int,skipped:int,notes:string[]}
  */
 function dz_import_run_hero() {
 	$dz_slides = dz_import_get_hero_data();
@@ -280,6 +334,7 @@ function dz_import_run_hero() {
 	if ( ! $dz_slides ) {
 		return array(
 			'created' => 0,
+			'updated' => 0,
 			'skipped' => 0,
 			'notes'   => array( __( 'Aucune donnée dans inc/import/data-hero.php pour le moment (voir CONTENT_PROMPTS.md PROMPT 1).', 'diocese-ziguinchor' ) ),
 		);
@@ -288,21 +343,40 @@ function dz_import_run_hero() {
 	if ( 'page' !== get_option( 'show_on_front' ) || ! get_option( 'page_on_front' ) ) {
 		return array(
 			'created' => 0,
+			'updated' => 0,
 			'skipped' => 0,
 			'notes'   => array( __( "Aucune page d'accueil statique n'est configurée (Réglages > Lecture) : impossible d'importer le hero tant que group_dz_front_hero n'a pas de page à laquelle s'attacher.", 'diocese-ziguinchor' ) ),
 		);
 	}
 
 	$dz_front_page_id = (int) get_option( 'page_on_front' );
-	$dz_rows           = dz_get_field( 'dz_front_hero_slides', $dz_front_page_id, array() );
-	$dz_existing_ids   = wp_list_pluck( $dz_rows, 'dz_front_hero_slide_source_id' );
+	$dz_rows          = dz_get_field( 'dz_front_hero_slides', $dz_front_page_id, array() );
 
-	$dz_created = 0;
-	$dz_skipped = 0;
-	$dz_notes   = array();
+	// Index existing rows by source_id, separating the ones whose image is
+	// actually usable from broken ones eligible for replacement.
+	$dz_valid_source_ids = array();
+	$dz_broken_row_by_id = array();
+	foreach ( $dz_rows as $dz_index => $dz_row ) {
+		$dz_source_id     = $dz_row['dz_front_hero_slide_source_id'];
+		$dz_attachment_id = attachment_url_to_postid( $dz_row['dz_front_hero_slide_image'] );
+
+		if ( dz_import_attachment_is_valid( $dz_attachment_id ) ) {
+			$dz_valid_source_ids[] = $dz_source_id;
+		} else {
+			$dz_broken_row_by_id[ $dz_source_id ] = $dz_index;
+		}
+	}
+
+	$dz_created      = 0;
+	$dz_updated      = 0;
+	$dz_skipped      = 0;
+	$dz_notes        = array();
+	$dz_rows_changed = false;
 
 	foreach ( $dz_slides as $dz_slide ) {
-		if ( in_array( $dz_slide['source_id'], $dz_existing_ids, true ) ) {
+		$dz_is_replacement = isset( $dz_broken_row_by_id[ $dz_slide['source_id'] ] );
+
+		if ( ! $dz_is_replacement && in_array( $dz_slide['source_id'], $dz_valid_source_ids, true ) ) {
 			++$dz_skipped;
 			continue;
 		}
@@ -322,10 +396,14 @@ function dz_import_run_hero() {
 
 		if ( is_wp_error( $dz_attachment_id ) ) {
 			$dz_notes[] = sprintf(
-				/* translators: 1: image file path, 2: error message */
-				__( "Échec de l'import de l'image %1\$s : %2\$s", 'diocese-ziguinchor' ),
+				/* translators: 1: slide title, 2: image file path, 3: error message, 4: extra note when replacing a broken slide (may be empty) */
+				__( "Échec sur la diapositive « %1\$s » (%2\$s) : %3\$s%4\$s", 'diocese-ziguinchor' ),
+				$dz_slide['titre'],
 				$dz_slide['image'],
-				$dz_attachment_id->get_error_message()
+				$dz_attachment_id->get_error_message(),
+				$dz_is_replacement
+					? ' — ' . __( 'la diapositive existante avec image cassée a été conservée telle quelle.', 'diocese-ziguinchor' )
+					: ''
 			);
 			continue;
 		}
@@ -336,7 +414,7 @@ function dz_import_run_hero() {
 		// "vrai attachment WordPress, avec métadonnées".
 		update_post_meta( $dz_attachment_id, '_wp_attachment_image_alt', $dz_slide['titre'] );
 
-		$dz_rows[] = array(
+		$dz_new_row = array(
 			'dz_front_hero_slide_image'     => $dz_attachment_id,
 			'dz_front_hero_slide_titre'     => $dz_slide['titre'],
 			'dz_front_hero_slide_texte'     => $dz_slide['texte'],
@@ -344,15 +422,27 @@ function dz_import_run_hero() {
 			'dz_front_hero_slide_source_id' => $dz_slide['source_id'],
 		);
 
-		++$dz_created;
+		if ( $dz_is_replacement ) {
+			// Overwrite the whole broken row in place — never append a
+			// second row for the same source_id (no duplicate) and never
+			// keep any of its stale fields (no mix of old/new data).
+			$dz_rows[ $dz_broken_row_by_id[ $dz_slide['source_id'] ] ] = $dz_new_row;
+			++$dz_updated;
+		} else {
+			$dz_rows[] = $dz_new_row;
+			++$dz_created;
+		}
+
+		$dz_rows_changed = true;
 	}
 
-	if ( $dz_created > 0 ) {
+	if ( $dz_rows_changed ) {
 		update_field( 'dz_front_hero_slides', $dz_rows, $dz_front_page_id );
 	}
 
 	return array(
 		'created' => $dz_created,
+		'updated' => $dz_updated,
 		'skipped' => $dz_skipped,
 		'notes'   => $dz_notes,
 	);
@@ -1162,12 +1252,17 @@ function dz_import_run_armoiries() {
  * Skip-once semantics (like the hero slides), not an upsert like the
  * organisational CPTs: once a logo/favicon is set — by this import, or
  * manually by an admin through wp-admin/the Customizer — re-running never
- * overwrites it, so a deliberate manual change always wins.
+ * overwrites it, so a deliberate manual change always wins. The one
+ * exception is a set logo/favicon whose attachment is actually broken (see
+ * dz_import_attachment_is_valid()) — that can only be this import's own
+ * doing (a manual admin pick is always a real upload), so it's replaced
+ * rather than left in place forever.
  *
- * @return array{created:int,skipped:int,notes:string[]}
+ * @return array{created:int,updated:int,skipped:int,notes:string[]}
  */
 function dz_import_run_logo() {
 	$dz_created = 0;
+	$dz_updated = 0;
 	$dz_skipped = 0;
 	$dz_notes   = array();
 
@@ -1176,49 +1271,77 @@ function dz_import_run_logo() {
 	if ( ! file_exists( $dz_image_path ) ) {
 		return array(
 			'created' => 0,
+			'updated' => 0,
 			'skipped' => 0,
 			'notes'   => array( __( 'Fichier logo-diocese-ziguinchor.png introuvable dans assets/seed-images/armoiries/.', 'diocese-ziguinchor' ) ),
 		);
 	}
 
-	$dz_existing_logo = dz_get_option( 'dz_logo', array() );
-	if ( ! empty( $dz_existing_logo['ID'] ) ) {
+	$dz_existing_logo  = dz_get_option( 'dz_logo', array() );
+	$dz_logo_is_broken = ! empty( $dz_existing_logo['ID'] ) && ! dz_import_attachment_is_valid( $dz_existing_logo['ID'] );
+
+	if ( ! empty( $dz_existing_logo['ID'] ) && ! $dz_logo_is_broken ) {
 		++$dz_skipped;
 	} else {
 		$dz_logo_id = dz_import_sideload_image( $dz_image_path, 0, __( 'Armoiries du diocèse de Ziguinchor', 'diocese-ziguinchor' ) );
 
 		if ( is_wp_error( $dz_logo_id ) ) {
 			$dz_notes[] = sprintf(
-				/* translators: %s: error message */
-				__( "Échec de l'import du logo : %s", 'diocese-ziguinchor' ),
-				$dz_logo_id->get_error_message()
+				/* translators: 1: error message, 2: extra note when the previous logo attachment was broken (may be empty) */
+				__( "Échec de l'import du logo : %1\$s%2\$s", 'diocese-ziguinchor' ),
+				$dz_logo_id->get_error_message(),
+				$dz_logo_is_broken
+					? ' — ' . __( "le logo précédemment enregistré (image cassée) a été conservé tel quel.", 'diocese-ziguinchor' )
+					: ''
 			);
 		} else {
 			update_post_meta( $dz_logo_id, '_wp_attachment_image_alt', __( 'Armoiries du diocèse de Ziguinchor', 'diocese-ziguinchor' ) );
 			update_field( 'dz_logo', $dz_logo_id, 'option' );
-			++$dz_created;
+
+			if ( $dz_logo_is_broken ) {
+				// Replaced, not just re-pointed: the broken attachment post
+				// is removed so it doesn't linger as an orphan in the media
+				// library (no duplicate, no leftover broken entry).
+				wp_delete_attachment( $dz_existing_logo['ID'], true );
+				++$dz_updated;
+			} else {
+				++$dz_created;
+			}
 		}
 	}
 
-	if ( get_option( 'site_icon' ) ) {
+	$dz_site_icon_id      = get_option( 'site_icon' );
+	$dz_favicon_is_broken = $dz_site_icon_id && ! dz_import_attachment_is_valid( $dz_site_icon_id );
+
+	if ( $dz_site_icon_id && ! $dz_favicon_is_broken ) {
 		++$dz_skipped;
 	} else {
 		$dz_favicon_id = dz_import_generate_favicon( $dz_image_path );
 
 		if ( is_wp_error( $dz_favicon_id ) ) {
 			$dz_notes[] = sprintf(
-				/* translators: %s: error message */
-				__( 'Échec de la génération du favicon : %s', 'diocese-ziguinchor' ),
-				$dz_favicon_id->get_error_message()
+				/* translators: 1: error message, 2: extra note when the previous favicon attachment was broken (may be empty) */
+				__( 'Échec de la génération du favicon : %1$s%2$s', 'diocese-ziguinchor' ),
+				$dz_favicon_id->get_error_message(),
+				$dz_favicon_is_broken
+					? ' — ' . __( 'le favicon précédemment enregistré (image cassée) a été conservé tel quel.', 'diocese-ziguinchor' )
+					: ''
 			);
 		} else {
 			update_option( 'site_icon', $dz_favicon_id );
-			++$dz_created;
+
+			if ( $dz_favicon_is_broken ) {
+				wp_delete_attachment( $dz_site_icon_id, true );
+				++$dz_updated;
+			} else {
+				++$dz_created;
+			}
 		}
 	}
 
 	return array(
 		'created' => $dz_created,
+		'updated' => $dz_updated,
 		'skipped' => $dz_skipped,
 		'notes'   => $dz_notes,
 	);
