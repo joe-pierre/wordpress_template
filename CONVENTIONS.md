@@ -11,7 +11,7 @@
 - **Text domain** du thème : `diocese-ziguinchor`
 - **Préfixe de toutes les fonctions/hooks custom** : `dz_` (ex. `dz_register_cpt_paroisse()`, `dz_enqueue_assets()`) — évite les collisions avec les plugins
 - **Slugs des CPT** : `paroisse`, `pretre`, `evenement`, `sacrement` (singulier, minuscule, sans accent)
-- **Slugs des taxonomies** : `secteur_pastoral` (si utilisée)
+- **Slugs des taxonomies** : `doyenne`, `type_aumonerie`, `evenement_type` (singulier, minuscule, sans accent)
 - **Fichiers de template-parts** : `card-{type}.php`, `loop-{type}.php` (ex. `card-paroisse.php`, `loop-evenements.php`)
 - **Classes CSS** : on conserve la nomenclature du template d'origine (`kebab-case`, ex. `.blog-hero`, `.category-postst`) pour toute section réutilisée telle quelle ; toute nouvelle section métier custom (paroisses, prêtres...) suit le même style pour rester cohérente (`.paroisse-card`, `.pretre-profile`)
 - **Champs ACF** : `snake_case`, préfixés par le nom du CPT quand ambigu (ex. `paroisse_horaires_messes`, `pretre_date_ordination`)

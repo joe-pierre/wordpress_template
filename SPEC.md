@@ -47,7 +47,7 @@ Le site doit être utilisable par des **rédacteurs non techniques** (secrétari
 
 ### Taxonomies
 - `category` (native) pour les Actualités
-- Taxonomie custom `secteur_pastoral` (optionnel) pour regrouper les paroisses par doyenné/secteur, si le diocèse est structuré ainsi — **à confirmer avec le client avant implémentation**
+- ~~Taxonomie custom `secteur_pastoral` (optionnel) pour regrouper les paroisses par doyenné/secteur, si le diocèse est structuré ainsi — à confirmer avec le client avant implémentation~~ — **remplacée par `doyenne`**, voir "Taxonomies additionnelles" ci-dessous
 
 ### Page "Dons"
 Pas de CPT : une page statique (`page-dons.php`) avec champs ACF pour les modalités (RIB, Mobile Money, etc.) et éventuellement un formulaire Contact Form 7 dédié. Intégration d'un prestataire de paiement en ligne **hors périmètre v1** (à inscrire en ROADMAP).
