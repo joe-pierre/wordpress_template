@@ -4486,8 +4486,8 @@ section,
 .contact .form-container .form-floating .form-control {
   border-radius: 12px;
   border: 1px solid color-mix(in srgb, var(--default-color), transparent 80%);
-  padding: 24px 20px 8px 20px;
-  height: calc(3.5rem + 3px);
+  padding: 36px 20px 8px 20px;
+  height: calc(3.5rem + 15px);
   background-color: var(--surface-color);
   color: var(--default-color);
   transition: all 0.3s ease;
@@ -5171,6 +5171,93 @@ block still apply and take over once fields are wrapped that way.
 .contact .form-container .wpcf7-response-output {
   border-radius: 12px;
   margin-top: 20px;
+}
+
+/*--------------------------------------------------------------
+# Diocèse de Ziguinchor — Floating labels compatibles Contact Form 7
+Correctif remplaçant une première tentative insuffisante (voir
+BUGS_AND_ROADMAP.md) : celle-ci supposait <label> frère ou enfant direct
+de l'input à l'intérieur de .form-floating. Le HTML réellement rendu par
+CF7 imbrique un niveau de plus, confirmé sur le site réel :
+
+  .form-floating > p > ( span.wpcf7-form-control-wrap > input.form-control ), <br>, label
+
+Le <p> et le <br> sont de purs artefacts de mise en forme ajoutés par CF7
+(jamais écrits dans le formulaire lui-même) : neutralisés ci-dessous.
+Aucun sélecteur Bootstrap standard basé sur un enfant direct (>) ou un
+frère direct (~) ne peut atteindre ce label à travers ce <p>/<br> — ce
+bloc est donc entièrement autonome (n'étend ni ne dépend des règles
+".form-floating" de assets/vendor/bootstrap/css/bootstrap.css) et
+n'utilise que des sélecteurs descendants (espace) et :has() sur
+.form-floating lui-même, qui matchent quelle que soit la profondeur.
+
+Placé volontairement APRÈS le bloc "Formulaire Contact Form 7" ci-dessus :
+`.form-control`/`p` y sont aussi ciblés via `.wpcf7-form-control`/`.wpcf7-form
+p` avec la même spécificité (4 classes) que les sélecteurs de ce bloc-ci ;
+à spécificité égale, c'est l'ordre d'apparition dans la feuille de style
+qui tranche, donc ce bloc doit rester après pour que ses valeurs gagnent.
+--------------------------------------------------------------*/
+.contact .form-container .form-floating {
+  position: relative;
+}
+
+.contact .form-container .form-floating p {
+  margin-bottom: 0;
+}
+
+.contact .form-container .form-floating br {
+  display: none;
+}
+
+.contact .form-container .form-floating .wpcf7-form-control-wrap {
+  display: block;
+  width: 100%;
+}
+
+/* Overrides the fixed single-line height set above (shared .form-control
+   class applies it to the message textarea too). */
+.contact .form-container .form-floating textarea.form-control {
+  height: auto;
+  min-height: 150px;
+  resize: vertical;
+}
+
+.contact .form-container .form-floating label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  padding: 24px 20px 8px 20px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+  transform-origin: 0 0;
+  transition: transform 0.15s ease-in-out;
+}
+
+/*
+ * Active state: scale(0.85) shrinks the label from its top-left corner
+ * (transform-origin above) rather than resizing font-size, so the
+ * translateY needed to fully clear the field's own text is much smaller
+ * than it looks — translate happens first (innermost function), then
+ * scale multiplies that already-translated offset toward the origin.
+ * With this label's own resting padding-top (24px) and translateY(-1rem
+ * = -16px): (24 - 16) * 0.85 ≈ 6.8px from the field's top border — the
+ * label ends up overlapping that border, well clear of the typed text,
+ * which starts at the .form-control's own padding-top (36px, see above).
+ * Identical for the "Votre message" textarea: its label uses the exact
+ * same padding-top/transform (only height/min-height differ on the
+ * textarea.form-control rule above), and this math doesn't depend on
+ * field height, so the ~29px clearance holds whether the field is a
+ * single-line input or a textarea filled with several wrapped lines.
+ */
+.contact .form-container .form-floating:has(.form-control:focus) label,
+.contact .form-container .form-floating:has(.form-control:not(:placeholder-shown)) label {
+  transform: scale(0.85) translateY(-1rem);
+  color: var(--heading-color);
 }
 
 /*--------------------------------------------------------------
