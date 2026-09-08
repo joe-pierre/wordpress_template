@@ -32,6 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once DZ_THEME_DIR . '/inc/import/data-hero.php';
 require_once DZ_THEME_DIR . '/inc/import/data-calendrier.php';
 require_once DZ_THEME_DIR . '/inc/import/data-nominations.php';
+require_once DZ_THEME_DIR . '/inc/import/data-aumoneries.php';
 
 /**
  * Data source key => admin button label + dispatcher callback. The single
@@ -52,6 +53,10 @@ function dz_import_get_sources() {
 		'nominations' => array(
 			'label'    => __( 'Importer les nominations', 'diocese-ziguinchor' ),
 			'callback' => 'dz_import_run_nominations',
+		),
+		'aumoneries'  => array(
+			'label'    => __( 'Importer les aumôneries et enseignements', 'diocese-ziguinchor' ),
+			'callback' => 'dz_import_run_aumoneries',
 		),
 	);
 }
@@ -773,6 +778,131 @@ function dz_import_run_nominations() {
 		'commission_diocesaine' => 'dz_import_run_nominations_commission_diocesaine',
 		'mouvement'             => 'dz_import_run_nominations_mouvement',
 		'association'           => 'dz_import_run_nominations_association',
+	);
+
+	$dz_created = 0;
+	$dz_updated = 0;
+	$dz_skipped = 0;
+	$dz_notes   = array();
+
+	foreach ( $dz_dispatch as $dz_key => $dz_callback ) {
+		if ( empty( $dz_data[ $dz_key ] ) ) {
+			continue;
+		}
+
+		$dz_result = call_user_func( $dz_callback, $dz_data[ $dz_key ] );
+
+		$dz_created += $dz_result['created'];
+		$dz_updated += $dz_result['updated'];
+		$dz_skipped += $dz_result['skipped'];
+		$dz_notes    = array_merge( $dz_notes, $dz_result['notes'] );
+	}
+
+	return array(
+		'created' => $dz_created,
+		'updated' => $dz_updated,
+		'skipped' => $dz_skipped,
+		'notes'   => $dz_notes,
+	);
+}
+
+/**
+ * PROMPT 4, sections V-VIII: chaplaincies. Same upsert helper as the
+ * nominations import (dz_import_upsert_organisation_post() is generic
+ * across post types, not nominations-specific) plus the `type_aumonerie`
+ * taxonomy term from the entry.
+ *
+ * @param array $dz_entries
+ * @return array{created:int,updated:int,skipped:int,notes:string[]}
+ */
+function dz_import_run_aumoneries_aumonerie( array $dz_entries ) {
+	$dz_created = 0;
+	$dz_updated = 0;
+	$dz_notes   = array();
+
+	foreach ( $dz_entries as $dz_entry ) {
+		list( $dz_post_id, $dz_is_new ) = dz_import_upsert_organisation_post( 'aumonerie', $dz_entry, $dz_notes );
+		if ( ! $dz_post_id ) {
+			continue;
+		}
+
+		if ( ! empty( $dz_entry['type_aumonerie'] ) ) {
+			wp_set_object_terms( $dz_post_id, $dz_entry['type_aumonerie'], 'type_aumonerie' );
+		}
+
+		$dz_is_new ? ++$dz_created : ++$dz_updated;
+	}
+
+	return array(
+		'created' => $dz_created,
+		'updated' => $dz_updated,
+		'skipped' => 0,
+		'notes'   => $dz_notes,
+	);
+}
+
+/**
+ * PROMPT 4, point 2: diocesan establishments not already covered by an
+ * `aumonerie` entry (see inc/import/data-aumoneries.php and DECISIONS.md for
+ * which ones were deliberately left out to avoid duplicating an existing
+ * aumonerie fiche). `type_etablissement` is a select field (not a taxonomy,
+ * unlike aumonerie — see acf-json/group_dz_cpt_etablissement.json), set the
+ * same way as org_responsable/org_membres.
+ *
+ * @param array $dz_entries
+ * @return array{created:int,updated:int,skipped:int,notes:string[]}
+ */
+function dz_import_run_aumoneries_etablissement( array $dz_entries ) {
+	$dz_created = 0;
+	$dz_updated = 0;
+	$dz_notes   = array();
+
+	foreach ( $dz_entries as $dz_entry ) {
+		list( $dz_post_id, $dz_is_new ) = dz_import_upsert_organisation_post( 'etablissement', $dz_entry, $dz_notes );
+		if ( ! $dz_post_id ) {
+			continue;
+		}
+
+		if ( ! empty( $dz_entry['type_etablissement'] ) ) {
+			update_field( 'type_etablissement', $dz_entry['type_etablissement'], $dz_post_id );
+		}
+		if ( ! empty( $dz_entry['contact'] ) ) {
+			update_field( 'etablissement_contact', $dz_entry['contact'], $dz_post_id );
+		}
+
+		$dz_is_new ? ++$dz_created : ++$dz_updated;
+	}
+
+	return array(
+		'created' => $dz_created,
+		'updated' => $dz_updated,
+		'skipped' => 0,
+		'notes'   => $dz_notes,
+	);
+}
+
+/**
+ * Imports chaplaincies and diocesan establishments (CONTENT_PROMPTS.md
+ * PROMPT 4): dispatches to the two functions above and aggregates their
+ * results, same pattern as dz_import_run_nominations().
+ *
+ * @return array{created:int,updated:int,skipped:int,notes:string[]}
+ */
+function dz_import_run_aumoneries() {
+	$dz_data = dz_import_get_aumoneries_data();
+
+	if ( ! array_filter( $dz_data ) ) {
+		return array(
+			'created' => 0,
+			'updated' => 0,
+			'skipped' => 0,
+			'notes'   => array( __( 'Aucune donnée dans inc/import/data-aumoneries.php pour le moment (voir CONTENT_PROMPTS.md PROMPT 4).', 'diocese-ziguinchor' ) ),
+		);
+	}
+
+	$dz_dispatch = array(
+		'aumonerie'     => 'dz_import_run_aumoneries_aumonerie',
+		'etablissement' => 'dz_import_run_aumoneries_etablissement',
 	);
 
 	$dz_created = 0;
