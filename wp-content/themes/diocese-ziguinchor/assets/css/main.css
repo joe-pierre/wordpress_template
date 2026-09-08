@@ -4383,6 +4383,15 @@ section,
   font-size: 14px;
   margin-bottom: 0;
   opacity: 0.8;
+  color: var(--contrast-color);
+}
+
+.contact .info-card .card-content p a {
+  color: var(--contrast-color);
+}
+
+.contact .info-card .card-content p a:hover {
+  color: color-mix(in srgb, var(--contrast-color), transparent 25%);
 }
 
 .contact .social-links-panel {
