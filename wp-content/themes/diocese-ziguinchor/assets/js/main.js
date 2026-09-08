@@ -115,7 +115,7 @@
    */
   const preloader = document.querySelector('#preloader');
   if (preloader) {
-    window.addEventListener('load', () => {
+    document.addEventListener('DOMContentLoaded', () => {
       preloader.remove();
     });
   }
@@ -152,7 +152,7 @@
       mirror: false
     });
   }
-  window.addEventListener('load', aosInit);
+  document.addEventListener('DOMContentLoaded', aosInit);
 
   /**
    * Init swiper sliders
@@ -171,7 +171,7 @@
     });
   }
 
-  window.addEventListener("load", initSwiper);
+  document.addEventListener("DOMContentLoaded", initSwiper);
 
   /**
    * Initiate Pure Counter
