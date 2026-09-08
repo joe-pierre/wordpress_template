@@ -83,7 +83,7 @@
 
 ## Phase 6 — Formulaires & sécurité
 
-- [ ] Installer le plugin Contact Form 7, créer le formulaire et coller son shortcode dans le contenu de la page Contact (le point de montage `the_content()` et le CSS de base — `.wpcf7-form-control` + `.form-floating` — sont déjà en place, voir `page-contact.php` et DECISIONS.md, Tâche 8)
+- [x] Installer le plugin Contact Form 7, créer le formulaire et coller son shortcode dans le contenu de la page Contact (le point de montage `the_content()` et le CSS de base — `.wpcf7-form-control` + `.form-floating` — sont déjà en place, voir `page-contact.php` et DECISIONS.md, Tâche 8) ; destinataire du mail forcé dynamiquement vers `dz_contact_email` (page d'options) via `inc/contact-form.php` (`wpcf7_before_send_mail`), voir DECISIONS.md
 - [ ] Ajouter la protection anti-spam (honeypot + reCAPTCHA v3 si retenu)
 - [x] Revue de sécurité du code du thème (échappement, sanitization, `ABSPATH`, notices/warnings potentielles) — Tâche 9, voir DECISIONS.md et BUGS_AND_ROADMAP.md. Nonces : sans objet, aucun formulaire admin custom dans le thème (commentaires natifs, recherche native, Contact Form 7 gèrent déjà les leurs)
 
