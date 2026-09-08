@@ -309,6 +309,41 @@ function dz_import_sideload_image( $file_path, $post_id, $description ) {
 }
 
 /**
+ * Normalizes a hero slide title for duplicate detection: strips accents
+ * (remove_accents()), lowercases, collapses whitespace. Two titles that only
+ * differ by accents/case/spacing (e.g. a legacy manually-typed "Une eglise
+ * proche des fidlèles" vs. the real "Une Église proche des fidèles")
+ * normalize close enough to flag as a likely duplicate of the same canonical
+ * slide — see DECISIONS.md "Repeater hero : doublons créés par des lignes
+ * orphelines sans identifiant d'import".
+ *
+ * @param string $title
+ * @return string
+ */
+function dz_import_hero_normalize_title( $title ) {
+	return trim( preg_replace( '/\s+/', ' ', strtolower( remove_accents( (string) $title ) ) ) );
+}
+
+/**
+ * Derives a stable comparison key from a hero slide image reference — either
+ * the canonical source path in data-hero.php (e.g.
+ * "assets/seed-images/hero/eveque.jpg") or an already-sideloaded row's
+ * attachment URL (e.g. ".../uploads/2026/09/eveque-1.jpg") — so a legacy row
+ * whose image sideloaded fine but whose dz_front_hero_slide_source_id
+ * sub-field never saved (see DECISIONS.md) can still be recognized as "this
+ * canonical slide" on a later run: the filename, minus extension, minus
+ * WordPress' own "-1"/"-2"... de-duplication suffix.
+ *
+ * @param string $image_ref
+ * @return string
+ */
+function dz_import_hero_image_key( $image_ref ) {
+	$dz_name = pathinfo( wp_basename( (string) $image_ref ), PATHINFO_FILENAME );
+
+	return strtolower( preg_replace( '/-\d+$/', '', $dz_name ) );
+}
+
+/**
  * Imports the front-page hero slides: sideloads each image into the media
  * library, then appends a row to the `dz_front_hero_slides` repeater
  * (group_dz_front_hero — see inc/acf-fields.php) on the static front page.
@@ -325,6 +360,23 @@ function dz_import_sideload_image( $file_path, $post_id, $description ) {
  * duplicate row and no mix of stale/fresh fields (the whole row is
  * overwritten at once). If re-import fails again, the broken row is left
  * untouched and reported so it's never silently swapped for an empty one.
+ *
+ * A row with NO source_id at all (e.g. created back when ACF free didn't
+ * reliably save repeater sub-fields on this options-page-turned-front-page
+ * field, before SCF — see DECISIONS.md "Repeater hero : doublons créés par
+ * des lignes orphelines sans identifiant d'import") is invisible to the
+ * check above and would otherwise cause every canonical slide to be
+ * re-appended as a brand new row on every run. Such a row is now matched by
+ * a fallback: its image filename (dz_import_hero_image_key()), if it has
+ * one. If it doesn't even have that (a fully empty legacy row), it is left
+ * untouched — this function never deletes or guesses its way into replacing
+ * a row it can't positively identify — but reported in the returned notes
+ * when its title looks like a duplicate of a canonical slide, and the
+ * 5-slide cap (field_dz_front_hero_slides "max", inc/acf-fields.php) is
+ * enforced here too so such leftover rows can never silently push a
+ * legitimate slide out of the repeater: once the cap is reached, further
+ * new (non-recognized) slides are skipped with an explicit note instead of
+ * being appended.
  *
  * @return array{created:int,updated:int,skipped:int,notes:string[]}
  */
@@ -352,19 +404,47 @@ function dz_import_run_hero() {
 	$dz_front_page_id = (int) get_option( 'page_on_front' );
 	$dz_rows          = dz_get_field( 'dz_front_hero_slides', $dz_front_page_id, array() );
 
-	// Index existing rows by source_id, separating the ones whose image is
-	// actually usable from broken ones eligible for replacement.
-	$dz_valid_source_ids = array();
-	$dz_broken_row_by_id = array();
+	// Index existing rows 3 ways so a canonical slide already present under
+	// this page is recognized even when its source_id sub-field is empty
+	// (see this function's docblock):
+	// 1. by source_id — valid (image OK, skip) vs. broken (replace in
+	//    place), the pre-existing behaviour;
+	// 2. rows with NO source_id, by a normalized image filename key, so a
+	//    row whose image sideloaded fine but whose source_id never saved is
+	//    still adopted (replaced in place, source_id finally written)
+	//    instead of triggering a fresh duplicate;
+	// 3. any remaining row with neither a source_id nor a recognizable
+	//    image is left alone entirely and only reported below.
+	$dz_valid_source_ids     = array();
+	$dz_broken_row_by_id     = array();
+	$dz_orphan_row_by_imgkey = array();
+	$dz_unmatched_orphans    = array();
+
 	foreach ( $dz_rows as $dz_index => $dz_row ) {
 		$dz_source_id     = $dz_row['dz_front_hero_slide_source_id'];
 		$dz_attachment_id = attachment_url_to_postid( $dz_row['dz_front_hero_slide_image'] );
 
-		if ( dz_import_attachment_is_valid( $dz_attachment_id ) ) {
-			$dz_valid_source_ids[] = $dz_source_id;
-		} else {
-			$dz_broken_row_by_id[ $dz_source_id ] = $dz_index;
+		if ( '' !== $dz_source_id ) {
+			if ( dz_import_attachment_is_valid( $dz_attachment_id ) ) {
+				$dz_valid_source_ids[] = $dz_source_id;
+			} else {
+				$dz_broken_row_by_id[ $dz_source_id ] = $dz_index;
+			}
+			continue;
 		}
+
+		if ( ! empty( $dz_row['dz_front_hero_slide_image'] ) ) {
+			$dz_img_key = dz_import_hero_image_key( $dz_row['dz_front_hero_slide_image'] );
+			if ( ! isset( $dz_orphan_row_by_imgkey[ $dz_img_key ] ) ) {
+				$dz_orphan_row_by_imgkey[ $dz_img_key ] = $dz_index;
+			}
+			continue;
+		}
+
+		$dz_unmatched_orphans[] = array(
+			'index' => $dz_index,
+			'titre' => $dz_row['dz_front_hero_slide_titre'],
+		);
 	}
 
 	$dz_created      = 0;
@@ -373,11 +453,36 @@ function dz_import_run_hero() {
 	$dz_notes        = array();
 	$dz_rows_changed = false;
 
-	foreach ( $dz_slides as $dz_slide ) {
-		$dz_is_replacement = isset( $dz_broken_row_by_id[ $dz_slide['source_id'] ] );
+	// field_dz_front_hero_slides "max" (inc/acf-fields.php) / SPEC.md §4:
+	// enforced here directly so a brand new row can never silently push the
+	// repeater past 5, whatever is already sitting in it (orphans
+	// included) — see this function's docblock and DECISIONS.md.
+	$dz_hero_slides_max = 5;
 
-		if ( ! $dz_is_replacement && in_array( $dz_slide['source_id'], $dz_valid_source_ids, true ) ) {
+	foreach ( $dz_slides as $dz_slide ) {
+		$dz_target_index = null;
+
+		if ( isset( $dz_broken_row_by_id[ $dz_slide['source_id'] ] ) ) {
+			$dz_target_index = $dz_broken_row_by_id[ $dz_slide['source_id'] ];
+		} elseif ( in_array( $dz_slide['source_id'], $dz_valid_source_ids, true ) ) {
 			++$dz_skipped;
+			continue;
+		} else {
+			$dz_img_key = dz_import_hero_image_key( $dz_slide['image'] );
+			if ( isset( $dz_orphan_row_by_imgkey[ $dz_img_key ] ) ) {
+				$dz_target_index = $dz_orphan_row_by_imgkey[ $dz_img_key ];
+			}
+		}
+
+		$dz_is_replacement = null !== $dz_target_index;
+
+		if ( ! $dz_is_replacement && count( $dz_rows ) >= $dz_hero_slides_max ) {
+			$dz_notes[] = sprintf(
+				/* translators: 1: slide title, 2: max number of slides */
+				__( "Diapositive « %1\$s » non ajoutée : le repeater contient déjà %2\$d diapositives (limite). Vérifiez s'il y a d'anciennes lignes orphelines à supprimer manuellement dans l'admin avant de relancer l'import.", 'diocese-ziguinchor' ),
+				$dz_slide['titre'],
+				$dz_hero_slides_max
+			);
 			continue;
 		}
 
@@ -423,10 +528,12 @@ function dz_import_run_hero() {
 		);
 
 		if ( $dz_is_replacement ) {
-			// Overwrite the whole broken row in place — never append a
-			// second row for the same source_id (no duplicate) and never
-			// keep any of its stale fields (no mix of old/new data).
-			$dz_rows[ $dz_broken_row_by_id[ $dz_slide['source_id'] ] ] = $dz_new_row;
+			// Overwrite the whole broken/orphan row in place — never append
+			// a second row for the same slide (no duplicate) and never keep
+			// any of its stale fields (no mix of old/new data); this is
+			// also how an orphan row recognized only by image filename
+			// finally gets a proper dz_front_hero_slide_source_id written.
+			$dz_rows[ $dz_target_index ] = $dz_new_row;
 			++$dz_updated;
 		} else {
 			$dz_rows[] = $dz_new_row;
@@ -434,6 +541,26 @@ function dz_import_run_hero() {
 		}
 
 		$dz_rows_changed = true;
+	}
+
+	// Rows that never got recognized by source_id nor by image filename
+	// (typically a legacy manual/broken entry with no image at all) are
+	// never touched automatically — report the ones that look like a
+	// duplicate of a canonical slide so they don't sit invisibly in the
+	// admin (see this function's docblock).
+	foreach ( $dz_unmatched_orphans as $dz_orphan ) {
+		foreach ( $dz_slides as $dz_slide ) {
+			if ( dz_import_hero_normalize_title( $dz_orphan['titre'] ) !== dz_import_hero_normalize_title( $dz_slide['titre'] ) ) {
+				continue;
+			}
+
+			$dz_notes[] = sprintf(
+				/* translators: %s: legacy row title */
+				__( "Diapositive existante « %s » sans identifiant d'import ni image reconnue, non modifiée : ressemble à une ancienne ligne orpheline (voir DECISIONS.md) — à vérifier/supprimer manuellement dans l'admin si c'est bien un doublon.", 'diocese-ziguinchor' ),
+				$dz_orphan['titre']
+			);
+			break;
+		}
 	}
 
 	if ( $dz_rows_changed ) {
