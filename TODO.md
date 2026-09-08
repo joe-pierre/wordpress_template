@@ -30,8 +30,8 @@
 - [x] Créer les pages statiques listées dans `SPEC.md` §3 (Mot de l'évêque, Contacts, Évêché, Chancellerie, Historique, L'évêque, Cartographie du diocèse, Vie Consacrée, Prières, Pèlerinages Nationaux, Pèlerinages Diocésains, Devenir bénévole, Secrétariat diocésain) — `page.php` (gabarit générique désormais implémenté) + `page-cartographie.php` (Template Name dédié, embed carte) ; contenu de test créé par `bin/seed-static-pages.php` (statut `draft`, même logique que `bin/seed-cpt-organisation.php`)
 - [ ] Saisir le contenu réel de la circulaire de nominations dans les nouveaux CPT (Économat, Caritas, ODEC, mouvements, associations, aumôneries...)
 - [ ] Importer le calendrier diocésain 2026-2027 dans le CPT `evenement`
-- [ ] Appliquer la palette de couleurs des armoiries (bleu/or/vert) dans `assets/css/main.css`
-- [ ] Intégrer le logo/armoiries officiel dans la page d'options "Réglages du thème" (déjà existante, Phase 2) + favicon
+- [x] Appliquer la palette de couleurs des armoiries (bleu/or/vert) dans `assets/css/main.css` — les 3 teintes sont échantillonnées directement dans `logo-diocese-ziguinchor.png` (script Python/Pillow, non versionné) puis assombries en conservant la même teinte (H) pour rester lisibles en texte/blanc sur fond (ratios WCAG calculés) : `--heading-color: #173e4c` (bleu/azur de l'écu, contraste ~11.5:1 sur blanc), `--accent-color`/`--nav-hover-color`/`--nav-dropdown-hover-color: #8c6c2a` (or/jaune de la croix et de la tiare, ~4.9:1 sur blanc), `--bs-success`/`--bs-success-rgb: #2b7a3f` (vert des croix fleuries, ~5.3:1 — retinte uniquement le badge de statut "en cours" déjà utilisé par `single-evenement.php` via `.text-bg-success`, "usage ponctuel" au sens de `SPEC.md` §10, sans toucher au markup Bootstrap). Voir `DECISIONS.md`.
+- [x] Intégrer le logo/armoiries officiel dans la page d'options "Réglages du thème" (déjà existante, Phase 2) + favicon — nouvelle fonction `dz_import_run_logo()` dans `inc/import/import-tools.php` (6ᵉ bouton de l'outil "Réglages > Import contenu diocèse", `dz_import_get_sources()`) : sideload de `logo-diocese-ziguinchor.png` comme valeur par défaut du champ `dz_logo` (déjà rendu par `header.php`), puis génération d'un favicon carré (`site_icon`) par recadrage centré via `WP_Image_Editor` (le PNG source, 6512×6041, n'est pas parfaitement carré). Idempotence "skip-once" (comme le hero, pas un upsert) : ne touche jamais un logo/favicon déjà défini, y compris manuellement par un rédacteur. Testé par script PHP autonome (idempotence sur 2 imports + non-écrasement d'une valeur manuelle préexistante, calcul du recadrage carré centré vérifié). Voir `DECISIONS.md`.
 
 ## Phase 1 — Socle du thème
 
@@ -54,7 +54,6 @@
 - [x] Enregistrer le CPT `pretre` + champs ACF + relation vers `paroisse` — `inc/cpt-pretre.php`, `acf-json/group_dz_cpt_pretre.json` (relation bidirectionnelle, voir DECISIONS.md)
 - [x] Enregistrer le CPT `evenement` + champs ACF — `inc/cpt-evenement.php`, `acf-json/group_dz_cpt_evenement.json`
 - [x] Enregistrer le CPT `sacrement` + champs ACF — `inc/cpt-sacrement.php`, `acf-json/group_dz_cpt_sacrement.json`
-- [ ] Créer la taxonomie `secteur_pastoral` si confirmée en Phase 0 (toujours en attente de confirmation client)
 - [x] Exporter la config ACF en JSON dans le thème (`acf-json/`) pour versionner les champs avec le code
 - [x] Champ ACF "Mettre à la une" (`post_a_la_une`) sur le type natif `post`, pour le slider d'actualités de l'accueil — `acf-json/group_dz_post_a_la_une.json`
 

@@ -43,6 +43,10 @@ require_once DZ_THEME_DIR . '/inc/import/data-armoiries.php';
  */
 function dz_import_get_sources() {
 	return array(
+		'logo'        => array(
+			'label'    => __( 'Importer le logo et générer le favicon', 'diocese-ziguinchor' ),
+			'callback' => 'dz_import_run_logo',
+		),
 		'hero'        => array(
 			'label'    => __( 'Importer le hero', 'diocese-ziguinchor' ),
 			'callback' => 'dz_import_run_hero',
@@ -1141,4 +1145,138 @@ function dz_import_run_armoiries() {
 		'skipped' => $dz_skipped,
 		'notes'   => $dz_notes,
 	);
+}
+
+/**
+ * PROMPT 1 ("Identité visuelle" — DESIGN_PROMPTS.md PROMPT 12bis, still
+ * unchecked in TODO.md Phase 1bis): sets the real crest as the default
+ * "Réglages du thème" logo (`dz_logo`, group_dz_theme_settings — see
+ * inc/acf-fields.php, already rendered by header.php) and generates a
+ * square WordPress site icon (favicon) from the same file.
+ *
+ * Unlike the other dz_import_run_*() functions, there is no data-*.php file
+ * here: this isn't content transcribed from a PDF, just wiring an
+ * already-placed theme asset (assets/seed-images/armoiries/) to two
+ * WordPress-native settings, so there is nothing to "transcribe".
+ *
+ * Skip-once semantics (like the hero slides), not an upsert like the
+ * organisational CPTs: once a logo/favicon is set — by this import, or
+ * manually by an admin through wp-admin/the Customizer — re-running never
+ * overwrites it, so a deliberate manual change always wins.
+ *
+ * @return array{created:int,skipped:int,notes:string[]}
+ */
+function dz_import_run_logo() {
+	$dz_created = 0;
+	$dz_skipped = 0;
+	$dz_notes   = array();
+
+	$dz_image_path = DZ_THEME_DIR . '/assets/seed-images/armoiries/logo-diocese-ziguinchor.png';
+
+	if ( ! file_exists( $dz_image_path ) ) {
+		return array(
+			'created' => 0,
+			'skipped' => 0,
+			'notes'   => array( __( 'Fichier logo-diocese-ziguinchor.png introuvable dans assets/seed-images/armoiries/.', 'diocese-ziguinchor' ) ),
+		);
+	}
+
+	$dz_existing_logo = dz_get_option( 'dz_logo', array() );
+	if ( ! empty( $dz_existing_logo['ID'] ) ) {
+		++$dz_skipped;
+	} else {
+		$dz_logo_id = dz_import_sideload_image( $dz_image_path, 0, __( 'Armoiries du diocèse de Ziguinchor', 'diocese-ziguinchor' ) );
+
+		if ( is_wp_error( $dz_logo_id ) ) {
+			$dz_notes[] = sprintf(
+				/* translators: %s: error message */
+				__( "Échec de l'import du logo : %s", 'diocese-ziguinchor' ),
+				$dz_logo_id->get_error_message()
+			);
+		} else {
+			update_post_meta( $dz_logo_id, '_wp_attachment_image_alt', __( 'Armoiries du diocèse de Ziguinchor', 'diocese-ziguinchor' ) );
+			update_field( 'dz_logo', $dz_logo_id, 'option' );
+			++$dz_created;
+		}
+	}
+
+	if ( get_option( 'site_icon' ) ) {
+		++$dz_skipped;
+	} else {
+		$dz_favicon_id = dz_import_generate_favicon( $dz_image_path );
+
+		if ( is_wp_error( $dz_favicon_id ) ) {
+			$dz_notes[] = sprintf(
+				/* translators: %s: error message */
+				__( 'Échec de la génération du favicon : %s', 'diocese-ziguinchor' ),
+				$dz_favicon_id->get_error_message()
+			);
+		} else {
+			update_option( 'site_icon', $dz_favicon_id );
+			++$dz_created;
+		}
+	}
+
+	return array(
+		'created' => $dz_created,
+		'skipped' => $dz_skipped,
+		'notes'   => $dz_notes,
+	);
+}
+
+/**
+ * Generates a square favicon from a non-square source image (our crest PNG
+ * is 6512×6041, not exactly square) via a center-crop, so a browser's
+ * square favicon slot doesn't squeeze/distort the shield. Copies the source
+ * first (same reasoning as dz_import_sideload_image() — WP_Image_Editor
+ * writes its crop back out, never edit the permanent theme asset in place),
+ * crops the copy, then sideloads the cropped result as its own media
+ * library attachment, kept separate from `dz_logo` (which stays the
+ * uncropped original for header/footer display).
+ *
+ * @param string $file_path Absolute path to the source image.
+ * @return int|WP_Error Attachment ID, or a WP_Error on failure.
+ */
+function dz_import_generate_favicon( $file_path ) {
+	$dz_tmp_source = wp_tempnam( basename( $file_path ) );
+
+	if ( ! copy( $file_path, $dz_tmp_source ) ) {
+		return new WP_Error(
+			'dz_import_copy_failed',
+			__( "Impossible de copier l'image source pour générer le favicon.", 'diocese-ziguinchor' )
+		);
+	}
+
+	$dz_editor = wp_get_image_editor( $dz_tmp_source );
+
+	if ( is_wp_error( $dz_editor ) ) {
+		if ( file_exists( $dz_tmp_source ) ) {
+			unlink( $dz_tmp_source );
+		}
+		return $dz_editor;
+	}
+
+	$dz_size = $dz_editor->get_size();
+	$dz_side = min( $dz_size['width'], $dz_size['height'] );
+	$dz_x    = (int) ( ( $dz_size['width'] - $dz_side ) / 2 );
+	$dz_y    = (int) ( ( $dz_size['height'] - $dz_side ) / 2 );
+
+	$dz_crop_result = $dz_editor->crop( $dz_x, $dz_y, $dz_side, $dz_side );
+	$dz_saved       = is_wp_error( $dz_crop_result ) ? $dz_crop_result : $dz_editor->save();
+
+	if ( file_exists( $dz_tmp_source ) ) {
+		unlink( $dz_tmp_source );
+	}
+
+	if ( is_wp_error( $dz_saved ) ) {
+		return $dz_saved;
+	}
+
+	$dz_attachment_id = dz_import_sideload_image( $dz_saved['path'], 0, __( 'Favicon — armoiries du diocèse de Ziguinchor', 'diocese-ziguinchor' ) );
+
+	if ( file_exists( $dz_saved['path'] ) ) {
+		unlink( $dz_saved['path'] );
+	}
+
+	return $dz_attachment_id;
 }

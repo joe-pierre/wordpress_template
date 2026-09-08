@@ -12,11 +12,16 @@
 }
 
 /* Global Colors - The following color variables are used throughout the website. Updating them here will change the color scheme of the entire website */
-:root { 
+/* Palette réelle du diocèse (CONTENT_PROMPTS.md PROMPT 1, SPEC.md §10) : les
+   trois teintes sont échantillonnées directement dans logo-diocese-ziguinchor.png
+   (écu bleu/azur, croix et tiare or/jaune, petites croix vertes du pourtour),
+   puis assombries en conservant la même teinte (H) pour rester lisibles en
+   texte/blanc sur fond — voir DECISIONS.md pour le détail des contrastes WCAG. */
+:root {
   --background-color: #ffffff; /* Background color for the entire website, including individual sections */
   --default-color: #212529; /* Default color used for the majority of the text content across the entire website */
-  --heading-color: #2d465e; /* Color for headings, subheadings and title throughout the website */
-  --accent-color: #2986cc; /* Accent color that represents your brand on the website. It's used for buttons, links, and other elements that need to stand out */
+  --heading-color: #173e4c; /* Bleu/azur du blason (écu), assombri pour le texte — contraste ~11.5:1 sur blanc */
+  --accent-color: #8c6c2a; /* Or/jaune du blason (croix, tiare), assombri pour rester lisible en blanc sur fond — contraste ~4.9:1 sur blanc */
   --surface-color: #ffffff; /* The surface color is used as a background of boxed elements within sections, such as cards, icon boxes, or other elements that require a visual separation from the global background. */
   --contrast-color: #ffffff; /* Contrast color for text, ensuring readability against backgrounds of accent, heading, or default colors. */
 }
@@ -24,11 +29,22 @@
 /* Nav Menu Colors - The following color variables are used specifically for the navigation menu. They are separate from the global colors to allow for more customization options */
 :root {
   --nav-color: #000000;  /* The default color of the main navmenu links */
-  --nav-hover-color: #2986cc; /* Applied to main navmenu links when they are hovered over or active */
+  --nav-hover-color: #8c6c2a; /* Applied to main navmenu links when they are hovered over or active */
   --nav-mobile-background-color: #ffffff; /* Used as the background color for mobile navigation menu */
   --nav-dropdown-background-color: #ffffff; /* Used as the background color for dropdown items that appear when hovering over primary navigation items */
   --nav-dropdown-color: #212529; /* Used for navigation links of the dropdown items in the navigation menu. */
-  --nav-dropdown-hover-color: #2986cc; /* Similar to --nav-hover-color, this color is applied to dropdown navigation links when they are hovered over. */
+  --nav-dropdown-hover-color: #8c6c2a; /* Similar to --nav-hover-color, this color is applied to dropdown navigation links when they are hovered over. */
+}
+
+/* Vert du blason (petites croix fleuries du pourtour) — "usage ponctuel"
+   (SPEC.md §10) : retinte uniquement les variables Bootstrap de succès déjà
+   consommées par le thème (.text-bg-success, badge de statut "en cours"
+   dans single-evenement.php), sans toucher au markup Bootstrap existant.
+   dz-main est enqueue après dz-bootstrap (functions.php), donc cette
+   redéfinition prend le dessus. */
+:root {
+  --bs-success: #2b7a3f;
+  --bs-success-rgb: 43, 122, 63;
 }
 
 /* Color Presets - These classes override global colors when applied to any section or element, providing reuse of the sam color scheme. */
