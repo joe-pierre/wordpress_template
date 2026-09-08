@@ -2,7 +2,7 @@
 /**
  * Single association template.
  *
- * Same layout as conseil/service_diocesain/commission_diocesaine (see
+ * Same layout as conseil/service_diocesain/commission_diocesain (see
  * DECISIONS.md, PROMPT 13/14): description via the_content(), responsable +
  * membres via the shared template-parts/organisation-composition.php. No
  * field specific to this CPT.

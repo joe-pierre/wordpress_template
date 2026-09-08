@@ -57,7 +57,7 @@
             {
                 "param": "post_type",
                 "operator": "==",
-                "value": "commission_diocesaine"
+                "value": "commission_diocesain"
             }
         ],
         [
@@ -96,7 +96,7 @@
     "instruction_placement": "label",
     "hide_on_screen": "",
     "active": true,
-    "description": "Socle de champs commun aux CPT organisationnels conseil/service_diocesain/commission_diocesaine/mouvement/association/aumonerie/etablissement (voir SPEC.md §3 et DECISIONS.md). ancien_eveque n'en fait pas partie (pas de responsable/membres pour ce CPT, voir group_dz_cpt_ancien_eveque). La description elle-même utilise l'éditeur natif (the_content()), pas un champ ACF — même logique que paroisse/pretre/evenement/sacrement.",
+    "description": "Socle de champs commun aux CPT organisationnels conseil/service_diocesain/commission_diocesain/mouvement/association/aumonerie/etablissement (voir SPEC.md §3 et DECISIONS.md). ancien_eveque n'en fait pas partie (pas de responsable/membres pour ce CPT, voir group_dz_cpt_ancien_eveque). La description elle-même utilise l'éditeur natif (the_content()), pas un champ ACF — même logique que paroisse/pretre/evenement/sacrement.",
     "show_in_rest": 0,
     "modified": 1788779248
 }

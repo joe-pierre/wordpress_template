@@ -1,6 +1,6 @@
 <?php
 /**
- * Archive card shared by conseil/service_diocesain/commission_diocesaine
+ * Archive card shared by conseil/service_diocesain/commission_diocesain
  * (see DECISIONS.md). New ".organisation-card" class rather than reusing
  * .info-card: .info-card is only ever styled as a tile inside the dark
  * .contact-info-panel gradient background (paroisse/pretre/sacrement

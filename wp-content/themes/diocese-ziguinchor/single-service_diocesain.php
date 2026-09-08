@@ -2,7 +2,7 @@
 /**
  * Single service_diocesain template.
  *
- * Same socle layout as conseil/commission_diocesaine, plus a "Structures
+ * Same socle layout as conseil/commission_diocesain, plus a "Structures
  * rattachées" block for the CPT-specific `service_diocesain_sous_structures`
  * repeater (see SPEC.md §3 and acf-json/group_dz_cpt_service_diocesain.json)
  * — Bootstrap's own .list-group, no new CSS needed (same reasoning as the

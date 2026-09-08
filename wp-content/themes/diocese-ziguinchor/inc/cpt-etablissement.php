@@ -2,7 +2,7 @@
 /**
  * Registers the etablissement (Enseignements diocésains) custom post type.
  *
- * Same organisational socle as conseil/service_diocesain/commission_diocesaine/
+ * Same organisational socle as conseil/service_diocesain/commission_diocesain/
  * mouvement/association/aumonerie (PROMPT 13-14) — see SPEC.md §3 and
  * DECISIONS.md ("Un Custom Post Type séparé par grande rubrique
  * organisationnelle"). Covers DIDEC, Séminaires et Maisons de formation,

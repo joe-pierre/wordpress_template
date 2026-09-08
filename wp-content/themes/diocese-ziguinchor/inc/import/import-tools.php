@@ -869,7 +869,11 @@ function dz_import_run_nominations_commission_diocesaine( array $dz_entries ) {
 	$dz_notes   = array();
 
 	foreach ( $dz_entries as $dz_entry ) {
-		list( $dz_post_id, $dz_is_new ) = dz_import_upsert_organisation_post( 'commission_diocesaine', $dz_entry, $dz_notes );
+		// Post type is "commission_diocesain" (20 chars), not
+		// "commission_diocesaine" (21) — see DECISIONS.md / inc/cpt-
+		// commission_diocesain.php's docblock for why the final "e" is
+		// dropped from the internal identifier only.
+		list( $dz_post_id, $dz_is_new ) = dz_import_upsert_organisation_post( 'commission_diocesain', $dz_entry, $dz_notes );
 		if ( ! $dz_post_id ) {
 			continue;
 		}

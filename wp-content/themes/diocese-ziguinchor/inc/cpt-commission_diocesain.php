@@ -1,6 +1,17 @@
 <?php
 /**
- * Registers the commission_diocesaine custom post type.
+ * Registers the commission_diocesain custom post type.
+ *
+ * Slug is "commission_diocesain" (20 characters), NOT the grammatically
+ * correct "commission_diocesaine" (21) — WordPress hard-rejects any post
+ * type name over 20 characters (register_post_type() returns a WP_Error
+ * without registering anything; wp_posts.post_type is varchar(20)). This
+ * was the actual slug for a while and caused every wp_insert_post() call
+ * for it to fail in production once the database ran in strict SQL mode
+ * (silent truncation otherwise) — see DECISIONS.md "commission_diocesaine :
+ * slug de 21 caractères, au-delà de la limite WordPress". Only the internal
+ * identifier is shortened; labels/menus below still read "Commission(s)
+ * diocésaine(s)" correctly.
  *
  * See SPEC.md §3 and DECISIONS.md ("Un Custom Post Type séparé par grande
  * rubrique organisationnelle"). Covers Catéchèse, Cellule d'écoute,
@@ -13,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-function dz_register_cpt_commission_diocesaine() {
+function dz_register_cpt_commission_diocesain() {
 	$labels = array(
 		'name'                  => _x( 'Commissions diocésaines', 'Post type general name', 'diocese-ziguinchor' ),
 		'singular_name'         => _x( 'Commission diocésaine', 'Post type singular name', 'diocese-ziguinchor' ),
@@ -36,7 +47,7 @@ function dz_register_cpt_commission_diocesaine() {
 	);
 
 	register_post_type(
-		'commission_diocesaine',
+		'commission_diocesain',
 		array(
 			'labels'        => $labels,
 			'public'        => true,
@@ -45,8 +56,8 @@ function dz_register_cpt_commission_diocesaine() {
 			'menu_icon'     => 'dashicons-portfolio',
 			'menu_position' => 28,
 			'supports'      => array( 'title', 'editor', 'thumbnail' ),
-			'rewrite'       => array( 'slug' => 'commission_diocesaine' ),
+			'rewrite'       => array( 'slug' => 'commission_diocesain' ),
 		)
 	);
 }
-add_action( 'init', 'dz_register_cpt_commission_diocesaine' );
+add_action( 'init', 'dz_register_cpt_commission_diocesain' );

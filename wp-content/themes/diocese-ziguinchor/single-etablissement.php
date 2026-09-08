@@ -2,7 +2,7 @@
 /**
  * Single etablissement template.
  *
- * Same socle layout as conseil/service_diocesain/commission_diocesaine/
+ * Same socle layout as conseil/service_diocesain/commission_diocesain/
  * mouvement/association/aumonerie (see DECISIONS.md, PROMPT 13-15). "Type
  * d'établissement" is folded into the page-title subtitle next to
  * "Responsable" — same pattern as single-aumonerie.php's "Type" subtitle.

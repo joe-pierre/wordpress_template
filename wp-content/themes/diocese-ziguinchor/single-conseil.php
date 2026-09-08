@@ -2,7 +2,7 @@
 /**
  * Single conseil (bishop's council) template.
  *
- * Same layout as service_diocesain/commission_diocesaine (see DECISIONS.md,
+ * Same layout as service_diocesain/commission_diocesain (see DECISIONS.md,
  * PROMPT 13): description via the_content(), responsable + membres via the
  * shared template-parts/organisation-composition.php.
  */

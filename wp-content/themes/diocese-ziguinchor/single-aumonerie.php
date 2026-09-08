@@ -2,7 +2,7 @@
 /**
  * Single aumonerie template.
  *
- * Same socle layout as conseil/service_diocesain/commission_diocesaine/
+ * Same socle layout as conseil/service_diocesain/commission_diocesain/
  * mouvement/association (see DECISIONS.md, PROMPT 13/14). The
  * `type_aumonerie` term(s) are folded into the page-title subtitle, next to
  * "Responsable" when both are set — same subtitle slot already used by every

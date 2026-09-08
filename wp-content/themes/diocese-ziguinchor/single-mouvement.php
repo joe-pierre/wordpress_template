@@ -2,7 +2,7 @@
 /**
  * Single mouvement template.
  *
- * Same socle layout as conseil/service_diocesain/commission_diocesaine/
+ * Same socle layout as conseil/service_diocesain/commission_diocesain/
  * association (see DECISIONS.md, PROMPT 13/14), plus an "Aumônier" tile for
  * the CPT-specific `mouvement_aumonier` relation (see
  * acf-json/group_dz_cpt_mouvement.json) — reuses .contact-info-panel/.info-card

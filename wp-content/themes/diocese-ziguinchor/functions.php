@@ -20,7 +20,7 @@ require_once DZ_THEME_DIR . '/inc/cpt-evenement.php';
 require_once DZ_THEME_DIR . '/inc/cpt-sacrement.php';
 require_once DZ_THEME_DIR . '/inc/cpt-conseil.php';
 require_once DZ_THEME_DIR . '/inc/cpt-service_diocesain.php';
-require_once DZ_THEME_DIR . '/inc/cpt-commission_diocesaine.php';
+require_once DZ_THEME_DIR . '/inc/cpt-commission_diocesain.php';
 require_once DZ_THEME_DIR . '/inc/cpt-mouvement.php';
 require_once DZ_THEME_DIR . '/inc/cpt-association.php';
 require_once DZ_THEME_DIR . '/inc/cpt-aumonerie.php';

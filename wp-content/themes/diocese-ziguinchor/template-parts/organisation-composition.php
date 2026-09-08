@@ -1,7 +1,7 @@
 <?php
 /**
  * "Responsable" + "Composition" (repeater membres) block, shared by the
- * conseil/service_diocesain/commission_diocesaine single templates — same
+ * conseil/service_diocesain/commission_diocesain single templates — same
  * socle fields for all three (see acf-json/group_dz_cpt_organisation_socle.json
  * and DECISIONS.md). Operates on the current post in the loop, no $args.
  *

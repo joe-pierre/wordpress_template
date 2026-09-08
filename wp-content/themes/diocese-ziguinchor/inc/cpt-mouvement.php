@@ -2,7 +2,7 @@
 /**
  * Registers the mouvement (Mouvements d'Action Catholique) custom post type.
  *
- * Same organisational socle as conseil/service_diocesain/commission_diocesaine
+ * Same organisational socle as conseil/service_diocesain/commission_diocesain
  * (PROMPT 13) — see SPEC.md §3 and DECISIONS.md ("Un Custom Post Type séparé
  * par grande rubrique organisationnelle"). Covers Coordination des Jeunes,
  * CV/AV, JAC/UJRCS/MARCS, JOC, JEC, Scouts et Guides. Adds its own

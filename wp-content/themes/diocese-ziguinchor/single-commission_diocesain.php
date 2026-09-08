@@ -1,6 +1,6 @@
 <?php
 /**
- * Single commission_diocesaine template.
+ * Single commission_diocesain template.
  *
  * Same socle layout as conseil/service_diocesain — see DECISIONS.md.
  */

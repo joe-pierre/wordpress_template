@@ -5178,7 +5178,7 @@ instead (color/centering already inherited from .blog-hero-content).
 
 /*--------------------------------------------------------------
 # Diocèse de Ziguinchor — CPT organisationnels (conseil, service_diocesain,
-commission_diocesaine — archive-*.php / template-parts/card-organisation.php)
+commission_diocesain — archive-*.php / template-parts/card-organisation.php)
 New class, same pattern as .paroisse-card/.evenement-card: .info-card was
 not reused here because it is only ever styled as a tile inside the dark
 .contact-info-panel gradient, not as a freestanding grid card on a plain

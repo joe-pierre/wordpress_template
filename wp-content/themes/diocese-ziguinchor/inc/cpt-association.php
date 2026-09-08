@@ -2,7 +2,7 @@
 /**
  * Registers the association (Associations et Groupes d'Apostolat) custom post type.
  *
- * Same organisational socle as conseil/service_diocesain/commission_diocesaine
+ * Same organisational socle as conseil/service_diocesain/commission_diocesain
  * (PROMPT 13) — see SPEC.md §3 and DECISIONS.md ("Un Custom Post Type séparé
  * par grande rubrique organisationnelle"). Covers UDAFC/Z, Légion de Marie,
  * Coordination des Chorales, Renouveau Charismatique, Vie Montante, Équipes

@@ -12,7 +12,7 @@
  * from the WordPress root, after activating the diocese-ziguinchor theme
  * and ACF Pro.
  *
- * Originally also seeded a demo "Catéchèse" (commission_diocesaine) and
+ * Originally also seeded a demo "Catéchèse" (commission_diocesain) and
  * "Économat" (service_diocesain) entry — removed at CONTENT_PROMPTS.md
  * PROMPT 3, which now creates both (as "Catéchèse" and "Économat
  * Diocésain" respectively) through the proper idempotent import tool

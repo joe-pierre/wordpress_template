@@ -3,7 +3,7 @@
  * Registers the aumonerie (chaplaincies) custom post type and its
  * type_aumonerie taxonomy.
  *
- * Same organisational socle as conseil/service_diocesain/commission_diocesaine
+ * Same organisational socle as conseil/service_diocesain/commission_diocesain
  * (PROMPT 13) — see SPEC.md §3 and DECISIONS.md ("Un Custom Post Type séparé
  * par grande rubrique organisationnelle"). Covers aumôneries scolaires,
  * universitaires, de santé et carcérales.
