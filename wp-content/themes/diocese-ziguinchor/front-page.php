@@ -128,4 +128,46 @@ $dz_featured_query = new WP_Query(
 	<?php wp_reset_postdata(); ?>
 <?php endif; ?>
 
+<?php
+$dz_quick_links = array_values(
+	array_filter(
+		array(
+			array(
+				'url'   => get_post_type_archive_link( 'paroisse' ),
+				'icon'  => 'bi-building',
+				'title' => __( 'Paroisses', 'diocese-ziguinchor' ),
+				'text'  => __( 'Trouvez la paroisse la plus proche de chez vous.', 'diocese-ziguinchor' ),
+			),
+			array(
+				'url'   => get_post_type_archive_link( 'pretre' ),
+				'icon'  => 'bi-person-badge',
+				'title' => __( 'Prêtres', 'diocese-ziguinchor' ),
+				'text'  => __( 'Découvrez les prêtres et le clergé du diocèse.', 'diocese-ziguinchor' ),
+			),
+			array(
+				'url'   => get_post_type_archive_link( 'sacrement' ),
+				'icon'  => 'bi-droplet',
+				'title' => __( 'Sacrements', 'diocese-ziguinchor' ),
+				'text'  => __( 'Préparez un baptême, un mariage ou une confirmation.', 'diocese-ziguinchor' ),
+			),
+			array(
+				'url'   => dz_get_page_url_by_template( 'page-dons.php', false ),
+				'icon'  => 'bi-heart',
+				'title' => __( 'Faire un don', 'diocese-ziguinchor' ),
+				'text'  => __( 'Soutenez les actions du diocèse.', 'diocese-ziguinchor' ),
+			),
+		),
+		function ( $dz_item ) {
+			return ! empty( $dz_item['url'] );
+		}
+	)
+);
+
+get_template_part(
+	'template-parts/quick-links',
+	null,
+	array( 'items' => $dz_quick_links )
+);
+?>
+
 <?php get_footer(); ?>

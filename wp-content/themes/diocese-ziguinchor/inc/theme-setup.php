@@ -52,13 +52,16 @@ function dz_get_option( $selector, $default = null ) {
 }
 
 /**
- * Finds the front-end URL of the page using a given page template, falling
- * back to the site's home URL when no such page exists yet.
+ * Finds the front-end URL of the page using a given page template.
  *
- * @param string $template Page template filename (e.g. 'page-contact.php').
+ * @param string $template      Page template filename (e.g. 'page-contact.php').
+ * @param bool   $fallback_home When true (default, existing callers rely on this),
+ *                               returns the site's home URL if no such page exists yet.
+ *                               Pass false when the caller needs to tell "no page yet"
+ *                               apart from a real URL (e.g. to hide a link).
  * @return string
  */
-function dz_get_page_url_by_template( $template ) {
+function dz_get_page_url_by_template( $template, $fallback_home = true ) {
 	$pages = get_posts(
 		array(
 			'post_type'      => 'page',
@@ -69,7 +72,11 @@ function dz_get_page_url_by_template( $template ) {
 		)
 	);
 
-	return $pages ? get_permalink( $pages[0] ) : home_url( '/' );
+	if ( $pages ) {
+		return get_permalink( $pages[0] );
+	}
+
+	return $fallback_home ? home_url( '/' ) : '';
 }
 
 /**

@@ -5250,6 +5250,20 @@ section background.
   margin-right: 6px;
 }
 
+/* Quick-links tiles (front-page.php) reuse .organisation-card as-is (see
+   DECISIONS.md) but need the *whole* tile clickable, not just the title, so
+   the card itself becomes the <a>. An anchor defaults to inline and inherits
+   the global link color/underline (see "a {" above), which would collapse
+   the card's height:100% and tint its text — reset just enough to behave
+   like the original <div> card again; the hover lift already targets
+   ".organisation-card" regardless of tag, so it carries over unchanged. */
+a.organisation-card.quick-link-card {
+  display: flex;
+  flex-direction: column;
+  color: inherit;
+  text-decoration: none;
+}
+
 /* Nav-pills filter tabs, shared by archive-aumonerie.php (type_aumonerie)
    and archive-evenement.php (evenement_type) — see DECISIONS.md PROMPT 14/16. */
 .archive-filters .nav-link {
