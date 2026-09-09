@@ -157,6 +157,15 @@ h6 {
   background-color: var(--background-color);
   padding: 15px 0;
   transition: all 0.5s;
+  /* Explicit here rather than relying on the "sticky-top" class's own
+     Bootstrap utility CSS: Bootstrap's ".position-relative" (previously
+     also on #header) sets "position: relative !important", which would
+     silently cancel ".sticky-top"'s "position: sticky" if that class ever
+     came back onto this element — see DECISIONS.md "Header sticky au
+     scroll". Kept self-contained so this can't regress via an unrelated
+     class change on #header. */
+  position: sticky;
+  top: 0;
   z-index: 997;
 }
 
@@ -165,12 +174,12 @@ h6 {
 }
 
 .header .logo img {
-  max-height: 36px;
+  max-height: 50px;
   margin-right: 8px;
 }
 
 .header .logo h1 {
-  font-size: 30px;
+  font-size: 40px;
   margin: 0;
   font-weight: 700;
   color: var(--heading-color);
@@ -199,6 +208,10 @@ h6 {
 @media (max-width: 1200px) {
   .header .logo {
     order: 1;
+  }
+
+  .header .logo img {
+    max-height: 42px;
   }
 
   .header .header-social-links {

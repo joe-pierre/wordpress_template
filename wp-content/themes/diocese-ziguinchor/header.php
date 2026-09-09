@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <body <?php body_class(); ?>>
 <?php wp_body_open(); ?>
 
-	<header id="header" class="header d-flex align-items-center position-relative">
+	<header id="header" class="header d-flex align-items-center sticky-top">
 		<div class="container position-relative d-flex align-items-center justify-content-between">
 
 			<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="logo d-flex align-items-center me-auto me-xl-0">
