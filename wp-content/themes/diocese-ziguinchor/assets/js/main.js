@@ -72,8 +72,25 @@
    * simple dropdown's own handler already toggles, so both end up in the
    * same state whichever element (chevron or link) is actually clicked —
    * see the CSS comments in main.css for why that pairing matters.
+   *
+   * Desktop hover is added below (requested after visual QA): click/tap
+   * stays the only trigger on touch, where there is no real hover to
+   * begin with. `megaMenuCloseTimer` is shared by every open/close path
+   * (click, hover, Escape, outside click) and always cleared before a new
+   * action decides the resulting state, so a hover-close scheduled just
+   * before a click can never undo what that click just did (or vice
+   * versa) — see DECISIONS.md "Mega-menu hybride" for the race this
+   * avoids.
    */
+  let megaMenuCloseTimer = null;
+
+  function cancelMegaMenuClose() {
+    clearTimeout(megaMenuCloseTimer);
+    megaMenuCloseTimer = null;
+  }
+
   function closeAllMegaMenus() {
+    cancelMegaMenuClose();
     document.querySelectorAll('.navmenu .mega-menu-parent > a.active').forEach(link => {
       link.classList.remove('active');
       link.nextElementSibling.classList.remove('dropdown-active');
@@ -83,6 +100,7 @@
   document.querySelectorAll('.navmenu .mega-menu-parent > a').forEach(link => {
     link.addEventListener('click', function(e) {
       e.preventDefault();
+      cancelMegaMenuClose();
       const isOpen = this.classList.contains('active');
       closeAllMegaMenus();
       if (!isOpen) {
@@ -90,6 +108,41 @@
         this.nextElementSibling.classList.add('dropdown-active');
       }
       e.stopImmediatePropagation();
+    });
+  });
+
+  /**
+   * Desktop hover trigger. Gated on a hover-capable pointer at the same
+   * >=1200px breakpoint the panel's own desktop layout uses (main.css),
+   * checked live on every mouseenter rather than assumed from viewport
+   * width alone — a wide but touch-only device (e.g. a tablet in
+   * landscape) has no real hover and must stay click/tap-only, per the
+   * request. Bound on the <li> (.mega-menu-parent), not the link or panel
+   * separately: it and its absolutely-positioned panel are both its DOM
+   * descendants, so mouseenter/mouseleave on the <li> already ignores the
+   * gap between them for a straight cursor path — the short close delay
+   * below only covers a fast/diagonal path that clips outside both.
+   */
+  const dzDesktopHoverQuery = window.matchMedia('(hover: hover) and (pointer: fine) and (min-width: 1200px)');
+
+  document.querySelectorAll('.navmenu .mega-menu-parent').forEach(item => {
+    const link = item.querySelector(':scope > a');
+    const panel = item.querySelector(':scope > .mega-menu');
+    if (!link || !panel) return;
+
+    item.addEventListener('mouseenter', function() {
+      if (!dzDesktopHoverQuery.matches) return;
+      cancelMegaMenuClose();
+      if (!link.classList.contains('active')) {
+        closeAllMegaMenus();
+        link.classList.add('active');
+        panel.classList.add('dropdown-active');
+      }
+    });
+
+    item.addEventListener('mouseleave', function() {
+      if (!dzDesktopHoverQuery.matches) return;
+      megaMenuCloseTimer = setTimeout(closeAllMegaMenus, 250);
     });
   });
 
