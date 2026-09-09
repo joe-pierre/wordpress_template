@@ -85,7 +85,7 @@
 
 - [x] Installer le plugin Contact Form 7, créer le formulaire et coller son shortcode dans le contenu de la page Contact (le point de montage `the_content()` et le CSS de base — `.wpcf7-form-control` + `.form-floating` — sont déjà en place, voir `page-contact.php` et DECISIONS.md, Tâche 8) ; destinataire du mail forcé dynamiquement vers `dz_contact_email` (page d'options) via `inc/contact-form.php` (`wpcf7_before_send_mail`), voir DECISIONS.md
 - [x] Ajouter la protection anti-spam honeypot sur le formulaire de contact — champ CF7 `site-web` (à ajouter manuellement dans l'admin, masqué en CSS inline, jamais `type="hidden"`) + `dz_cf7_check_contact_honeypot()` accrochée à `wpcf7_spam` dans `inc/contact-form.php`, même logique de ciblage que `dz_cf7_set_contact_recipient()`. Voir DECISIONS.md
-- [ ] Activer reCAPTCHA v3 sur le formulaire de contact — entièrement via l'admin Contact Form 7 (clés API + case à cocher sur le formulaire), aucun code thème nécessaire
+- [x] Activer reCAPTCHA v3 sur le formulaire de contact — entièrement via l'admin Contact Form 7 (clés API + case à cocher sur le formulaire), aucun code thème nécessaire
 - [x] Revue de sécurité du code du thème (échappement, sanitization, `ABSPATH`, notices/warnings potentielles) — Tâche 9, voir DECISIONS.md et BUGS_AND_ROADMAP.md. Nonces : sans objet, aucun formulaire admin custom dans le thème (commentaires natifs, recherche native, Contact Form 7 gèrent déjà les leurs)
 
 ## Phase 7 — Contenu & médias
