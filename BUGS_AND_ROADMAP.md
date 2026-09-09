@@ -43,6 +43,35 @@
 
 ---
 
+# AUDIT DE PRÉ-PRODUCTION (PHASE 8) — [2026-09-09]
+
+Audit limité à ce qui est vérifiable dans le code du thème (`wp-content/themes/diocese-ziguinchor/`) depuis ce dépôt : pas d'accès à `wp-config.php` ni à un serveur/une installation WordPress réelle. Voir `TODO.md` Phase 8 pour la case cochée correspondante et les points restant explicitement non vérifiables depuis cet environnement.
+
+**1. Traces de débogage oubliées — recherche exhaustive, rien trouvé.** Grep systématique sur tout le thème (tous les `.php`, plus `assets/js/main.js` et `bin/*.php`) :
+- `var_dump()`, `print_r()`, `var_export()` : aucune occurrence.
+- `error_log()` : aucune occurrence (donc rien à évaluer côté "conditionné par `WP_DEBUG` ou non").
+- `console.log()`/`console.debug()`/`console.warn()`/`console.error()`/`console.trace()` dans `assets/js/` : aucune occurrence dans `main.js` (seul fichier JS non-vendor du thème). Présentes uniquement dans les fichiers vendor tiers (`bootstrap.bundle.js`, `aos.js`, `swiper-bundle.min.js`...), hors périmètre — code non écrit par ce projet, jamais à modifier (voir `CONVENTIONS.md`).
+- Commentaires `// TODO debug`, `// debug`, `// à retirer avant prod`, `FIXME`, `XXX` : aucune occurrence.
+- `exit`/`die()` : uniquement les gardes `if ( ! defined( 'ABSPATH' ) ) exit;` en tête de chaque fichier PHP (72 fichiers, conforme à `CONVENTIONS.md` §Sécurité) — aucun `die()`/`exit` de débogage.
+- `debugger;` dans `main.js` : aucune occurrence.
+
+**2. Assets dev vs. prod et dépendances `wp_enqueue_*` — 1 bug trouvé et corrigé.**
+- **Corrigé** : `functions.php` (`dz_enqueue_assets()`) chargeait `assets/vendor/bootstrap-icons/bootstrap-icons.css` (99 556 octets, non minifié) alors que `bootstrap-icons.min.css` (87 008 octets) existe dans le même dossier et référence les mêmes polices relatives (`fonts/bootstrap-icons.woff`/`.woff2`, vérifié). Changé pour charger la version `.min.css`, seule ligne modifiée.
+- **Vérifié, pas un bug** : Bootstrap (CSS + JS bundle) et Swiper étaient déjà chargés en `.min`. AOS (`aos.css`/`aos.js`) et PureCounter (`purecounter_vanilla.js`) sont chargés en version non minifiée, mais **aucune version minifiée n'existe dans leur dossier vendor respectif** (`assets/vendor/aos/`, `assets/vendor/purecounter/` — vérifié par recherche de fichiers `*min*` dans ces dossiers, rien trouvé) : ce sont les seuls fichiers distribués par ces librairies dans ce dépôt, donc rien à changer — pas un pointeur dev oublié.
+- **Dépendances** : toutes les feuilles de style/scripts vendor + `main.css`/`main.js` sont enregistrés une seule fois dans `functions.php` (`dz_enqueue_assets()`), conformément à `CONVENTIONS.md` §Partials/Frontend — aucun autre `wp_enqueue_script`/`wp_enqueue_style` ailleurs dans le thème, à l'exception du script natif WordPress `comment-reply` (`inc/theme-setup.php`), correctement conditionné (`is_singular() && comments_open() && get_option( 'thread_comments' )`, pattern standard). `dz-main` (JS) déclare ses 4 dépendances (`dz-bootstrap-bundle`, `dz-aos`, `dz-swiper`, `dz-purecounter`) — toutes bien enregistrées avant lui dans la même fonction, aucune dépendance cassée/manquante. `dz-main` (CSS) dépend de `dz-bootstrap`, également enregistré avant — correct.
+
+**3. Secrets/identifiants en dur — rien trouvé.** Grep sur `password|secret|api[_-]?key|apikey|token|private[_-]?key|recaptcha` (insensible à la casse) sur tout le thème : aucune occurrence en dehors de l'appel légitime à la fonction native `post_password_required()` de WordPress (`comments.php`, protection par mot de passe d'un article — pas un secret en dur). En particulier :
+- `inc/contact-form.php` relu intégralement : le destinataire du mail passe par `dz_get_option( 'dz_contact_email' )` (page d'options ACF/SCF), jamais codé en dur, conforme à `SPEC.md` §4/§9. Le honeypot (`dz_cf7_check_contact_honeypot()`) ne manipule qu'un nom de champ CF7 (`site-web`), pas un secret.
+- reCAPTCHA v3 : confirmé **aucune ligne de code dans le thème** ne le concerne (clés API et activation entièrement côté admin Contact Form 7, conforme à `TODO.md` Phase 6) — rien à trouver côté thème, cohérent avec ce qui était déjà documenté.
+- Cartes Google Maps (`page-contact.php`, `page-cartographie.php`) : embed via `https://www.google.com/maps?q=...&output=embed`, formulaire sans clé API (le paramètre `q` ne contient que l'adresse du diocèse, échappée via `esc_url()`/`rawurlencode()`).
+- Champs ACF dont le nom contient "responsable" (`org_responsable`) sont des champs métier légitimes (nom d'une personne responsable d'une structure diocésaine), pas des identifiants techniques — pas de faux positif à signaler ici.
+
+**4. Attributs `alt` sur les `<img>` — rien à corriger.** Seuls 2 tags `<img>` bruts existent dans tout le thème (hors vendor) : le logo (`header.php`, `alt` = texte alternatif ACF ou nom du site en repli) et chaque diapositive du hero (`template-parts/hero-slider.php`, `alt` = titre de la diapositive) — les deux ont un `alt` non vide. Toutes les autres images du thème passent par `the_post_thumbnail()`/`get_the_post_thumbnail()` (27 sites d'appel recensés dans les gabarits `single-*`, `archive-*`/`card-*`, `front-page.php`, `author.php`, `page-about.php`, `page-armoiries.php`) et **chacun** passe un `alt` explicite (`get_the_title()` dans la quasi-totalité des cas). `front-page.php` et `page-contact.php` (gabarits cités par la consigne) ne contiennent eux-mêmes aucun tag `<img>` brut — `front-page.php` délègue à `hero-slider.php`/`the_post_thumbnail()`, et `page-contact.php` n'a jamais eu d'image (déjà documenté plus haut : contact = coordonnées + carte + formulaire).
+
+**Bilan** : 1 correction appliquée (bootstrap-icons non minifié). Aucune trace de débogage, aucun secret en dur, aucun attribut `alt` manquant trouvé. Les points de la Phase 8 nécessitant un accès dont cet environnement ne dispose pas (installation WordPress réelle pour `WP_DEBUG`, test navigateur responsive, test d'envoi réel du formulaire, mesure de performance serveur) restent explicitement non cochés dans `TODO.md`, avec la raison précisée à chaque ligne plutôt que d'être ignorés silencieusement.
+
+---
+
 # ROADMAP (idées / améliorations futures)
 
 Idées identifiées pendant le cadrage, volontairement hors périmètre de la v1 (voir `SPEC.md` §8 Extensibilité et `DECISIONS.md` pour le raisonnement) :

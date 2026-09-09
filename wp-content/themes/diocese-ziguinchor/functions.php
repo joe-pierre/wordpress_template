@@ -43,7 +43,7 @@ function dz_enqueue_assets() {
 	);
 
 	wp_enqueue_style( 'dz-bootstrap', DZ_THEME_URI . '/assets/vendor/bootstrap/css/bootstrap.min.css', array(), '5.3.7' );
-	wp_enqueue_style( 'dz-bootstrap-icons', DZ_THEME_URI . '/assets/vendor/bootstrap-icons/bootstrap-icons.css', array(), DZ_THEME_VERSION );
+	wp_enqueue_style( 'dz-bootstrap-icons', DZ_THEME_URI . '/assets/vendor/bootstrap-icons/bootstrap-icons.min.css', array(), DZ_THEME_VERSION );
 	wp_enqueue_style( 'dz-aos', DZ_THEME_URI . '/assets/vendor/aos/aos.css', array(), DZ_THEME_VERSION );
 	wp_enqueue_style( 'dz-swiper', DZ_THEME_URI . '/assets/vendor/swiper/swiper-bundle.min.css', array(), DZ_THEME_VERSION );
 	wp_enqueue_style( 'dz-main', DZ_THEME_URI . '/assets/css/main.css', array( 'dz-bootstrap' ), DZ_THEME_VERSION );

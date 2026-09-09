@@ -926,6 +926,17 @@ Testé par un script PHP autonome (non versionné) simulant `WP_Image_Editor` (`
 
 ---
 
+## [RÉSOLU] Audit de préparation à la mise en production (Phase 8) : méthode et périmètre
+
+**Contexte :** `TODO.md` Phase 8 demande un audit de pré-production couvrant traces de débogage oubliées, assets dev/prod (`wp_enqueue_*`), secrets en dur, et attributs `alt` — le tout documenté dans `BUGS_AND_ROADMAP.md` avant correction, comme la revue design globale du PROMPT 12 (voir décision ci-dessus).
+**Symptôme / Problème :** Même contrainte récurrente que toutes les revues précédentes (PROMPT 12, PROMPT 17...) : aucun environnement WordPress réel dans ce dépôt, donc ni `WP_DEBUG` réellement activé, ni accès à `wp-config.php`/au serveur. La consigne demande explicitement de limiter l'audit à ce qui est vérifiable dans le code du thème, et de laisser non cochés (avec la raison précisée) les points hors de portée plutôt que de les ignorer silencieusement.
+**Cause / Alternatives :** Vérification systématique par recherche de motifs (`grep`) sur l'ensemble du thème (`.php` + `assets/js/main.js` + `bin/*.php`) : `var_dump`/`print_r`/`var_export`/`error_log`/`console.*`/`debugger`/commentaires "TODO debug"/"FIXME"/"XXX" pour les traces de débogage ; comparaison de chaque `wp_enqueue_script`/`wp_enqueue_style` de `functions.php` contre le contenu réel de son dossier vendor pour les assets dev/prod ; grep insensible à la casse sur `password|secret|api[_-]?key|token|private[_-]?key|recaptcha` pour les secrets, avec relecture complète de `inc/contact-form.php` ; recensement de tous les `<img>` bruts et de tous les sites d'appel `the_post_thumbnail()`/`get_the_post_thumbnail()` pour les attributs `alt`.
+**Fix / Décision :** 1 bug trouvé et corrigé : `functions.php` chargeait `bootstrap-icons.css` non minifié alors que `bootstrap-icons.min.css` existe dans le même dossier vendor (mêmes polices relatives, vérifié) — changé pour le `.min.css`. AOS/PureCounter chargés en version non minifiée eux aussi, mais **vérifiés** : aucune version `.min` n'existe dans leur dossier vendor respectif, donc pas un oubli, rien à changer. Aucune trace de débogage, aucun secret en dur, aucun `alt` manquant trouvés (détail complet dans `BUGS_AND_ROADMAP.md`, nouvelle section "AUDIT DE PRÉ-PRODUCTION (PHASE 8)"). Les 4 points de `TODO.md` Phase 8 nécessitant un accès réel (checklist responsive navigateur, `WP_DEBUG` sur une vraie installation, test d'envoi réel du formulaire de contact, mesure de performance serveur) restent explicitement non cochés, chacun annoté de la raison précise pour laquelle cet environnement ne permet pas de les valider.
+**Leçon :** Un audit "de préparation à la mise en production" mené uniquement par revue de code peut être exhaustif et fiable sur tout ce qui est statique (traces de débogage, secrets, assets, attributs HTML) sans jamais se substituer aux vérifications qui nécessitent un environnement d'exécution réel (notices PHP effectivement émises, rendu responsive réel, envoi SMTP réel, performance réseau) — les distinguer explicitement dans `TODO.md` évite qu'une case cochée à tort ne masque un point encore ouvert.
+**Statut :** ✅ Résolu
+
+---
+
 **Contexte :** ...
 **Symptôme / Problème :** ...
 **Cause / Alternatives :** ...
