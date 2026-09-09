@@ -713,6 +713,16 @@ than the narrow ~200px a simple dropdown uses. ---------------------------------
   margin: 12px 0 0;
 }
 
+/* Contraste renforcé sur fond clair (.light-background, #f0f1f2) : les
+   transparences d'origine du template (30%) rendaient la tagline trop pâle
+   sur ce fond. Règle scopée à .footer.light-background pour ne pas modifier
+   le rendu si le footer passait un jour en .dark-background, où le contraste
+   avec ces mêmes valeurs reste correct (default-color blanc sur fond quasi
+   noir). Voir BUGS_AND_ROADMAP.md. */
+.footer.light-background .footer-brand .tagline {
+  color: color-mix(in srgb, var(--default-color), transparent 12%);
+}
+
 .footer .social-links {
   display: flex;
   gap: 15px;
@@ -731,6 +741,17 @@ than the narrow ~200px a simple dropdown uses. ---------------------------------
   transition: all 0.3s ease;
   text-decoration: none;
   border: 1px solid color-mix(in srgb, var(--default-color), transparent 80%);
+}
+
+/* Contraste renforcé sur fond clair (.light-background) : à 40%/80% de
+   transparence, l'icône et son contour étaient à peine visibles sur
+   #f0f1f2 (contour ~1.5:1, bien sous le minimum WCAG 1.4.11 de 3:1 pour les
+   composants non textuels). Le survol (fond var(--accent-color), icône
+   var(--contrast-color)) n'est pas touché. Scopé à .footer.light-background,
+   voir commentaire ci-dessus. */
+.footer.light-background .social-links a {
+  color: color-mix(in srgb, var(--default-color), transparent 15%);
+  border-color: color-mix(in srgb, var(--default-color), transparent 50%);
 }
 
 .footer .social-links a:hover {
@@ -771,6 +792,12 @@ than the narrow ~200px a simple dropdown uses. ---------------------------------
   transition: all 0.3s ease;
   position: relative;
   padding-left: 10px;
+}
+
+/* Contraste renforcé sur fond clair (.light-background), voir commentaire
+   plus haut sur .footer.light-background .social-links a. */
+.footer.light-background .footer-links-grid ul li a {
+  color: color-mix(in srgb, var(--default-color), transparent 10%);
 }
 
 .footer .footer-links-grid ul li a::before {
@@ -844,6 +871,14 @@ than the narrow ~200px a simple dropdown uses. ---------------------------------
   color: color-mix(in srgb, var(--default-color), transparent 40%);
   font-size: 14px;
   font-weight: 300;
+}
+
+/* Contraste renforcé sur fond clair (.light-background), voir commentaire
+   plus haut sur .footer.light-background .social-links a. Reste plus clair
+   que le texte principal du site (0% de transparence) pour garder une
+   hiérarchie visuelle avec le contenu éditorial. */
+.footer.light-background .footer-bottom .footer-bottom-content p {
+  color: color-mix(in srgb, var(--default-color), transparent 15%);
 }
 
 .footer .footer-bottom .footer-bottom-content p .sitename {
