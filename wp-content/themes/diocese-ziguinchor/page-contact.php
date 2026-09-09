@@ -37,59 +37,60 @@ while ( have_posts() ) :
 		<div class="container" data-aos="fade-up" data-aos-delay="100">
 			<div class="contact-wrapper">
 
-				<div class="contact-info-panel">
-					<div class="contact-info-header">
-						<h3><?php esc_html_e( 'Nos coordonnées', 'diocese-ziguinchor' ); ?></h3>
+				<?php if ( $dz_address ) : ?>
+					<div class="map-container">
+						<iframe
+							src="<?php echo esc_url( sprintf( 'https://www.google.com/maps?q=%s&output=embed', rawurlencode( $dz_address ) ) ); ?>"
+							width="100%" height="100%" style="border:0;" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+							title="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>"
+						></iframe>
 					</div>
+				<?php endif; ?>
 
-					<div class="contact-info-cards">
-						<?php if ( $dz_address ) : ?>
-							<div class="info-card">
-								<div class="icon-container"><i class="bi bi-pin-map-fill"></i></div>
-								<div class="card-content">
-									<h4><?php esc_html_e( 'Adresse', 'diocese-ziguinchor' ); ?></h4>
-									<p><?php echo nl2br( esc_html( $dz_address ) ); ?></p>
-								</div>
-							</div>
-						<?php endif; ?>
+				<div class="contact-columns">
 
-						<?php if ( $dz_email ) : ?>
-							<div class="info-card">
-								<div class="icon-container"><i class="bi bi-envelope-open"></i></div>
-								<div class="card-content">
-									<h4><?php esc_html_e( 'E-mail', 'diocese-ziguinchor' ); ?></h4>
-									<p><a href="<?php echo esc_url( 'mailto:' . $dz_email ); ?>"><?php echo esc_html( $dz_email ); ?></a></p>
-								</div>
-							</div>
-						<?php endif; ?>
-
-						<?php if ( $dz_phone ) : ?>
-							<div class="info-card">
-								<div class="icon-container"><i class="bi bi-telephone-fill"></i></div>
-								<div class="card-content">
-									<h4><?php esc_html_e( 'Téléphone', 'diocese-ziguinchor' ); ?></h4>
-									<p><a href="<?php echo esc_url( 'tel:' . preg_replace( '/\s+/', '', $dz_phone ) ); ?>"><?php echo esc_html( $dz_phone ); ?></a></p>
-								</div>
-							</div>
-						<?php endif; ?>
-					</div>
-
-					<div class="social-links-panel">
-						<h5><?php esc_html_e( 'Suivez-nous', 'diocese-ziguinchor' ); ?></h5>
-						<?php get_template_part( 'template-parts/social-links', null, array( 'wrapper_class' => 'social-icons' ) ); ?>
-					</div>
-				</div>
-
-				<div class="contact-form-panel">
-					<?php if ( $dz_address ) : ?>
-						<div class="map-container">
-							<iframe
-								src="<?php echo esc_url( sprintf( 'https://www.google.com/maps?q=%s&output=embed', rawurlencode( $dz_address ) ) ); ?>"
-								width="100%" height="100%" style="border:0;" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"
-								title="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>"
-							></iframe>
+					<div class="contact-info-panel">
+						<div class="contact-info-header">
+							<h3><?php esc_html_e( 'Nos coordonnées', 'diocese-ziguinchor' ); ?></h3>
 						</div>
-					<?php endif; ?>
+
+						<div class="contact-info-cards">
+							<?php if ( $dz_address ) : ?>
+								<div class="info-card">
+									<div class="icon-container"><i class="bi bi-pin-map-fill"></i></div>
+									<div class="card-content">
+										<h4><?php esc_html_e( 'Adresse', 'diocese-ziguinchor' ); ?></h4>
+										<p><?php echo nl2br( esc_html( $dz_address ) ); ?></p>
+									</div>
+								</div>
+							<?php endif; ?>
+
+							<?php if ( $dz_email ) : ?>
+								<div class="info-card">
+									<div class="icon-container"><i class="bi bi-envelope-open"></i></div>
+									<div class="card-content">
+										<h4><?php esc_html_e( 'E-mail', 'diocese-ziguinchor' ); ?></h4>
+										<p><a href="<?php echo esc_url( 'mailto:' . $dz_email ); ?>"><?php echo esc_html( $dz_email ); ?></a></p>
+									</div>
+								</div>
+							<?php endif; ?>
+
+							<?php if ( $dz_phone ) : ?>
+								<div class="info-card">
+									<div class="icon-container"><i class="bi bi-telephone-fill"></i></div>
+									<div class="card-content">
+										<h4><?php esc_html_e( 'Téléphone', 'diocese-ziguinchor' ); ?></h4>
+										<p><a href="<?php echo esc_url( 'tel:' . preg_replace( '/\s+/', '', $dz_phone ) ); ?>"><?php echo esc_html( $dz_phone ); ?></a></p>
+									</div>
+								</div>
+							<?php endif; ?>
+						</div>
+
+						<div class="social-links-panel">
+							<h5><?php esc_html_e( 'Suivez-nous', 'diocese-ziguinchor' ); ?></h5>
+							<?php get_template_part( 'template-parts/social-links', null, array( 'wrapper_class' => 'social-icons' ) ); ?>
+						</div>
+					</div>
 
 					<div class="form-container">
 						<h3><?php esc_html_e( 'Envoyez-nous un message', 'diocese-ziguinchor' ); ?></h3>
@@ -108,6 +109,7 @@ while ( have_posts() ) :
 						the_content();
 						?>
 					</div>
+
 				</div>
 
 			</div>

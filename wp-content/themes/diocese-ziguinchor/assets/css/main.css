@@ -4287,13 +4287,19 @@ section,
 }
 
 .contact .contact-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.contact .contact-columns {
   display: grid;
   grid-template-columns: 1fr;
   gap: 40px;
 }
 
 @media (min-width: 992px) {
-  .contact .contact-wrapper {
+  .contact .contact-columns {
     grid-template-columns: 38% 62%;
     gap: 30px;
   }
@@ -4426,12 +4432,6 @@ section,
 .contact .social-links-panel .social-icons a:hover {
   background-color: rgba(255, 255, 255, 0.3);
   transform: translateY(-5px);
-}
-
-.contact .contact-form-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
 }
 
 .contact .map-container {
@@ -5235,7 +5235,7 @@ qui tranche, donc ce bloc doit rester après pour que ses valeurs gagnent.
   white-space: nowrap;
   pointer-events: none;
   transform-origin: 0 0;
-  transition: transform 0.15s ease-in-out;
+  transition: transform 0.15s ease-in-out, opacity 0.15s ease-in-out;
 }
 
 /*
@@ -5258,6 +5258,19 @@ qui tranche, donc ce bloc doit rester après pour que ses valeurs gagnent.
 .contact .form-container .form-floating:has(.form-control:not(:placeholder-shown)) label {
   transform: scale(0.85) translateY(-1rem);
   color: var(--heading-color);
+}
+
+/*
+ * "Votre message" textarea only: instead of floating above the border like
+ * the other fields, its label disappears entirely once focused/filled — a
+ * multi-line message makes an overlapping-border label look cluttered.
+ * :has(textarea.form-control...) scopes this to the .form-floating wrapping
+ * that field specifically, leaving the other (input) fields' floating
+ * labels untouched.
+ */
+.contact .form-container .form-floating:has(textarea.form-control:focus) label,
+.contact .form-container .form-floating:has(textarea.form-control:not(:placeholder-shown)) label {
+  opacity: 0;
 }
 
 /*--------------------------------------------------------------
