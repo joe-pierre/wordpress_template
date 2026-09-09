@@ -62,3 +62,58 @@ function dz_cf7_set_contact_recipient( $contact_form ) {
 	$contact_form->set_properties( array( 'mail' => $mail ) );
 }
 add_action( 'wpcf7_before_send_mail', 'dz_cf7_set_contact_recipient' );
+
+/**
+ * Honeypot spam check for the Contact page's CF7 form.
+ *
+ * Requires a text field named "site-web" to be added manually in wp-admin
+ * (CF7 > the site's form > "Formulaire" tab) — named to look like a
+ * plausible real field rather than something like "honeypot" that would
+ * tip off a bot, and hidden via an inline style on its wrapper (never
+ * type="hidden", which spam bots already know to skip):
+ *
+ *   <span style="position:absolute;left:-9999px;top:-9999px;" aria-hidden="true">
+ *       [text site-web tabindex:-1 autocomplete:off]
+ *   </span>
+ *
+ * A human never sees or focuses this field; a bot that blindly fills every
+ * field it finds will. Any non-empty value marks the submission as spam so
+ * CF7 rejects it with its own generic message, rather than a validation
+ * error that would reveal the honeypot was tripped.
+ *
+ * Reuses the exact same "is this the real contact form" logic as
+ * dz_cf7_set_contact_recipient() above (container_post_id vs.
+ * dz_get_page_url_by_template()) instead of a second detection mechanism,
+ * so a future CF7 form on another page is never affected.
+ *
+ * @param bool               $spam
+ * @param WPCF7_Submission $submission
+ * @return bool
+ */
+function dz_cf7_check_contact_honeypot( $spam, $submission ) {
+	if ( $spam ) {
+		return $spam;
+	}
+
+	$container_post_id = $submission->get_meta( 'container_post_id' );
+
+	if ( ! $container_post_id ) {
+		return $spam;
+	}
+
+	$contact_page_url = dz_get_page_url_by_template( 'page-contact.php', false );
+
+	if ( ! $contact_page_url || get_permalink( $container_post_id ) !== $contact_page_url ) {
+		return $spam;
+	}
+
+	$posted_data = $submission->get_posted_data();
+	$honeypot    = isset( $posted_data['site-web'] ) ? trim( (string) $posted_data['site-web'] ) : '';
+
+	if ( '' !== $honeypot ) {
+		return true;
+	}
+
+	return $spam;
+}
+add_filter( 'wpcf7_spam', 'dz_cf7_check_contact_honeypot', 10, 2 );

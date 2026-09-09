@@ -904,6 +904,26 @@ Testé par un script PHP autonome (non versionné) simulant `WP_Image_Editor` (`
 
 ---
 
+## [CHOIX] Honeypot anti-spam sur le formulaire de contact via `wpcf7_spam` plutôt que `wpcf7_before_send_mail`
+
+**Contexte :** `TODO.md` Phase 6 demande d'ajouter une protection anti-spam (honeypot + éventuellement reCAPTCHA) sur l'unique formulaire CF7 du site, déjà ciblé par `dz_cf7_set_contact_recipient()` (destinataire dynamique, voir décision "Router dynamiquement le destinataire...").
+**Symptôme / Problème :** `wpcf7_before_send_mail` (utilisé pour le destinataire) s'exécute juste avant l'envoi du mail et sert à modifier la configuration du formulaire, pas à décider si la soumission doit être bloquée ; l'utiliser pour la détection de spam demanderait de rappeler manuellement `$submission->set_status()` et de reproduire une logique que CF7 gère déjà nativement.
+**Cause / Alternatives :** (a) détecter le honeypot dans `wpcf7_before_send_mail` et court-circuiter l'envoi manuellement ; (b) utiliser `wpcf7_spam`, le filtre CF7 dédié à la détection de spam (même famille que les honeypots/blocklists intégrés au plugin) : retourner `true` y marque simplement la soumission comme spam, et CF7 se charge lui-même de bloquer l'envoi et d'afficher son message générique de refus (`spam.` — pas d'erreur de validation par champ, donc aucun indice pour un bot sur la raison du rejet).
+**Fix / Décision :** Option (b) — `dz_cf7_check_contact_honeypot( $spam, $submission )` dans `inc/contact-form.php`, accrochée à `add_filter( 'wpcf7_spam', 'dz_cf7_check_contact_honeypot', 10, 2 )`. Elle réutilise **exactement** la même logique de ciblage que `dz_cf7_set_contact_recipient()` (comparaison de `$submission->get_meta( 'container_post_id' )` avec `dz_get_page_url_by_template( 'page-contact.php', false )`) plutôt que d'écrire un second mécanisme de détection du "bon" formulaire — si `$spam` est déjà `true` (une autre protection CF7 a déjà flaggé la soumission) ou si on n'est pas sur la page Contact, la fonction ne fait rien et retourne la valeur reçue inchangée. Le champ honeypot lui-même (`site-web`) est lu via `$submission->get_posted_data()` ; toute valeur non vide fait retourner `true` (spam), sans jamais dévoiler pourquoi au visiteur ni au bot.
+**Champ honeypot — nommage et masquage :** le champ est nommé `site-web` (et non `honeypot`/`ne-pas-remplir`, qui donnerait l'indice à un bot) : un nom plausible qu'un bot de soumission automatique peut confondre avec un champ légitime (les bots remplissent volontiers tout ce qui ressemble à une URL/un site web), mais qu'aucun humain ne remplirait sur un formulaire de contact diocésain. Il doit être ajouté manuellement dans l'admin CF7 (formulaire du site, onglet "Formulaire") avec le balisage suivant — masqué par un `style` inline sur un conteneur (position hors écran), jamais via `type="hidden"` que les bots savent déjà ignorer :
+
+```
+<span style="position:absolute;left:-9999px;top:-9999px;" aria-hidden="true">
+    [text site-web tabindex:-1 autocomplete:off]
+</span>
+```
+
+**Portée limitée au bon formulaire :** comme `dz_cf7_set_contact_recipient()`, la fonction ne s'applique qu'à la soumission dont le `container_post_id` correspond à la page utilisant `page-contact.php` ; un futur second formulaire CF7 sur une autre page n'est jamais affecté par cette vérification, sans avoir à dupliquer/adapter la logique de ciblage.
+**Leçon :** Un filtre CF7 dédié (`wpcf7_spam`) existe précisément pour ce cas d'usage et évite de réimplémenter à la main ce que `wpcf7_before_send_mail` ferait de façon plus fragile ; quand une logique de ciblage de formulaire existe déjà (ici : identifier "le" formulaire de contact), la réutiliser telle quelle plutôt que d'écrire un second mécanisme de détection différent.
+**Statut :** ✅ Résolu — reCAPTCHA v3 traité séparément, entièrement via l'admin CF7 (aucun code thème), voir `TODO.md` Phase 6
+
+---
+
 **Contexte :** ...
 **Symptôme / Problème :** ...
 **Cause / Alternatives :** ...
