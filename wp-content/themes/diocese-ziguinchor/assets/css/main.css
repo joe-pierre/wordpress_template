@@ -5458,6 +5458,16 @@ paroisse (gabarit de post type, pas une page unique) : header.php
 (bandeau utilitaire, is_singular('paroisse')) et footer.php (variante
 .paroisse-footer) partagent ce même bloc.
 
+Mise à jour "Refonte archive prêtres" (voir DECISIONS.md) : archive-
+pretre.php ("Nos prêtres") réutilise cette même palette crème/anthracite/
+or. Les quelques composants réellement partagés entre les deux gabarits
+(bandeau utilitaire, fil d'Ariane, eyebrow, titre/sous-titre de hero) ont
+été renommés en `.dz-*` (au lieu de `.paroisse-*`) à cette occasion — même
+précédent déjà suivi pour `.archive-filters` (ex-`.aumonerie-filters`).
+Tout le reste (`.paroisse-stat`, `.mass-badge`, `.paroisse-cure-card`...)
+reste spécifique à la fiche paroisse ; les styles propres à "Nos prêtres"
+(`.pretre-*`) sont ajoutés dans leur propre section plus bas.
+
 Palette : réutilise le système de variables CSS déjà en place dans ce
 fichier (--background-color/--default-color/--heading-color/--accent-
 color, voir "Color Presets" plus haut, même principe que .light-
@@ -5485,7 +5495,7 @@ même méthode que le reste du thème) :
    round 3 — les deux abandonnés). Seuls --heading-color/--accent-color/etc.
    restent scopés ici (palette crème/ancre/or, elle bien spécifique à cette
    page) ; la police mono (eyebrows/badges) reste elle aussi spécifique,
-   déclarée au cas par cas plus bas (.paroisse-eyebrow, .mass-badge...). */
+   déclarée au cas par cas plus bas (.dz-eyebrow, .mass-badge...). */
 .paroisse-page {
   --background-color: #F5F1EA;
   --default-color: #2a2a2e;
@@ -5495,34 +5505,41 @@ même méthode que le reste du thème) :
   --contrast-color: #1a1b22;
 }
 
-/* Bandeau utilitaire (header.php, au-dessus du header principal) */
-.paroisse-utility-bar {
+/* Bandeau utilitaire (header.php, au-dessus du header principal) — d'abord
+   scopé à single-paroisse.php, désormais partagé avec archive-pretre.php
+   ("Nos prêtres" réutilise la même palette, voir DECISIONS.md "Refonte
+   archive prêtres") : classes renommées .paroisse-utility-bar* ->
+   .dz-utility-bar*, .dz-utility-bar-center généralise l'ancien
+   .paroisse-utility-bar-next-mass (prochaine messe sur une fiche paroisse,
+   nom de l'évêque sur "Nos prêtres" — même emplacement, contenu propre à
+   chaque contexte). */
+.dz-utility-bar {
   background-color: #14151c;
   color: #f5f1ea;
   font-size: 13px;
   padding: 8px 0;
 }
 
-.paroisse-utility-bar-brand {
+.dz-utility-bar-brand {
   font-weight: 500;
 }
 
-.paroisse-utility-bar-next-mass,
-.paroisse-utility-bar-phone {
+.dz-utility-bar-center,
+.dz-utility-bar-phone {
   font-family: var(--mono-font);
   letter-spacing: 0.02em;
 }
 
-.paroisse-utility-bar-phone {
+.dz-utility-bar-phone {
   color: #f5f1ea;
 }
 
-.paroisse-utility-bar-phone:hover {
+.dz-utility-bar-phone:hover {
   color: #d9af66;
 }
 
 /* Hero — redéclare localement --accent-color (or clair #D9AF66, 8.40:1 sur
-   #1A1B22) : sans ce override, .paroisse-eyebrow hériterait de l'or foncé
+   #1A1B22) : sans ce override, .dz-eyebrow hériterait de l'or foncé
    #8A6524 défini par .paroisse-page (pensé pour du texte sur fond crème),
    qui ne fait que 3.24:1 sur ce fond sombre — sous le seuil AA 4.5:1. */
 .paroisse-hero {
@@ -5548,9 +5565,9 @@ même méthode que le reste du thème) :
    55%->92%), plus clair en haut (où se trouve surtout le ciel/la façade) et
    plus sombre en bas (où le texte est ancré) pour équilibrer lisibilité du
    texte et visibilité de la photo, comme sur la maquette de référence. Le
-   text-shadow sur .paroisse-eyebrow/.paroisse-hero-title/.paroisse-hero-
-   subtitle (plus bas) est le filet de sécurité qui garde le texte lisible
-   même si une paroisse a une photo particulièrement claire à cet endroit. */
+   text-shadow sur .dz-eyebrow/.dz-hero-title/.dz-hero-subtitle
+   (plus bas) est le filet de sécurité qui garde le texte lisible même si
+   une paroisse a une photo particulièrement claire à cet endroit. */
 .paroisse-hero-overlay {
   position: absolute;
   inset: 0;
@@ -5562,13 +5579,13 @@ même méthode que le reste du thème) :
   z-index: 1;
 }
 
-.paroisse-hero .paroisse-eyebrow,
-.paroisse-hero-title,
-.paroisse-hero-subtitle {
+.paroisse-hero .dz-eyebrow,
+.dz-hero-title,
+.dz-hero-subtitle {
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
 }
 
-.paroisse-eyebrow {
+.dz-eyebrow {
   display: block;
   font-family: var(--mono-font);
   font-size: 12px;
@@ -5582,7 +5599,7 @@ même méthode que le reste du thème) :
 /* Pas de font-family ici : c'est un <h1>, déjà couvert par la règle
    générique "h1,h2,...{ font-family: var(--heading-font) }" sitewide
    (Montserrat, round 5 — voir la note sur .paroisse-page plus haut). */
-.paroisse-hero-title {
+.dz-hero-title {
   font-weight: 700;
   font-size: 46px;
   line-height: 1.15;
@@ -5591,12 +5608,12 @@ même méthode que le reste du thème) :
 }
 
 @media (max-width: 767px) {
-  .paroisse-hero-title {
+  .dz-hero-title {
     font-size: 32px;
   }
 }
 
-.paroisse-hero-subtitle {
+.dz-hero-subtitle {
   font-size: 17px;
   max-width: 640px;
   color: color-mix(in srgb, #f5f1ea, transparent 12%);
@@ -5604,13 +5621,13 @@ même méthode que le reste du thème) :
 }
 
 /* Fil d'Ariane */
-.paroisse-breadcrumb {
+.dz-breadcrumb {
   background-color: #f5f1ea;
   border-bottom: 1px solid rgba(26, 27, 34, 0.08);
   padding: 14px 0;
 }
 
-.paroisse-breadcrumb ol {
+.dz-breadcrumb ol {
   display: flex;
   flex-wrap: wrap;
   list-style: none;
@@ -5619,25 +5636,25 @@ même méthode que le reste du thème) :
   font-size: 14px;
 }
 
-.paroisse-breadcrumb li {
+.dz-breadcrumb li {
   color: #1a1b22;
 }
 
-.paroisse-breadcrumb li a {
+.dz-breadcrumb li a {
   color: #8a6524;
 }
 
-.paroisse-breadcrumb li a:hover {
+.dz-breadcrumb li a:hover {
   color: color-mix(in srgb, #8a6524, transparent 25%);
 }
 
-.paroisse-breadcrumb li:not(:last-child)::after {
+.dz-breadcrumb li:not(:last-child)::after {
   content: "/";
   margin: 0 10px;
   color: color-mix(in srgb, #1a1b22, transparent 65%);
 }
 
-.paroisse-breadcrumb li.current {
+.dz-breadcrumb li.current {
   color: color-mix(in srgb, #1a1b22, transparent 30%);
 }
 
@@ -5791,7 +5808,7 @@ même méthode que le reste du thème) :
   padding: 22px;
 }
 
-.paroisse-find-card .paroisse-eyebrow {
+.paroisse-find-card .dz-eyebrow {
   margin-bottom: 10px;
 }
 
@@ -5965,5 +5982,375 @@ même méthode que le reste du thème) :
   .mass-row {
     flex-direction: column;
     align-items: flex-start;
+  }
+}
+
+/*--------------------------------------------------------------
+# Diocèse de Ziguinchor — Refonte archive prêtres ("Nos prêtres",
+archive-pretre.php). Même palette crème/anthracite/or que la fiche
+paroisse ci-dessus (voir la note en tête de cette section) : .pretre-page
+redéclare les mêmes variables --background-color/--default-color/
+--heading-color/--accent-color/--surface-color/--contrast-color, pour les
+mêmes raisons (héritage automatique par h1-h6/a/.section). Couleurs de
+badge de rôle vérifiées au contraste WCAG direct (texte sur fond, même
+méthode que le reste du thème) :
+- Curé #C9974F / texte #1A1B22 : 6.56:1
+- Vicaire #8A5330 / texte #F5F1EA : 5.55:1
+- Économe #5B6B2A / texte #F5F1EA : 5.21:1
+- Service diocésain #173E4C / texte #F5F1EA : 10.19:1 (bleu/azur des
+  armoiries, SPEC.md §10 — couleur principale du site, réutilisée ici pour
+  un rôle qui n'a pas d'équivalent dans la maquette de référence)
+- Diacre #5A6470 / texte #F5F1EA : 5.34:1
+- Autre #6B6B6B / texte #F5F1EA : 4.73:1
+--------------------------------------------------------------*/
+.pretre-page {
+  --background-color: #F5F1EA;
+  --default-color: #2a2a2e;
+  --heading-color: #1a1b22;
+  --accent-color: #8a6524;
+  --surface-color: #ffffff;
+  --contrast-color: #1a1b22;
+}
+
+/* Hero — fond anthracite plein, pas de photo (contrairement au hero
+   paroisse) : --accent-color redéclaré en or clair pour le même motif de
+   contraste que .paroisse-hero (l'or foncé de .pretre-page ne suffit pas
+   sur fond sombre, voir la note de .paroisse-hero plus haut). */
+.pretre-hero {
+  background-color: #1a1b22;
+  color: #f5f1ea;
+  --accent-color: #d9af66;
+  padding: 90px 0 60px;
+}
+
+.pretre-hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px;
+  justify-content: flex-start;
+}
+
+@media (min-width: 992px) {
+  .pretre-hero-stats {
+    justify-content: flex-end;
+    text-align: right;
+  }
+}
+
+.pretre-hero-stat-value {
+  display: block;
+  font-family: var(--heading-font);
+  font-size: 36px;
+  font-weight: 600;
+  color: var(--accent-color);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.pretre-hero-stat-label {
+  display: block;
+  font-size: 13px;
+  color: color-mix(in srgb, #f5f1ea, transparent 15%);
+}
+
+/* Barre de filtres + recherche */
+.pretre-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 40px;
+}
+
+.pretre-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.pretre-filter {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 20px;
+  border-radius: 50px;
+  border: 1px solid rgba(26, 27, 34, 0.22);
+  color: var(--heading-color);
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+.pretre-filter:hover {
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+}
+
+.pretre-filter.active {
+  background-color: #1a1b22;
+  border-color: #1a1b22;
+  color: #f5f1ea;
+}
+
+.pretre-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--surface-color);
+  border: 1px solid rgba(26, 27, 34, 0.15);
+  border-radius: 50px;
+  padding: 4px 4px 4px 20px;
+}
+
+.pretre-search input[type="search"] {
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: 14px;
+  min-width: 260px;
+  color: var(--default-color);
+}
+
+.pretre-search button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background-color: #1a1b22;
+  color: #f5f1ea;
+  flex-shrink: 0;
+  transition: background-color 0.3s ease;
+}
+
+.pretre-search button:hover {
+  background-color: var(--accent-color);
+}
+
+@media (max-width: 767px) {
+  .pretre-filters {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .pretre-search {
+    width: 100%;
+  }
+
+  .pretre-search input[type="search"] {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+}
+
+.pretre-empty {
+  text-align: center;
+  color: color-mix(in srgb, var(--default-color), transparent 20%);
+  padding: 30px 0;
+}
+
+/* Grille de cartes */
+.pretre-card {
+  display: block;
+  height: 100%;
+  background-color: var(--surface-color);
+  border: 1px solid rgba(26, 27, 34, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.pretre-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 30px rgba(26, 27, 34, 0.12);
+}
+
+.pretre-card-media {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background-color: #ede7da;
+}
+
+.pretre-card-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.pretre-card-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1a1b22, #3a3b45);
+  color: #d9af66;
+  font-family: var(--heading-font);
+  font-size: 64px;
+  font-weight: 600;
+}
+
+.pretre-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 1;
+  font-family: var(--mono-font);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: 50px;
+}
+
+.pretre-badge--cure {
+  background-color: #c9974f;
+  color: #1a1b22;
+}
+
+.pretre-badge--vicaire {
+  background-color: #8a5330;
+  color: #f5f1ea;
+}
+
+.pretre-badge--econome {
+  background-color: #5b6b2a;
+  color: #f5f1ea;
+}
+
+.pretre-badge--service_diocesain {
+  background-color: #173e4c;
+  color: #f5f1ea;
+}
+
+.pretre-badge--diacre {
+  background-color: #5a6470;
+  color: #f5f1ea;
+}
+
+.pretre-badge--autre {
+  background-color: #6b6b6b;
+  color: #f5f1ea;
+}
+
+.pretre-card-body {
+  padding: 18px 20px 22px;
+}
+
+.pretre-card-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--heading-color);
+  margin-bottom: 4px;
+}
+
+.pretre-card-affectation {
+  font-size: 14px;
+  color: color-mix(in srgb, var(--default-color), transparent 15%);
+  margin-bottom: 0;
+}
+
+.pretre-pagination .page-numbers {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 38px;
+  height: 38px;
+  padding: 0 8px;
+  margin: 0 4px;
+  border-radius: 50px;
+  border: 1px solid rgba(26, 27, 34, 0.22);
+  color: var(--heading-color);
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.pretre-pagination .page-numbers:hover {
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+}
+
+.pretre-pagination .page-numbers.current {
+  background-color: #1a1b22;
+  border-color: #1a1b22;
+  color: #f5f1ea;
+}
+
+.pretre-pagination .page-numbers.dots {
+  border-color: transparent;
+}
+
+/* Bandeau "Prier pour les vocations" */
+.pretre-vocations {
+  background-color: #ede7da;
+  padding: 60px 0;
+}
+
+.pretre-vocations-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+}
+
+.pretre-vocations-text {
+  border-left: 4px solid #c9974f;
+  padding-left: 24px;
+  max-width: 640px;
+}
+
+.pretre-vocations-text h2 {
+  font-size: 26px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.pretre-vocations-text p {
+  margin-bottom: 0;
+  color: color-mix(in srgb, var(--default-color), transparent 10%);
+}
+
+.pretre-vocations-btn {
+  display: inline-block;
+  flex-shrink: 0;
+  background-color: #c9974f;
+  color: #1a1b22;
+  font-weight: 600;
+  padding: 14px 28px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.pretre-vocations-btn:hover {
+  background-color: #b8862f;
+  color: #1a1b22;
+}
+
+@media (max-width: 575px) {
+  .pretre-hero-stats {
+    gap: 20px;
+  }
+
+  .pretre-hero-stat-value {
+    font-size: 28px;
+  }
+
+  .pretre-vocations-inner {
+    align-items: flex-start;
+  }
+
+  .pretre-vocations-text {
+    padding-left: 16px;
   }
 }

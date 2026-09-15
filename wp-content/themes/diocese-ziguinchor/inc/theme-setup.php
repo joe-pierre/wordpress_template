@@ -116,6 +116,29 @@ function dz_no_em_dash( $text ) {
 }
 
 /**
+ * Diocese-wide headline counts ("34 Prêtres", "19 Paroisses", "6 Doyennés"
+ * on the "Nos prêtres" hero, see DECISIONS.md "Refonte archive prêtres") —
+ * always computed from the real content, never hard-coded, so the numbers
+ * stay correct as fiches are added. `doyenne` is a taxonomy on `paroisse`
+ * (SPEC.md §3), not a separate CPT, hence `wp_count_terms()` rather than
+ * `wp_count_posts()` for that one.
+ *
+ * @return array{pretres:int,paroisses:int,doyennes:int}
+ */
+function dz_get_diocese_stats() {
+	return array(
+		'pretres'   => (int) wp_count_posts( 'pretre' )->publish,
+		'paroisses' => (int) wp_count_posts( 'paroisse' )->publish,
+		'doyennes'  => (int) wp_count_terms(
+			array(
+				'taxonomy'   => 'doyenne',
+				'hide_empty' => false,
+			)
+		),
+	);
+}
+
+/**
  * Estimated reading time for a post, in whole minutes (minimum 1).
  *
  * @param int $post_id

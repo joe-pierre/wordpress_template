@@ -42,13 +42,13 @@ function dz_enqueue_assets() {
 		null
 	);
 
-	// JetBrains Mono (eyebrows/badges/labels) — only the paroisse template
-	// uses it (refonte design "crème/anthracite/or"). Round 5 (voir
-	// DECISIONS.md) : les titres/le corps de texte de cette page réutilisent
-	// désormais Montserrat/Roboto, déjà chargées ci-dessus pour tout le site
-	// ("dz-google-fonts") — plus besoin d'une police serif dédiée (Aleo,
-	// round 4) ici, seule la mono reste spécifique à cette page.
-	if ( is_singular( 'paroisse' ) ) {
+	// JetBrains Mono (eyebrows/badges/labels) — the paroisse template and the
+	// "Nos prêtres" archive both use it (même palette crème/anthracite/or,
+	// voir DECISIONS.md "Refonte archive prêtres" et round 5 de la refonte
+	// fiche paroisse). Les titres/le corps de texte de ces deux gabarits
+	// réutilisent Montserrat/Roboto, déjà chargées ci-dessus pour tout le
+	// site ("dz-google-fonts") — seule la mono reste spécifique à eux.
+	if ( is_singular( 'paroisse' ) || is_post_type_archive( 'pretre' ) ) {
 		wp_enqueue_style(
 			'dz-paroisse-fonts',
 			'https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap',

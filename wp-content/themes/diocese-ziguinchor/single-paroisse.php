@@ -83,7 +83,7 @@ while ( have_posts() ) :
 			<div class="paroisse-hero-overlay"></div>
 			<div class="container" data-aos="fade-up">
 				<?php if ( $dz_doyenne_label ) : ?>
-					<p class="paroisse-eyebrow">
+					<p class="dz-eyebrow">
 						<?php
 						printf(
 							/* translators: %s: deanery/zone name */
@@ -93,17 +93,17 @@ while ( have_posts() ) :
 						?>
 					</p>
 				<?php else : ?>
-					<p class="paroisse-eyebrow"><?php esc_html_e( 'Paroisse', 'diocese-ziguinchor' ); ?></p>
+					<p class="dz-eyebrow"><?php esc_html_e( 'Paroisse', 'diocese-ziguinchor' ); ?></p>
 				<?php endif; ?>
-				<h1 class="paroisse-hero-title"><?php the_title(); ?></h1>
+				<h1 class="dz-hero-title"><?php the_title(); ?></h1>
 				<?php if ( $dz_soustitre ) : ?>
-					<p class="paroisse-hero-subtitle"><?php echo esc_html( $dz_soustitre ); ?></p>
+					<p class="dz-hero-subtitle"><?php echo esc_html( $dz_soustitre ); ?></p>
 				<?php endif; ?>
 			</div>
 		</section><!-- /Paroisse Hero -->
 
 		<!-- Fil d'Ariane -->
-		<nav class="paroisse-breadcrumb">
+		<nav class="dz-breadcrumb">
 			<div class="container">
 				<ol>
 					<li><a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'Accueil', 'diocese-ziguinchor' ); ?></a></li>
@@ -181,14 +181,14 @@ while ( have_posts() ) :
 								<div class="paroisse-find-cards">
 									<?php if ( $dz_adresse || $dz_secteur ) : ?>
 										<div class="paroisse-find-card">
-											<span class="paroisse-eyebrow"><?php esc_html_e( 'Adresse', 'diocese-ziguinchor' ); ?></span>
+											<span class="dz-eyebrow"><?php esc_html_e( 'Adresse', 'diocese-ziguinchor' ); ?></span>
 											<p><?php echo esc_html( trim( implode( ' - ', array_filter( array( $dz_adresse, $dz_secteur ) ) ) ) ); ?></p>
 										</div>
 									<?php endif; ?>
 
 									<?php if ( $dz_contact_phone ) : ?>
 										<div class="paroisse-find-card">
-											<span class="paroisse-eyebrow"><?php esc_html_e( 'Téléphone', 'diocese-ziguinchor' ); ?></span>
+											<span class="dz-eyebrow"><?php esc_html_e( 'Téléphone', 'diocese-ziguinchor' ); ?></span>
 											<p><a href="<?php echo esc_url( 'tel:' . preg_replace( '/\s+/', '', $dz_contact_phone ) ); ?>"><?php echo esc_html( $dz_contact_phone ); ?></a></p>
 											<?php if ( $dz_secretariat ) : ?>
 												<p class="paroisse-find-note">
@@ -206,7 +206,7 @@ while ( have_posts() ) :
 
 									<?php if ( $dz_contact_email ) : ?>
 										<div class="paroisse-find-card">
-											<span class="paroisse-eyebrow"><?php esc_html_e( 'E-mail', 'diocese-ziguinchor' ); ?></span>
+											<span class="dz-eyebrow"><?php esc_html_e( 'E-mail', 'diocese-ziguinchor' ); ?></span>
 											<p><a href="<?php echo esc_url( 'mailto:' . $dz_contact_email ); ?>"><?php echo esc_html( $dz_contact_email ); ?></a></p>
 										</div>
 									<?php endif; ?>
@@ -237,7 +237,7 @@ while ( have_posts() ) :
 										</div>
 									<?php endif; ?>
 									<div class="paroisse-cure-body">
-										<p class="paroisse-eyebrow"><?php esc_html_e( 'Curé de la paroisse', 'diocese-ziguinchor' ); ?></p>
+										<p class="dz-eyebrow"><?php esc_html_e( 'Curé de la paroisse', 'diocese-ziguinchor' ); ?></p>
 										<h3 class="paroisse-cure-name"><a href="<?php echo esc_url( get_permalink( $dz_cure->ID ) ); ?>"><?php echo esc_html( get_the_title( $dz_cure->ID ) ); ?></a></h3>
 										<?php $dz_cure_bio = dz_no_em_dash( dz_get_field( 'pretre_bio_courte', $dz_cure->ID ) ); ?>
 										<?php if ( $dz_cure_bio ) : ?>

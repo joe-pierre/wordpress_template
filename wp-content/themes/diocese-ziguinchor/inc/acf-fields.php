@@ -143,6 +143,13 @@ function dz_register_options_field_group() {
 					'type'  => 'tab',
 				),
 				array(
+					'key'          => 'field_dz_eveque_nom',
+					'label'        => __( "Nom de l'évêque", 'diocese-ziguinchor' ),
+					'name'         => 'dz_eveque_nom',
+					'type'         => 'text',
+					'instructions' => __( 'Ex. "Mgr Jean Baptiste Valter Manga". Affiché notamment dans le bandeau utilitaire de la page "Nos prêtres".', 'diocese-ziguinchor' ),
+				),
+				array(
 					'key'   => 'field_dz_contact_phone',
 					'label' => __( 'Téléphone', 'diocese-ziguinchor' ),
 					'name'  => 'dz_contact_phone',
@@ -239,6 +246,80 @@ function dz_register_options_field_group() {
 	);
 }
 add_action( 'acf/init', 'dz_register_options_field_group' );
+
+/**
+ * Editorial content for `archive-pretre.php` ("Nos prêtres") that isn't
+ * tied to any single priest or paroisse — the hero subtitle and the
+ * "Prier pour les vocations" banner (SPEC.md prompt "Nos prêtres": "à voir
+ * avec le client si un champ dédié existe déjà pour ce type de contenu
+ * global, sinon proposer une simple option de thème" — no such field
+ * existed, so this is that option). A second field group on the same
+ * options page (`dz-theme-settings`) rather than a new page, same pattern
+ * ACF already supports for `group_dz_theme_settings` above. No
+ * `default_value` on the text fields: templates fall back to a sensible
+ * French default via `dz_get_option( $field, $fallback )`, matching how
+ * `dz_footer_copyright` already works in footer.php — the field stays
+ * genuinely empty (and easy to spot as "not yet customised") in the admin
+ * until an editor fills it in, per SPEC.md's guardrail against fake/
+ * pre-filled defaults.
+ */
+function dz_register_archive_pretre_field_group() {
+	if ( ! function_exists( 'acf_add_local_field_group' ) ) {
+		return;
+	}
+
+	acf_add_local_field_group(
+		array(
+			'key'      => 'group_dz_archive_pretre',
+			'title'    => __( 'Page "Nos prêtres"', 'diocese-ziguinchor' ),
+			'fields'   => array(
+				array(
+					'key'          => 'field_dz_pretres_soustitre',
+					'label'        => __( 'Sous-titre du hero', 'diocese-ziguinchor' ),
+					'name'         => 'dz_pretres_soustitre',
+					'type'         => 'textarea',
+					'rows'         => 2,
+					'instructions' => __( 'Court texte affiché sous le titre "Nos prêtres".', 'diocese-ziguinchor' ),
+				),
+				array(
+					'key'   => 'field_dz_tab_vocations',
+					'label' => __( 'Bandeau "Prier pour les vocations"', 'diocese-ziguinchor' ),
+					'type'  => 'tab',
+				),
+				array(
+					'key'   => 'field_dz_vocations_titre',
+					'label' => __( 'Titre', 'diocese-ziguinchor' ),
+					'name'  => 'dz_vocations_titre',
+					'type'  => 'text',
+				),
+				array(
+					'key'   => 'field_dz_vocations_texte',
+					'label' => __( 'Texte', 'diocese-ziguinchor' ),
+					'name'  => 'dz_vocations_texte',
+					'type'  => 'textarea',
+					'rows'  => 3,
+				),
+				array(
+					'key'          => 'field_dz_vocations_cta_url',
+					'label'        => __( 'Lien du bouton', 'diocese-ziguinchor' ),
+					'name'         => 'dz_vocations_cta_url',
+					'type'         => 'url',
+					'instructions' => __( 'Optionnel. Par défaut, pointe vers la page "Dons" du site.', 'diocese-ziguinchor' ),
+				),
+			),
+			'location' => array(
+				array(
+					array(
+						'param'    => 'options_page',
+						'operator' => '==',
+						'value'    => 'dz-theme-settings',
+					),
+				),
+			),
+		)
+	);
+}
+add_action( 'acf/init', 'dz_register_archive_pretre_field_group' );
 
 /**
  * Hero slider on the homepage (index.html's ".blog-hero" section), attached

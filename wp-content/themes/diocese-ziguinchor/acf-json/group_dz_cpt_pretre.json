@@ -11,6 +11,8 @@
             "choices": {
                 "cure": "Curé",
                 "vicaire": "Vicaire",
+                "econome": "Économe",
+                "service_diocesain": "Service diocésain",
                 "diacre": "Diacre",
                 "autre": "Autre"
             },
@@ -103,5 +105,5 @@
     "active": true,
     "description": "Champs de la fiche prêtre (voir SPEC.md §3 et §4).",
     "show_in_rest": 0,
-    "modified": 1788557839
+    "modified": 1789732800
 }

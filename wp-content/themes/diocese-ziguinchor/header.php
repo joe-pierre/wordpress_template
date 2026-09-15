@@ -17,31 +17,50 @@ if ( ! defined( 'ABSPATH' ) ) {
 <body <?php body_class(); ?>>
 <?php wp_body_open(); ?>
 
-	<?php if ( is_singular( 'paroisse' ) ) : ?>
+	<?php if ( is_singular( 'paroisse' ) || is_post_type_archive( 'pretre' ) ) : ?>
 		<?php
-		$dz_bar_paroisse_id = get_queried_object_id();
-		$dz_bar_next_mass   = dz_get_paroisse_next_mass( $dz_bar_paroisse_id );
-		$dz_bar_phone       = dz_get_paroisse_contact_phone( $dz_bar_paroisse_id );
+		// Bandeau utilitaire — d'abord scopé à single-paroisse.php ("Refonte
+		// design crème/anthracite/or"), désormais partagé avec l'archive
+		// "Nos prêtres" (même palette). Classes renommées .paroisse-utility-
+		// bar* -> .dz-utility-bar* en conséquence (même précédent déjà suivi
+		// pour .archive-filters, voir DECISIONS.md). Le centre/la droite du
+		// bandeau restent propres à chaque contexte : prochaine messe/
+		// téléphone du curé sur une fiche paroisse, nom de l'évêque/
+		// téléphone général du diocèse sur "Nos prêtres".
+		if ( is_singular( 'paroisse' ) ) {
+			$dz_bar_paroisse_id = get_queried_object_id();
+			$dz_bar_next_mass   = dz_get_paroisse_next_mass( $dz_bar_paroisse_id );
+			$dz_bar_center      = $dz_bar_next_mass
+				? sprintf(
+					/* translators: 1: day label (lowercase), 2: time (H:i) */
+					__( 'Prochaine messe : %1$s %2$s', 'diocese-ziguinchor' ),
+					mb_strtolower( $dz_bar_next_mass['jour_label'], 'UTF-8' ),
+					$dz_bar_next_mass['heure']
+				)
+				: '';
+			$dz_bar_phone = dz_get_paroisse_contact_phone( $dz_bar_paroisse_id );
+		} else {
+			$dz_bar_eveque = dz_get_option( 'dz_eveque_nom' );
+			$dz_bar_center = $dz_bar_eveque
+				? sprintf(
+					/* translators: %s: bishop's name */
+					__( 'Évêque : %s', 'diocese-ziguinchor' ),
+					$dz_bar_eveque
+				)
+				: '';
+			$dz_bar_phone = dz_get_option( 'dz_contact_phone' );
+		}
 		?>
-		<div class="paroisse-utility-bar">
+		<div class="dz-utility-bar">
 			<div class="container d-flex flex-wrap align-items-center justify-content-between">
-				<span class="paroisse-utility-bar-brand"><?php echo esc_html( get_bloginfo( 'name' ) . ' - ' . __( 'Sénégal', 'diocese-ziguinchor' ) ); ?></span>
+				<span class="dz-utility-bar-brand"><?php echo esc_html( get_bloginfo( 'name' ) . ' - ' . __( 'Sénégal', 'diocese-ziguinchor' ) ); ?></span>
 
-				<?php if ( $dz_bar_next_mass ) : ?>
-					<span class="paroisse-utility-bar-next-mass">
-						<?php
-						printf(
-							/* translators: 1: day label (lowercase), 2: time (H:i) */
-							esc_html__( 'Prochaine messe : %1$s %2$s', 'diocese-ziguinchor' ),
-							esc_html( mb_strtolower( $dz_bar_next_mass['jour_label'], 'UTF-8' ) ),
-							esc_html( $dz_bar_next_mass['heure'] )
-						);
-						?>
-					</span>
+				<?php if ( $dz_bar_center ) : ?>
+					<span class="dz-utility-bar-center"><?php echo esc_html( $dz_bar_center ); ?></span>
 				<?php endif; ?>
 
 				<?php if ( $dz_bar_phone ) : ?>
-					<a class="paroisse-utility-bar-phone" href="<?php echo esc_url( 'tel:' . preg_replace( '/\s+/', '', $dz_bar_phone ) ); ?>"><?php echo esc_html( $dz_bar_phone ); ?></a>
+					<a class="dz-utility-bar-phone" href="<?php echo esc_url( 'tel:' . preg_replace( '/\s+/', '', $dz_bar_phone ) ); ?>"><?php echo esc_html( $dz_bar_phone ); ?></a>
 				<?php endif; ?>
 			</div>
 		</div>
