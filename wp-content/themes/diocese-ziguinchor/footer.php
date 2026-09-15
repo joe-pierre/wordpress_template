@@ -9,7 +9,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 	</main><!-- End #main -->
 
-	<footer id="footer" class="footer position-relative light-background">
+	<?php
+	// Refonte design "crème/anthracite/or" de la fiche paroisse (voir
+	// DECISIONS.md) : footer basculé sur un fond anthracite scoped
+	// (.paroisse-footer, assets/css/main.css) uniquement sur ce gabarit —
+	// le reste du site garde .light-background inchangé.
+	$dz_footer_class = is_singular( 'paroisse' ) ? 'dark-background paroisse-footer' : 'light-background';
+	?>
+	<footer id="footer" class="footer position-relative <?php echo esc_attr( $dz_footer_class ); ?>">
 
 		<div class="container">
 			<div class="row gy-5">

@@ -134,3 +134,165 @@ function dz_get_paroisse_clergy( $paroisse_id, $fonction = '' ) {
 
 	return $dz_clergy;
 }
+
+/**
+ * Days of the week, Monday-first, matching `field_dz_paroisse_horaire_jour`
+ * choices and ISO-8601 day numbers (`current_time( 'N' )`: 1 = Monday ... 7 =
+ * Sunday) — the single source of truth for both `single-paroisse.php` (mass
+ * schedule table) and `dz_get_paroisse_next_mass()` below, so the two never
+ * drift out of sync.
+ *
+ * @return array<string,string> jour key => libellé
+ */
+function dz_get_jours_semaine() {
+	return array(
+		'lundi'    => __( 'Lundi', 'diocese-ziguinchor' ),
+		'mardi'    => __( 'Mardi', 'diocese-ziguinchor' ),
+		'mercredi' => __( 'Mercredi', 'diocese-ziguinchor' ),
+		'jeudi'    => __( 'Jeudi', 'diocese-ziguinchor' ),
+		'vendredi' => __( 'Vendredi', 'diocese-ziguinchor' ),
+		'samedi'   => __( 'Samedi', 'diocese-ziguinchor' ),
+		'dimanche' => __( 'Dimanche', 'diocese-ziguinchor' ),
+	);
+}
+
+/**
+ * Mass schedule of a paroisse, grouped by day and sorted chronologically
+ * within each day (see DECISIONS.md "Regroupement des horaires de messes par
+ * jour"). Each entry also carries its optional event label (`ADORATION
+ * 17:00`, `CHEMIN DE CROIX`...) for the badge shown next to the time.
+ *
+ * @param int $paroisse_id
+ * @return array<string,array<int,array{heure:string,libelle:string}>> jour key => horaires, in $dz_jours order, only non-empty days present
+ */
+function dz_get_paroisse_horaires_par_jour( $paroisse_id ) {
+	$dz_par_jour = array();
+
+	if ( ! function_exists( 'have_rows' ) || ! have_rows( 'paroisse_horaires_messes', $paroisse_id ) ) {
+		return $dz_par_jour;
+	}
+
+	while ( have_rows( 'paroisse_horaires_messes', $paroisse_id ) ) {
+		the_row();
+		$dz_jour    = get_sub_field( 'paroisse_horaire_jour' );
+		$dz_heure   = get_sub_field( 'paroisse_horaire_heure' );
+		$dz_libelle = get_sub_field( 'paroisse_horaire_libelle' );
+
+		if ( ! $dz_jour || ! $dz_heure ) {
+			continue;
+		}
+
+		$dz_par_jour[ $dz_jour ][] = array(
+			'heure'   => $dz_heure,
+			'libelle' => $dz_libelle ? $dz_libelle : '',
+		);
+	}
+
+	foreach ( $dz_par_jour as $dz_jour => $dz_horaires ) {
+		usort(
+			$dz_horaires,
+			function ( $dz_a, $dz_b ) {
+				return strcmp( $dz_a['heure'], $dz_b['heure'] );
+			}
+		);
+		$dz_par_jour[ $dz_jour ] = $dz_horaires;
+	}
+
+	// Re-key in canonical Lundi->Dimanche order, independent of entry order.
+	$dz_ordered = array();
+	foreach ( array_keys( dz_get_jours_semaine() ) as $dz_jour_key ) {
+		if ( ! empty( $dz_par_jour[ $dz_jour_key ] ) ) {
+			$dz_ordered[ $dz_jour_key ] = $dz_par_jour[ $dz_jour_key ];
+		}
+	}
+
+	return $dz_ordered;
+}
+
+/**
+ * Next upcoming mass from now (site timezone, see `current_time()`), looking
+ * across the current day first (only times still ahead) then, if needed,
+ * wrapping forward through the rest of the week and back to the start —
+ * used by the utility bar ("Prochaine messe : dimanche 07:00").
+ *
+ * @param int $paroisse_id
+ * @return array{jour_key:string,jour_label:string,heure:string}|null Null when the paroisse has no schedule at all.
+ */
+function dz_get_paroisse_next_mass( $paroisse_id ) {
+	$dz_par_jour = dz_get_paroisse_horaires_par_jour( $paroisse_id );
+
+	if ( ! $dz_par_jour ) {
+		return null;
+	}
+
+	$dz_jours       = dz_get_jours_semaine();
+	$dz_jour_keys   = array_keys( $dz_jours );
+	$dz_today_index = (int) current_time( 'N' ) - 1; // 0-based, Monday = 0
+	$dz_now_hi      = current_time( 'H:i' );
+
+	for ( $dz_offset = 0; $dz_offset < 7; $dz_offset++ ) {
+		$dz_jour_key = $dz_jour_keys[ ( $dz_today_index + $dz_offset ) % 7 ];
+
+		if ( empty( $dz_par_jour[ $dz_jour_key ] ) ) {
+			continue;
+		}
+
+		foreach ( $dz_par_jour[ $dz_jour_key ] as $dz_horaire ) {
+			if ( 0 === $dz_offset && $dz_horaire['heure'] < $dz_now_hi ) {
+				continue; // Today, but this mass already happened.
+			}
+
+			return array(
+				'jour_key'   => $dz_jour_key,
+				'jour_label' => $dz_jours[ $dz_jour_key ],
+				'heure'      => $dz_horaire['heure'],
+			);
+		}
+	}
+
+	return null;
+}
+
+/**
+ * Contact phone shown for a paroisse (utility bar, "Nous trouver" — see
+ * DECISIONS.md "Ajustements typographiques round 3") : the curé's own
+ * phone takes priority when he has one on file, falling back to the
+ * paroisse's own `paroisse_telephone` field otherwise (e.g. no curé
+ * assigned yet, or he has no phone on file). Keeps the utility bar and
+ * "Nous trouver" in sync — both call this, never `paroisse_telephone`
+ * directly, so the same number never shows differently in two places on
+ * the same page.
+ *
+ * @param int $paroisse_id
+ * @return string Empty string if neither source has a phone.
+ */
+function dz_get_paroisse_contact_phone( $paroisse_id ) {
+	$dz_cure = dz_get_paroisse_clergy( $paroisse_id, 'cure' );
+	if ( $dz_cure ) {
+		$dz_phone = dz_get_field( 'pretre_telephone', $dz_cure[0]->ID );
+		if ( $dz_phone ) {
+			return $dz_phone;
+		}
+	}
+
+	return (string) dz_get_field( 'paroisse_telephone', $paroisse_id, '' );
+}
+
+/**
+ * Contact e-mail shown for a paroisse ("Nous trouver") — same priority
+ * order as dz_get_paroisse_contact_phone() above.
+ *
+ * @param int $paroisse_id
+ * @return string Empty string if neither source has an e-mail.
+ */
+function dz_get_paroisse_contact_email( $paroisse_id ) {
+	$dz_cure = dz_get_paroisse_clergy( $paroisse_id, 'cure' );
+	if ( $dz_cure ) {
+		$dz_email = dz_get_field( 'pretre_email', $dz_cure[0]->ID );
+		if ( $dz_email ) {
+			return $dz_email;
+		}
+	}
+
+	return (string) dz_get_field( 'paroisse_email', $paroisse_id, '' );
+}

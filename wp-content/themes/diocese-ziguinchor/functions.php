@@ -42,6 +42,21 @@ function dz_enqueue_assets() {
 		null
 	);
 
+	// JetBrains Mono (eyebrows/badges/labels) — only the paroisse template
+	// uses it (refonte design "crème/anthracite/or"). Round 5 (voir
+	// DECISIONS.md) : les titres/le corps de texte de cette page réutilisent
+	// désormais Montserrat/Roboto, déjà chargées ci-dessus pour tout le site
+	// ("dz-google-fonts") — plus besoin d'une police serif dédiée (Aleo,
+	// round 4) ici, seule la mono reste spécifique à cette page.
+	if ( is_singular( 'paroisse' ) ) {
+		wp_enqueue_style(
+			'dz-paroisse-fonts',
+			'https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap',
+			array(),
+			null
+		);
+	}
+
 	wp_enqueue_style( 'dz-bootstrap', DZ_THEME_URI . '/assets/vendor/bootstrap/css/bootstrap.min.css', array(), '5.3.7' );
 	wp_enqueue_style( 'dz-bootstrap-icons', DZ_THEME_URI . '/assets/vendor/bootstrap-icons/bootstrap-icons.min.css', array(), DZ_THEME_VERSION );
 	wp_enqueue_style( 'dz-aos', DZ_THEME_URI . '/assets/vendor/aos/aos.css', array(), DZ_THEME_VERSION );

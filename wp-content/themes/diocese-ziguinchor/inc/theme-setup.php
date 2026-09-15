@@ -101,6 +101,21 @@ function dz_get_field( $selector, $post_id = null, $default = null ) {
 }
 
 /**
+ * Replaces an em dash (—) with a simple hyphen (-), for a free-text ACF
+ * field an editor may have typed with one (see DECISIONS.md "Ajustements
+ * typographiques round 3" — the new paroisse design's mono/serif labels
+ * read better with simple hyphens than with an em dash). Deliberately not
+ * applied to the_content()/WYSIWYG output, where an em dash is ordinary
+ * French prose punctuation, not a typographic choice of this design.
+ *
+ * @param string|null $text
+ * @return string
+ */
+function dz_no_em_dash( $text ) {
+	return str_replace( '—', '-', (string) $text );
+}
+
+/**
  * Estimated reading time for a post, in whole minutes (minimum 1).
  *
  * @param int $post_id

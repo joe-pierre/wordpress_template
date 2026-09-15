@@ -3,6 +3,14 @@
     "title": "Paroisse",
     "fields": [
         {
+            "key": "field_dz_paroisse_soustitre",
+            "label": "Sous-titre (hero)",
+            "name": "paroisse_soustitre",
+            "type": "text",
+            "instructions": "Courte phrase de présentation affichée sous le nom de la paroisse en haut de la fiche (ex. « Église-mère du diocèse, ouverte chaque jour pour la prière, l'adoration et l'accueil des fidèles. »).",
+            "required": 0
+        },
+        {
             "key": "field_dz_paroisse_adresse",
             "label": "Adresse",
             "name": "paroisse_adresse",
@@ -28,6 +36,14 @@
             "label": "E-mail",
             "name": "paroisse_email",
             "type": "email",
+            "required": 0
+        },
+        {
+            "key": "field_dz_paroisse_secretariat_horaire",
+            "label": "Horaire du secrétariat",
+            "name": "paroisse_secretariat_horaire",
+            "type": "text",
+            "instructions": "Optionnel, ex. « lun. – ven., 09:00 – 13:00 ». Affiché sous le téléphone dans « Nous trouver ».",
             "required": 0
         },
         {
@@ -75,8 +91,78 @@
                     "required": 1,
                     "display_format": "H:i",
                     "return_format": "H:i"
+                },
+                {
+                    "key": "field_dz_paroisse_horaire_libelle",
+                    "label": "Libellé événement (optionnel)",
+                    "name": "paroisse_horaire_libelle",
+                    "type": "text",
+                    "instructions": "Affiché en badge à côté de l'horaire, ex. « ADORATION 17:00 », « CHEMIN DE CROIX ». Laisser vide pour un horaire de messe ordinaire.",
+                    "required": 0
                 }
             ]
+        },
+        {
+            "key": "field_dz_paroisse_confessions_note",
+            "label": "Note sur les confessions",
+            "name": "paroisse_confessions_note",
+            "type": "text",
+            "instructions": "Optionnel, ex. « Confessions : samedi de 17:00 à 19:00, ou sur rendez-vous au presbytère. » Affiché sous le tableau des horaires.",
+            "required": 0
+        },
+        {
+            "key": "field_dz_paroisse_stat_fondation",
+            "label": "Année de fondation",
+            "name": "paroisse_stat_fondation",
+            "type": "text",
+            "instructions": "Optionnel, ex. « 1888 ». Laisser vide si inconnue : le chiffre n'apparaît alors pas dans le bloc statistiques.",
+            "required": 0
+        },
+        {
+            "key": "field_dz_paroisse_stat_communautes",
+            "label": "Nombre de communautés de base",
+            "name": "paroisse_stat_communautes",
+            "type": "number",
+            "instructions": "Optionnel. Laisser vide si non applicable.",
+            "required": 0
+        },
+        {
+            "key": "field_dz_paroisse_vie_paroisse",
+            "label": "Vie de la paroisse",
+            "name": "paroisse_vie_paroisse",
+            "type": "repeater",
+            "instructions": "Activités récurrentes affichées dans l'encadré « Vie de la paroisse » (ex. répétition de chorale, catéchèse, adoration nocturne).",
+            "required": 0,
+            "layout": "table",
+            "button_label": "Ajouter une activité",
+            "min": 0,
+            "max": 0,
+            "sub_fields": [
+                {
+                    "key": "field_dz_paroisse_vie_frequence",
+                    "label": "Jour / fréquence",
+                    "name": "paroisse_vie_frequence",
+                    "type": "text",
+                    "instructions": "Ex. « Jeu. », « Sam. », « 1er ven. »",
+                    "required": 1
+                },
+                {
+                    "key": "field_dz_paroisse_vie_description",
+                    "label": "Description",
+                    "name": "paroisse_vie_description",
+                    "type": "text",
+                    "instructions": "Ex. « Répétition de la chorale - 19:00 »",
+                    "required": 1
+                }
+            ]
+        },
+        {
+            "key": "field_dz_paroisse_cta_rdv_url",
+            "label": "Lien du bouton « Demander un rendez-vous »",
+            "name": "paroisse_cta_rdv_url",
+            "type": "url",
+            "instructions": "Optionnel. Laisser vide pour pointer automatiquement vers la page Contact du site.",
+            "required": 0
         },
         {
             "key": "field_dz_paroisse_pretres",
@@ -114,7 +200,7 @@
     "instruction_placement": "label",
     "hide_on_screen": "",
     "active": true,
-    "description": "Champs de la fiche paroisse (voir SPEC.md §3).",
+    "description": "Champs de la fiche paroisse (voir SPEC.md §3). Étendu pour la refonte design « crème/anthracite/or » (voir DECISIONS.md) : sous-titre, note confessions, horaire secrétariat, statistiques optionnelles, repeater « Vie de la paroisse », libellé d'événement par horaire, lien CTA de rendez-vous.",
     "show_in_rest": 0,
-    "modified": 1788557839
+    "modified": 1789646400
 }

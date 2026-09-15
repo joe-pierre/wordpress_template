@@ -17,6 +17,36 @@ if ( ! defined( 'ABSPATH' ) ) {
 <body <?php body_class(); ?>>
 <?php wp_body_open(); ?>
 
+	<?php if ( is_singular( 'paroisse' ) ) : ?>
+		<?php
+		$dz_bar_paroisse_id = get_queried_object_id();
+		$dz_bar_next_mass   = dz_get_paroisse_next_mass( $dz_bar_paroisse_id );
+		$dz_bar_phone       = dz_get_paroisse_contact_phone( $dz_bar_paroisse_id );
+		?>
+		<div class="paroisse-utility-bar">
+			<div class="container d-flex flex-wrap align-items-center justify-content-between">
+				<span class="paroisse-utility-bar-brand"><?php echo esc_html( get_bloginfo( 'name' ) . ' - ' . __( 'Sénégal', 'diocese-ziguinchor' ) ); ?></span>
+
+				<?php if ( $dz_bar_next_mass ) : ?>
+					<span class="paroisse-utility-bar-next-mass">
+						<?php
+						printf(
+							/* translators: 1: day label (lowercase), 2: time (H:i) */
+							esc_html__( 'Prochaine messe : %1$s %2$s', 'diocese-ziguinchor' ),
+							esc_html( mb_strtolower( $dz_bar_next_mass['jour_label'], 'UTF-8' ) ),
+							esc_html( $dz_bar_next_mass['heure'] )
+						);
+						?>
+					</span>
+				<?php endif; ?>
+
+				<?php if ( $dz_bar_phone ) : ?>
+					<a class="paroisse-utility-bar-phone" href="<?php echo esc_url( 'tel:' . preg_replace( '/\s+/', '', $dz_bar_phone ) ); ?>"><?php echo esc_html( $dz_bar_phone ); ?></a>
+				<?php endif; ?>
+			</div>
+		</div>
+	<?php endif; ?>
+
 	<header id="header" class="header d-flex align-items-center sticky-top">
 		<div class="container position-relative d-flex align-items-center justify-content-between">
 

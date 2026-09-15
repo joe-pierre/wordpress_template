@@ -62,6 +62,15 @@
             ]
         },
         {
+            "key": "field_dz_pretre_bio_courte",
+            "label": "Bio courte",
+            "name": "pretre_bio_courte",
+            "type": "textarea",
+            "instructions": "Optionnel, 1-2 phrases affichées dans l'encadré « Curé de la paroisse » de la fiche paroisse (ex. « Nommé curé de la cathédrale, il accueille sur rendez-vous au presbytère. »). Ne remplace pas la biographie longue éventuelle du contenu de la fiche.",
+            "required": 0,
+            "rows": 3
+        },
+        {
             "key": "field_dz_pretre_telephone",
             "label": "Téléphone",
             "name": "pretre_telephone",

@@ -9,6 +9,11 @@
   --default-font: "Roboto",  system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --heading-font: "Montserrat",  sans-serif;
   --nav-font: "Raleway",  sans-serif;
+  /* Utilisée uniquement par la refonte design de single-paroisse.php (voir
+     la section dédiée en bas de ce fichier et DECISIONS.md) — déclarée ici,
+     avec les autres polices, pour rester cohérente avec le reste du thème
+     même si aucun autre gabarit ne la consomme. */
+  --mono-font: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
 }
 
 /* Global Colors - The following color variables are used throughout the website. Updating them here will change the color scheme of the entire website */
@@ -5078,6 +5083,12 @@ sections (prêtres, coordonnées, carte) reuse .team/.contact as-is.
   padding-top: 12px;
 }
 
+/* Diocèse de Ziguinchor — single-paroisse.php : voir la nouvelle section
+   dédiée en bas de ce fichier ("Refonte design « crème/anthracite/or » —
+   single-paroisse.php") pour le hero/bandeau/tableau d'horaires/sidebar de
+   la fiche paroisse. L'ancien habillage glassmorphism (rounds 1 et 2, voir
+   DECISIONS.md) a été entièrement remplacé, pas seulement retouché. */
+
 /*--------------------------------------------------------------
 # Diocèse de Ziguinchor — Agenda des événements (card-evenement.php)
 No equivalent card exists in the source template.
@@ -5436,4 +5447,523 @@ a.organisation-card.quick-link-card {
 .archive-filters .nav-link.active {
   background-color: var(--accent-color);
   color: var(--contrast-color);
+}
+
+/*--------------------------------------------------------------
+# Diocèse de Ziguinchor — Refonte design « crème/anthracite/or » —
+single-paroisse.php (remplace entièrement le glassmorphism précédent,
+voir DECISIONS.md « Regroupement des horaires... » et « round 2 » —
+statuts mis à jour en Remplacée). S'applique à toutes les fiches
+paroisse (gabarit de post type, pas une page unique) : header.php
+(bandeau utilitaire, is_singular('paroisse')) et footer.php (variante
+.paroisse-footer) partagent ce même bloc.
+
+Palette : réutilise le système de variables CSS déjà en place dans ce
+fichier (--background-color/--default-color/--heading-color/--accent-
+color, voir "Color Presets" plus haut, même principe que .light-
+background/.dark-background) plutôt que d'inventer un système
+parallèle — .paroisse-page (re)déclare ces variables en crème/ancre/or
+et tout composant qui les consomme déjà (h1-h6, `a`, .section, .footer)
+en hérite automatiquement. Contrastes vérifiés (calcul WCAG direct,
+même méthode que le reste du thème) :
+- crème #F5F1EA / ancre #1A1B22 (texte) : 15.24:1
+- ancre #1A1B22 / crème #F5F1EA (texte) : 15.24:1
+- crème #F5F1EA / or foncé #8A6524 (texte sur clair) : 4.70:1 (AA)
+- ancre #1A1B22 / or clair #D9AF66 (texte sur sombre) : 8.40:1
+- or plein #C9974F / ancre #1A1B22 (texte sur bouton CTA) : 6.56:1 —
+  c'est pourquoi le CTA et les badges dimanche utilisent un texte
+  sombre sur fond or, jamais l'inverse (or plein / blanc ne fait que
+  2.62:1, insuffisant).
+--------------------------------------------------------------*/
+/* Round 5 : plus de --heading-font ni de font-family propres à cette page —
+   Montserrat (titres) et Roboto (corps de texte) sont déjà les valeurs par
+   défaut sitewide (--heading-font/--default-font dans le bloc :root tout en
+   haut de ce fichier, jamais modifiées) : les redéclarer ici serait un
+   no-op. Titres/corps de texte de la fiche paroisse s'alignent donc
+   simplement sur le reste du site plutôt que sur un choix dédié (Fraunces
+   puis Aleo aux rounds 1 et 4, "cohérence avec la navbar" via Raleway au
+   round 3 — les deux abandonnés). Seuls --heading-color/--accent-color/etc.
+   restent scopés ici (palette crème/ancre/or, elle bien spécifique à cette
+   page) ; la police mono (eyebrows/badges) reste elle aussi spécifique,
+   déclarée au cas par cas plus bas (.paroisse-eyebrow, .mass-badge...). */
+.paroisse-page {
+  --background-color: #F5F1EA;
+  --default-color: #2a2a2e;
+  --heading-color: #1a1b22;
+  --accent-color: #8a6524;
+  --surface-color: #ffffff;
+  --contrast-color: #1a1b22;
+}
+
+/* Bandeau utilitaire (header.php, au-dessus du header principal) */
+.paroisse-utility-bar {
+  background-color: #14151c;
+  color: #f5f1ea;
+  font-size: 13px;
+  padding: 8px 0;
+}
+
+.paroisse-utility-bar-brand {
+  font-weight: 500;
+}
+
+.paroisse-utility-bar-next-mass,
+.paroisse-utility-bar-phone {
+  font-family: var(--mono-font);
+  letter-spacing: 0.02em;
+}
+
+.paroisse-utility-bar-phone {
+  color: #f5f1ea;
+}
+
+.paroisse-utility-bar-phone:hover {
+  color: #d9af66;
+}
+
+/* Hero — redéclare localement --accent-color (or clair #D9AF66, 8.40:1 sur
+   #1A1B22) : sans ce override, .paroisse-eyebrow hériterait de l'or foncé
+   #8A6524 défini par .paroisse-page (pensé pour du texte sur fond crème),
+   qui ne fait que 3.24:1 sur ce fond sombre — sous le seuil AA 4.5:1. */
+.paroisse-hero {
+  position: relative;
+  background-color: #1a1b22;
+  color: #f5f1ea;
+  --accent-color: #d9af66;
+  padding: 90px 0 50px;
+  overflow: hidden;
+}
+
+.paroisse-hero-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+}
+
+/* Round 3 : le premier rendu (opacity: 0.35 sur .paroisse-hero-bg + dégradé
+   55%->92% ci-dessous) cumulait deux calques d'assombrissement — la photo
+   devenait à peine visible. La photo reste maintenant à pleine opacité ;
+   seul ce dégradé l'assombrit, et nettement moins fort (25%->65% au lieu de
+   55%->92%), plus clair en haut (où se trouve surtout le ciel/la façade) et
+   plus sombre en bas (où le texte est ancré) pour équilibrer lisibilité du
+   texte et visibilité de la photo, comme sur la maquette de référence. Le
+   text-shadow sur .paroisse-eyebrow/.paroisse-hero-title/.paroisse-hero-
+   subtitle (plus bas) est le filet de sécurité qui garde le texte lisible
+   même si une paroisse a une photo particulièrement claire à cet endroit. */
+.paroisse-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(20, 21, 28, 0.25) 0%, rgba(20, 21, 28, 0.65) 100%);
+}
+
+.paroisse-hero .container {
+  position: relative;
+  z-index: 1;
+}
+
+.paroisse-hero .paroisse-eyebrow,
+.paroisse-hero-title,
+.paroisse-hero-subtitle {
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
+}
+
+.paroisse-eyebrow {
+  display: block;
+  font-family: var(--mono-font);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent-color);
+  margin-bottom: 14px;
+}
+
+/* Pas de font-family ici : c'est un <h1>, déjà couvert par la règle
+   générique "h1,h2,...{ font-family: var(--heading-font) }" sitewide
+   (Montserrat, round 5 — voir la note sur .paroisse-page plus haut). */
+.paroisse-hero-title {
+  font-weight: 700;
+  font-size: 46px;
+  line-height: 1.15;
+  color: #f5f1ea;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 767px) {
+  .paroisse-hero-title {
+    font-size: 32px;
+  }
+}
+
+.paroisse-hero-subtitle {
+  font-size: 17px;
+  max-width: 640px;
+  color: color-mix(in srgb, #f5f1ea, transparent 12%);
+  margin-bottom: 0;
+}
+
+/* Fil d'Ariane */
+.paroisse-breadcrumb {
+  background-color: #f5f1ea;
+  border-bottom: 1px solid rgba(26, 27, 34, 0.08);
+  padding: 14px 0;
+}
+
+.paroisse-breadcrumb ol {
+  display: flex;
+  flex-wrap: wrap;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 14px;
+}
+
+.paroisse-breadcrumb li {
+  color: #1a1b22;
+}
+
+.paroisse-breadcrumb li a {
+  color: #8a6524;
+}
+
+.paroisse-breadcrumb li a:hover {
+  color: color-mix(in srgb, #8a6524, transparent 25%);
+}
+
+.paroisse-breadcrumb li:not(:last-child)::after {
+  content: "/";
+  margin: 0 10px;
+  color: color-mix(in srgb, #1a1b22, transparent 65%);
+}
+
+.paroisse-breadcrumb li.current {
+  color: color-mix(in srgb, #1a1b22, transparent 30%);
+}
+
+/* Blocs de contenu */
+.paroisse-block {
+  margin-bottom: 55px;
+}
+
+.paroisse-block:last-child {
+  margin-bottom: 0;
+}
+
+.paroisse-section-title {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid color-mix(in srgb, var(--accent-color), transparent 60%);
+  display: inline-block;
+}
+
+/* Tableau des horaires */
+.mass-table {
+  border: 1px solid rgba(26, 27, 34, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.mass-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 16px 22px;
+  border-bottom: 1px solid rgba(26, 27, 34, 0.1);
+}
+
+.mass-row:last-child {
+  border-bottom: none;
+}
+
+.mass-row-day {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--heading-font);
+  font-size: 17px;
+  color: var(--heading-color);
+}
+
+.mass-row-today-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--accent-color);
+}
+
+.mass-row-times {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mass-badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--mono-font);
+  font-size: 13px;
+  background-color: #ede7da;
+  color: #1a1b22;
+  padding: 5px 14px;
+  border-radius: 50px;
+}
+
+.mass-badge--event {
+  background-color: transparent;
+  border: 1px solid var(--accent-color);
+  color: var(--accent-color);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 11px;
+}
+
+.mass-row--sunday {
+  background-color: #1a1b22;
+  --heading-color: #f5f1ea;
+  --accent-color: #d9af66;
+  margin: -1px -1px 0;
+  padding: 18px 23px;
+  border-radius: 4px;
+}
+
+.mass-row--sunday .mass-badge:not(.mass-badge--event) {
+  background-color: #c9974f;
+  color: #1a1b22;
+  font-weight: 600;
+}
+
+.paroisse-note {
+  font-style: italic;
+  font-size: 14px;
+  color: color-mix(in srgb, var(--default-color), transparent 25%);
+  margin: 18px 0 0;
+}
+
+/* La paroisse */
+.paroisse-presentation-text p:last-child {
+  margin-bottom: 0;
+}
+
+/* Statistiques */
+.paroisse-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 24px;
+  margin-top: 32px;
+  padding-top: 28px;
+  border-top: 1px solid rgba(26, 27, 34, 0.1);
+}
+
+.paroisse-stat-value {
+  display: block;
+  font-family: var(--heading-font);
+  font-size: 38px;
+  font-weight: 500;
+  color: var(--accent-color);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.paroisse-stat-label {
+  display: block;
+  font-size: 13px;
+  color: color-mix(in srgb, var(--default-color), transparent 20%);
+}
+
+/* Nous trouver */
+.paroisse-find-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.paroisse-find-card {
+  background-color: var(--surface-color);
+  border: 1px solid rgba(26, 27, 34, 0.12);
+  border-radius: 10px;
+  padding: 22px;
+}
+
+.paroisse-find-card .paroisse-eyebrow {
+  margin-bottom: 10px;
+}
+
+.paroisse-find-card p {
+  margin-bottom: 0;
+  color: var(--default-color);
+}
+
+.paroisse-find-note {
+  margin-top: 6px !important;
+  font-size: 13px;
+  color: color-mix(in srgb, var(--default-color), transparent 30%) !important;
+}
+
+.paroisse-content .map-container {
+  width: 100%;
+  height: 280px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* Sidebar */
+.paroisse-sidebar > * + * {
+  margin-top: 28px;
+}
+
+.paroisse-cure-card {
+  background-color: var(--surface-color);
+  border: 1px solid rgba(26, 27, 34, 0.12);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.paroisse-cure-photo img {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  display: block;
+}
+
+.paroisse-cure-body {
+  padding: 22px;
+}
+
+.paroisse-cure-name {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 4px 0 10px;
+}
+
+.paroisse-cure-name a {
+  color: var(--heading-color);
+}
+
+.paroisse-cure-bio {
+  font-size: 14px;
+  color: color-mix(in srgb, var(--default-color), transparent 10%);
+  margin-bottom: 0;
+}
+
+.paroisse-vicaires-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 14px;
+}
+
+.paroisse-vicaires-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(26, 27, 34, 0.1);
+}
+
+.paroisse-vicaires-list li:last-child {
+  border-bottom: none;
+}
+
+.paroisse-vicaires-list span {
+  color: color-mix(in srgb, var(--default-color), transparent 35%);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.paroisse-vie-card {
+  background-color: #1a1b22;
+  --default-color: #f5f1ea;
+  --heading-color: #f5f1ea;
+  --accent-color: #d9af66;
+  color: var(--default-color);
+  border-radius: 10px;
+  padding: 24px;
+}
+
+.paroisse-vie-card h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.paroisse-vie-card ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.paroisse-vie-card li {
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(245, 241, 234, 0.12);
+  font-size: 14px;
+}
+
+.paroisse-vie-card li:last-child {
+  border-bottom: none;
+}
+
+.paroisse-vie-frequence {
+  flex: 0 0 auto;
+  font-family: var(--mono-font);
+  color: var(--accent-color);
+  font-size: 13px;
+}
+
+.paroisse-vie-description {
+  color: color-mix(in srgb, var(--default-color), transparent 8%);
+}
+
+.paroisse-cta-btn {
+  display: block;
+  text-align: center;
+  background-color: #c9974f;
+  color: #1a1b22;
+  font-weight: 600;
+  padding: 14px 20px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.paroisse-cta-btn:hover {
+  background-color: #b8862f;
+  color: #1a1b22;
+}
+
+/* Footer — variante anthracite scoped, voir footer.php (is_singular('paroisse')) */
+.footer.paroisse-footer {
+  --background-color: #14151c;
+  --default-color: #f5f1ea;
+  --heading-color: #f5f1ea;
+  --surface-color: #1f2029;
+  --contrast-color: #f5f1ea;
+  --accent-color: #d9af66;
+}
+
+.footer.paroisse-footer .footer-links-grid h5,
+.footer.paroisse-footer .footer-cta h5 {
+  font-family: var(--mono-font);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #d9af66;
+}
+
+@media (max-width: 575px) {
+  .paroisse-hero {
+    padding: 70px 0 36px;
+  }
+
+  .mass-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }

@@ -76,6 +76,13 @@
 ## Phase 5 — Gabarits métier (Paroisses, Prêtres, Événements, Sacrements)
 
 - [x] `single-paroisse.php` + `archive-paroisse.php` (annuaire + fiche paroisse — coordonnées, horaires, carte, curé/vicaires)
+- [x] Refonte design « crème/anthracite/or » de `single-paroisse.php` (remplace le glassmorphism bleu/or, voir `DECISIONS.md`) — bandeau utilitaire (`header.php`, prochaine messe calculée dynamiquement), hero, tableau d'horaires avec badges d'événement + ligne dimanche mise en évidence, bloc statistiques, sidebar curé/« Vie de la paroisse »/CTA rendez-vous, footer anthracite scoped (`footer.php`). Nouveaux champs ACF ajoutés (tous optionnels, dégradation propre si vides) : `paroisse_soustitre`, `paroisse_confessions_note`, `paroisse_secretariat_horaire`, `paroisse_stat_fondation`, `paroisse_stat_communautes`, repeater `paroisse_vie_paroisse`, sous-champ `paroisse_horaire_libelle`, `paroisse_cta_rdv_url`, `pretre_bio_courte`. Vérifié par rendu réel (Chrome headless, desktop 1440px + mobile 390px) faute de WordPress réel dans ce dépôt — voir `BUGS_AND_ROADMAP.md`.
+- [x] Round 3 de la refonte (polices cohérentes avec la navbar, tirets simples, overlay du hero allégé, « Nous trouver » basé sur le contact du curé) — voir `DECISIONS.md` "Refonte fiche paroisse — round 3"
+- [x] Round 4 de la refonte (police serif Aleo à la place de Fraunces, poids distincts par niveau de titre) — voir `DECISIONS.md` "Refonte fiche paroisse — round 4"
+- [x] Round 5 de la refonte (retour à Montserrat/Roboto, polices par défaut du thème, à la place d'Aleo) — voir `DECISIONS.md` "Refonte fiche paroisse — round 5"
+- [ ] Assigner un terme `doyenne` à chaque paroisse réelle une fois saisie (utilisé par l'eyebrow « PAROISSE · [ZONE] » du nouveau hero — repli propre sur « Paroisse » seul si absent, voir `DECISIONS.md`)
+- [ ] Vérifier/corriger la valeur du champ `paroisse_telephone` sur le site réel pour la paroisse où `+339911353` a été signalé (donnée de back-office, non corrigeable depuis ce dépôt — voir `BUGS_AND_ROADMAP.md`)
+- [ ] Saisir le contenu des nouveaux champs optionnels de la refonte design (sous-titre, note confessions, horaire secrétariat, statistiques, « Vie de la paroisse », bio courte du curé) pour les paroisses réelles une fois leurs fiches créées (Phase 7)
 - [x] `single-pretre.php` + `archive-pretre.php` (annuaire + fiche prêtre — fonction, ordination, paroisse d'affectation)
 - [x] `single-evenement.php` + `archive-evenement.php` (agenda filtré sur événements à venir/en cours — voir SPEC.md §4 et DECISIONS.md ; tri du plus proche au plus lointain)
 - [x] `single-sacrement.php` (étapes, documents à télécharger, paroisse référente ; pas d'archive-sacrement.php, cf. SPEC.md)
