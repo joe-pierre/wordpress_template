@@ -17,16 +17,45 @@ if ( ! defined( 'ABSPATH' ) ) {
 <body <?php body_class(); ?>>
 <?php wp_body_open(); ?>
 
+	<?php
+	// Sitewide contact/social bar, above the header on every page (not just
+	// paroisse/pretre, unlike .dz-utility-bar below) — phone/email only shown
+	// when set (dz_get_option()'s own empty-string fallback), social icons
+	// via the shared template-part rather than a second copy of its markup.
+	$dz_topbar_phone = dz_get_option( 'dz_contact_phone' );
+	$dz_topbar_email = dz_get_option( 'dz_contact_email' );
+	?>
+	<div class="dz-topbar">
+		<div class="container d-flex align-items-center justify-content-between">
+			<div class="dz-topbar-contact">
+				<?php if ( $dz_topbar_phone ) : ?>
+					<a class="dz-topbar-contact-item" href="<?php echo esc_url( 'tel:' . preg_replace( '/\s+/', '', $dz_topbar_phone ) ); ?>">
+						<i class="bi bi-telephone"></i> <?php echo esc_html( $dz_topbar_phone ); ?>
+					</a>
+				<?php endif; ?>
+
+				<?php if ( $dz_topbar_email ) : ?>
+					<a class="dz-topbar-contact-item dz-topbar-email" href="<?php echo esc_url( 'mailto:' . $dz_topbar_email ); ?>">
+						<i class="bi bi-envelope"></i> <?php echo esc_html( $dz_topbar_email ); ?>
+					</a>
+				<?php endif; ?>
+			</div>
+
+			<?php get_template_part( 'template-parts/social-links', null, array( 'wrapper_class' => 'dz-topbar-social' ) ); ?>
+		</div>
+	</div>
+
 	<?php if ( is_singular( 'paroisse' ) || is_post_type_archive( 'pretre' ) ) : ?>
 		<?php
 		// Bandeau utilitaire — d'abord scopé à single-paroisse.php ("Refonte
 		// design crème/anthracite/or"), désormais partagé avec l'archive
 		// "Nos prêtres" (même palette). Classes renommées .paroisse-utility-
 		// bar* -> .dz-utility-bar* en conséquence (même précédent déjà suivi
-		// pour .archive-filters, voir DECISIONS.md). Le centre/la droite du
-		// bandeau restent propres à chaque contexte : prochaine messe/
-		// téléphone du curé sur une fiche paroisse, nom de l'évêque/
-		// téléphone général du diocèse sur "Nos prêtres".
+		// pour .archive-filters, voir DECISIONS.md). Le centre reste propre à
+		// chaque contexte (prochaine messe / nom de l'évêque) ; le téléphone
+		// a été retiré (voir DECISIONS.md "Bandeau contact/réseaux sociaux
+		// sitewide") : le nouveau bandeau sitewide ci-dessus l'affiche déjà
+		// en permanence, plus besoin de le répéter ici.
 		if ( is_singular( 'paroisse' ) ) {
 			$dz_bar_paroisse_id = get_queried_object_id();
 			$dz_bar_next_mass   = dz_get_paroisse_next_mass( $dz_bar_paroisse_id );
@@ -38,7 +67,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 					$dz_bar_next_mass['heure']
 				)
 				: '';
-			$dz_bar_phone = dz_get_paroisse_contact_phone( $dz_bar_paroisse_id );
 		} else {
 			$dz_bar_eveque = dz_get_option( 'dz_eveque_nom' );
 			$dz_bar_center = $dz_bar_eveque
@@ -48,7 +76,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 					$dz_bar_eveque
 				)
 				: '';
-			$dz_bar_phone = dz_get_option( 'dz_contact_phone' );
 		}
 		?>
 		<div class="dz-utility-bar">
@@ -58,15 +85,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php if ( $dz_bar_center ) : ?>
 					<span class="dz-utility-bar-center"><?php echo esc_html( $dz_bar_center ); ?></span>
 				<?php endif; ?>
-
-				<?php if ( $dz_bar_phone ) : ?>
-					<a class="dz-utility-bar-phone" href="<?php echo esc_url( 'tel:' . preg_replace( '/\s+/', '', $dz_bar_phone ) ); ?>"><?php echo esc_html( $dz_bar_phone ); ?></a>
-				<?php endif; ?>
 			</div>
 		</div>
 	<?php endif; ?>
 
-	<header id="header" class="header d-flex align-items-center sticky-top">
+	<header id="header" class="header d-flex align-items-center sticky-top dz-header-glass">
 		<div class="container position-relative d-flex align-items-center justify-content-between">
 
 			<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="logo d-flex align-items-center me-auto me-xl-0">
@@ -99,7 +122,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
 			</nav>
 
-			<?php get_template_part( 'template-parts/social-links', null, array( 'wrapper_class' => 'header-social-links' ) ); ?>
+			<a href="<?php echo esc_url( dz_get_page_url_by_template( 'page-dons.php' ) ); ?>" class="dz-header-donate-btn"><?php esc_html_e( 'Faire un don', 'diocese-ziguinchor' ); ?></a>
 
 		</div>
 	</header>

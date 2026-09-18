@@ -190,26 +190,6 @@ h6 {
   color: var(--heading-color);
 }
 
-.header .header-social-links {
-  padding-right: 15px;
-}
-
-.header .header-social-links a {
-  color: color-mix(in srgb, var(--default-color), transparent 40%);
-  padding-left: 6px;
-  display: inline-block;
-  transition: 0.3s;
-  font-size: 16px;
-}
-
-.header .header-social-links a:hover {
-  color: var(--accent-color);
-}
-
-.header .header-social-links a i {
-  line-height: 0px;
-}
-
 @media (max-width: 1200px) {
   .header .logo {
     order: 1;
@@ -217,10 +197,6 @@ h6 {
 
   .header .logo img {
     max-height: 42px;
-  }
-
-  .header .header-social-links {
-    order: 2;
   }
 
   .header .navmenu {
@@ -1136,161 +1112,6 @@ section,
   .section-title span {
     font-size: 38px;
   }
-}
-
-/*--------------------------------------------------------------
-# Blog Hero Section
---------------------------------------------------------------*/
-.blog-hero {
-  padding: 0;
-}
-
-.blog-hero .blog-hero-slider {
-  position: relative;
-  overflow: hidden;
-}
-
-.blog-hero .blog-hero-item {
-  position: relative;
-  height: 80vh;
-  min-height: 600px;
-}
-
-.blog-hero .blog-hero-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.blog-hero .blog-hero-item::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(0deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 0.1) 100%);
-}
-
-.blog-hero .blog-hero-content {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 2;
-  padding: 60px;
-  color: var(--contrast-color);
-  text-align: center;
-  max-width: 800px;
-  width: 100%;
-}
-
-.blog-hero .blog-hero-content .category {
-  display: inline-block;
-  background-color: var(--accent-color);
-  color: var(--contrast-color);
-  padding: 6px 16px;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
-  margin-bottom: 20px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.blog-hero .blog-hero-content h1 {
-  color: var(--contrast-color);
-  font-size: 48px;
-  font-weight: 700;
-  margin-bottom: 20px;
-  line-height: 1.2;
-}
-
-@media (max-width: 991px) {
-  .blog-hero .blog-hero-content h1 {
-    font-size: 36px;
-  }
-}
-
-@media (max-width: 767px) {
-  .blog-hero .blog-hero-content h1 {
-    font-size: 28px;
-  }
-}
-
-.blog-hero .blog-hero-content .meta {
-  margin-bottom: 30px;
-  font-size: 14px;
-}
-
-.blog-hero .blog-hero-content .meta span {
-  display: inline-block;
-  margin-right: 20px;
-  color: color-mix(in srgb, var(--contrast-color), transparent 20%);
-}
-
-.blog-hero .blog-hero-content .meta span:last-child {
-  margin-right: 0;
-}
-
-.blog-hero .blog-hero-content .meta span a {
-  color: var(--contrast-color);
-  font-weight: 600;
-}
-
-.blog-hero .blog-hero-content .meta span a:hover {
-  color: var(--accent-color);
-}
-
-@media (max-width: 767px) {
-  .blog-hero .blog-hero-content .meta span {
-    display: block;
-    margin: 0 0 10px 0;
-  }
-}
-
-.blog-hero .blog-hero-content .read-more {
-  display: inline-flex;
-  align-items: center;
-  color: var(--contrast-color);
-  font-weight: 500;
-}
-
-.blog-hero .blog-hero-content .read-more i {
-  margin-left: 8px;
-  transition: transform 0.3s ease;
-}
-
-.blog-hero .blog-hero-content .read-more:hover {
-  color: var(--accent-color);
-}
-
-.blog-hero .blog-hero-content .read-more:hover i {
-  transform: translateX(5px);
-}
-
-@media (max-width: 767px) {
-  .blog-hero .blog-hero-content {
-    padding: 30px;
-  }
-}
-
-.blog-hero .swiper-button-prev,
-.blog-hero .swiper-button-next {
-  color: var(--contrast-color);
-  width: 60px;
-  height: 60px;
-}
-
-.blog-hero .swiper-button-prev::after,
-.blog-hero .swiper-button-next::after {
-  font-size: 32px;
-}
-
-.blog-hero .swiper-button-prev:hover,
-.blog-hero .swiper-button-next:hover {
-  color: var(--accent-color);
-}
-
-.blog-hero .swiper-wrapper {
-  height: auto !important;
 }
 
 /*--------------------------------------------------------------
@@ -5333,18 +5154,6 @@ qui tranche, donc ce bloc doit rester après pour que ses valeurs gagnent.
 }
 
 /*--------------------------------------------------------------
-# Diocèse de Ziguinchor — Sous-titre du hero (template-parts/hero-slider.php)
-The source template only ever showed a short ".category" badge here; the
-"sous-titre / texte" ACF field is free text, so a plain paragraph is used
-instead (color/centering already inherited from .blog-hero-content).
---------------------------------------------------------------*/
-.blog-hero .blog-hero-content p {
-  font-size: 18px;
-  margin-bottom: 30px;
-  opacity: 0.9;
-}
-
-/*--------------------------------------------------------------
 # Diocèse de Ziguinchor — CPT organisationnels (conseil, service_diocesain,
 commission_diocesain — archive-*.php / template-parts/card-organisation.php)
 New class, same pattern as .paroisse-card/.evenement-card: .info-card was
@@ -5524,18 +5333,9 @@ même méthode que le reste du thème) :
   font-weight: 500;
 }
 
-.dz-utility-bar-center,
-.dz-utility-bar-phone {
+.dz-utility-bar-center {
   font-family: var(--mono-font);
   letter-spacing: 0.02em;
-}
-
-.dz-utility-bar-phone {
-  color: #f5f1ea;
-}
-
-.dz-utility-bar-phone:hover {
-  color: #d9af66;
 }
 
 /* Hero — redéclare localement --accent-color (or clair #D9AF66, 8.40:1 sur
@@ -6352,5 +6152,340 @@ méthode que le reste du thème) :
 
   .pretre-vocations-text {
     padding-left: 16px;
+  }
+}
+
+/*--------------------------------------------------------------
+# Diocèse de Ziguinchor — Refonte hero d'accueil (template-parts/hero-slider.php)
+Nouvelle direction visuelle validée par le client (maquette Claude Design) :
+bandeau eyebrow fixe, 2 boutons pilule, pagination à points. Balisage
+entièrement renommé en dz-front-hero-* (remplace .blog-hero/.blog-hero-item/
+.blog-hero-content/.read-more, retirés du fichier car devenus 100% morts —
+voir DECISIONS.md) pour ne rien écraser d'éventuelles règles génériques
+réutilisées ailleurs. Polices/couleurs : uniquement --heading-font/
+--default-font/--accent-color/--heading-color déjà déclarées dans :root,
+aucune nouvelle police importée (voir SPEC.md §10).
+--------------------------------------------------------------*/
+.dz-front-hero {
+  padding: 0;
+}
+
+.dz-front-hero-slider {
+  position: relative;
+  overflow: hidden;
+}
+
+.dz-front-hero-item {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  height: 85vh;
+  min-height: 620px;
+  padding-bottom: 64px;
+  background-color: var(--heading-color);
+  background-size: cover;
+  background-position: center;
+}
+
+.dz-front-hero-item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.45) 45%, rgba(0, 0, 0, 0.7) 100%);
+}
+
+.dz-front-hero-content {
+  position: relative;
+  z-index: 2;
+  color: var(--contrast-color);
+  text-align: left;
+}
+
+.dz-front-hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  color: var(--accent-color);
+  font-family: var(--heading-font);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.dz-front-hero-eyebrow::before {
+  content: "";
+  display: inline-block;
+  width: 34px;
+  height: 1px;
+  background-color: var(--accent-color);
+}
+
+.dz-front-hero-title {
+  max-width: 700px;
+  margin-bottom: 20px;
+  color: var(--contrast-color);
+  font-family: var(--heading-font);
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.dz-front-hero-text {
+  max-width: 540px;
+  margin-bottom: 30px;
+  color: color-mix(in srgb, var(--contrast-color), transparent 15%);
+  font-family: var(--default-font);
+  font-size: 18px;
+}
+
+.dz-front-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
+}
+
+.dz-front-hero-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 32px;
+  border-radius: 50px;
+  font-family: var(--heading-font);
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+.dz-front-hero-btn-primary {
+  background-color: var(--accent-color);
+  color: var(--contrast-color);
+}
+
+.dz-front-hero-btn-primary:hover {
+  background-color: color-mix(in srgb, var(--accent-color), black 15%);
+  color: var(--contrast-color);
+}
+
+.dz-front-hero-btn-secondary {
+  background-color: transparent;
+  border: 1px solid color-mix(in srgb, var(--contrast-color), transparent 30%);
+  color: var(--contrast-color);
+}
+
+.dz-front-hero-btn-secondary:hover {
+  background-color: color-mix(in srgb, var(--contrast-color), transparent 85%);
+  color: var(--contrast-color);
+}
+
+.dz-front-hero-pagination-row {
+  position: absolute;
+  z-index: 10;
+  left: 0;
+  bottom: 30px;
+  width: 100%;
+}
+
+.dz-front-hero-pagination-inner {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
+}
+
+.dz-front-hero-slider .swiper-pagination {
+  position: static;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: auto;
+}
+
+.dz-front-hero-slider .swiper-pagination .swiper-pagination-bullet {
+  width: 18px;
+  height: 3px;
+  margin: 0;
+  border-radius: 999px;
+  background: rgba(255, 253, 250, 0.4);
+  opacity: 1;
+  transition: width 0.3s ease, background 0.3s ease;
+}
+
+.dz-front-hero-slider .swiper-pagination .swiper-pagination-bullet-active {
+  width: 46px;
+  background: var(--accent-color);
+}
+
+.dz-front-hero-counter {
+  color: rgba(255, 253, 250, 0.6);
+  font-family: var(--default-font);
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+@media (max-width: 991px) {
+  .dz-front-hero-title {
+    font-size: 36px;
+  }
+}
+
+@media (max-width: 767px) {
+  .dz-front-hero-item {
+    height: auto;
+    min-height: 560px;
+    padding-top: 100px;
+  }
+
+  .dz-front-hero-title {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 575px) {
+  .dz-front-hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dz-front-hero-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/*--------------------------------------------------------------
+# Diocèse de Ziguinchor — Bandeau contact/réseaux sociaux sitewide
+(header.php, au-dessus du header principal sur toutes les pages — distinct
+du .dz-utility-bar contextuel paroisse/pretre juste en dessous)
+--------------------------------------------------------------*/
+.dz-topbar {
+  background-color: var(--heading-color);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 13px;
+  padding: 8px 0;
+}
+
+.dz-topbar .container {
+  min-height: 38px;
+}
+
+.dz-topbar-contact {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.dz-topbar-contact-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.85);
+  transition: color 0.3s ease;
+}
+
+.dz-topbar-contact-item:hover {
+  color: var(--accent-color);
+}
+
+.dz-topbar-contact-item + .dz-topbar-contact-item {
+  padding-left: 20px;
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dz-topbar-social {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.dz-topbar-social a {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 14px;
+  transition: color 0.3s ease;
+}
+
+.dz-topbar-social a:hover {
+  color: var(--accent-color);
+}
+
+/* Phone + social icons kept at every width (reachable another way is harder
+ * for a phone number than for an e-mail, already on the Contact page) ;
+ * e-mail is the first thing dropped once tel + mail + icons no longer fit
+ * on one line — see DECISIONS.md "Bandeau contact/réseaux sociaux sitewide". */
+@media (max-width: 575px) {
+  .dz-topbar-email {
+    display: none;
+  }
+}
+
+/*--------------------------------------------------------------
+# Diocèse de Ziguinchor — Header translucide "verre dépoli" + bouton
+"Faire un don" (header.php)
+Classes préfixées dz-header-* pour ne pas toucher aux règles génériques
+.header existantes (voir DECISIONS.md "Bug — header pas sticky au scroll") :
+.sticky-top et le comportement JS de .scrolled restent inchangés.
+--------------------------------------------------------------*/
+.header.dz-header-glass {
+  background-color: color-mix(in srgb, var(--background-color), transparent 18%);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+
+.scrolled .header.dz-header-glass {
+  background-color: color-mix(in srgb, var(--background-color), transparent 6%);
+}
+
+.dz-header-donate-btn {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 16px;
+  padding: 10px 24px;
+  border-radius: 50px;
+  background-color: var(--accent-color);
+  color: var(--contrast-color);
+  font-family: var(--heading-font);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+.dz-header-donate-btn:hover {
+  background-color: color-mix(in srgb, var(--accent-color), black 15%);
+  color: var(--contrast-color);
+}
+
+@media (max-width: 1200px) {
+  .dz-header-donate-btn {
+    order: 3;
+    margin: 0 10px;
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  .header .navmenu {
+    order: 4;
+  }
+}
+
+/* Below 576px the logo, hamburger toggle, donate button and social icons no
+ * longer fit on a single row (the donate button was pushing the mobile-nav
+ * hamburger off-screen, making the menu unreachable) — the header wraps
+ * onto two rows instead, logo alone on the first. */
+@media (max-width: 575px) {
+  .header .container {
+    flex-wrap: wrap;
+    row-gap: 10px;
+  }
+
+  .header .logo {
+    flex: 1 0 100%;
+    justify-content: center;
+    margin-right: 0 !important;
   }
 }

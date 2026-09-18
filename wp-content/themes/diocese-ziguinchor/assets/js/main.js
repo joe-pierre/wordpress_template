@@ -219,7 +219,16 @@
       if (swiperElement.classList.contains("swiper-tab")) {
         initSwiperWithCustomPagination(swiperElement, config);
       } else {
-        new Swiper(swiperElement, config);
+        const swiperInstance = new Swiper(swiperElement, config);
+        const counterCurrent = swiperElement.querySelector(".dz-front-hero-counter-current");
+
+        if (counterCurrent) {
+          const updateCounter = () => {
+            counterCurrent.textContent = String(swiperInstance.realIndex + 1).padStart(2, "0");
+          };
+          swiperInstance.on("slideChange", updateCounter);
+          updateCounter();
+        }
       }
     });
   }

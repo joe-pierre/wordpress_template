@@ -16,13 +16,17 @@ $dz_hero_slides = isset( $args['slides'] ) ? $args['slides'] : array();
 if ( ! $dz_hero_slides ) {
 	return;
 }
+
+// Fixed second button, resolved dynamically (never a hardcoded slug/ID) so
+// it keeps working if the editorial team renames or re-slugs the page.
+$dz_hero_bishop_word_url = dz_get_page_url_by_title( "Mot de l'évêque" );
 ?>
-<!-- Blog Hero Section -->
-<section id="blog-hero" class="blog-hero section">
+<!-- Front Hero Section -->
+<section id="dz-front-hero" class="dz-front-hero section">
 
 	<div class="container-fluid p-0" data-aos="fade">
 
-		<div class="blog-hero-slider swiper init-swiper">
+		<div class="dz-front-hero-slider swiper init-swiper">
 			<script type="application/json" class="swiper-config">
 				{
 					"loop": true,
@@ -32,9 +36,9 @@ if ( ! $dz_hero_slides ) {
 						"delay": 5000
 					},
 					"slidesPerView": 1,
-					"navigation": {
-						"nextEl": ".swiper-button-next",
-						"prevEl": ".swiper-button-prev"
+					"pagination": {
+						"el": ".swiper-pagination",
+						"clickable": true
 					}
 				}
 			</script>
@@ -42,31 +46,64 @@ if ( ! $dz_hero_slides ) {
 			<div class="swiper-wrapper">
 				<?php foreach ( $dz_hero_slides as $dz_slide ) : ?>
 					<div class="swiper-slide">
-						<div class="blog-hero-item">
+						<div class="dz-front-hero-item"
 							<?php if ( ! empty( $dz_slide['dz_front_hero_slide_image'] ) ) : ?>
-								<img src="<?php echo esc_url( $dz_slide['dz_front_hero_slide_image'] ); ?>" alt="<?php echo esc_attr( $dz_slide['dz_front_hero_slide_titre'] ); ?>" class="img-fluid">
+								style="background-image: url('<?php echo esc_url( $dz_slide['dz_front_hero_slide_image'] ); ?>');"
 							<?php endif; ?>
-							<div class="blog-hero-content">
-								<h1><?php echo esc_html( $dz_slide['dz_front_hero_slide_titre'] ); ?></h1>
-								<?php if ( ! empty( $dz_slide['dz_front_hero_slide_texte'] ) ) : ?>
-									<p><?php echo esc_html( $dz_slide['dz_front_hero_slide_texte'] ); ?></p>
-								<?php endif; ?>
-								<?php if ( ! empty( $dz_slide['dz_front_hero_slide_lien'] ) ) : ?>
-									<a href="<?php echo esc_url( $dz_slide['dz_front_hero_slide_lien'] ); ?>" class="read-more">
-										<?php esc_html_e( 'En savoir plus', 'diocese-ziguinchor' ); ?> <i class="bi bi-arrow-right"></i>
-									</a>
-								<?php endif; ?>
+						>
+							<div class="container">
+								<div class="dz-front-hero-content">
+									<span class="dz-front-hero-eyebrow"><?php esc_html_e( 'Église de Casamance', 'diocese-ziguinchor' ); ?></span>
+
+									<h1 class="dz-front-hero-title"><?php echo esc_html( $dz_slide['dz_front_hero_slide_titre'] ); ?></h1>
+
+									<?php if ( ! empty( $dz_slide['dz_front_hero_slide_texte'] ) ) : ?>
+										<p class="dz-front-hero-text"><?php echo esc_html( $dz_slide['dz_front_hero_slide_texte'] ); ?></p>
+									<?php endif; ?>
+
+									<div class="dz-front-hero-actions">
+										<?php if ( ! empty( $dz_slide['dz_front_hero_slide_lien'] ) ) : ?>
+											<a href="<?php echo esc_url( $dz_slide['dz_front_hero_slide_lien'] ); ?>" class="dz-front-hero-btn dz-front-hero-btn-primary">
+												<?php esc_html_e( 'En savoir plus', 'diocese-ziguinchor' ); ?> <i class="bi bi-arrow-right"></i>
+											</a>
+										<?php endif; ?>
+
+										<a href="<?php echo esc_url( $dz_hero_bishop_word_url ); ?>" class="dz-front-hero-btn dz-front-hero-btn-secondary">
+											<?php esc_html_e( "Mot de l'évêque", 'diocese-ziguinchor' ); ?>
+										</a>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div><!-- End slide item -->
 				<?php endforeach; ?>
 			</div>
 
-			<div class="swiper-button-prev"></div>
-			<div class="swiper-button-next"></div>
+			<?php
+			/*
+			 * A single pagination instance shared by all slides (Swiper grabs
+			 * the first ".swiper-pagination" match for the whole slider) —
+			 * it must stay a sibling of ".swiper-wrapper", never duplicated
+			 * inside the loop above, or Swiper would render/bind it once per
+			 * slide. Wrapped in its own ".container" purely so its left edge
+			 * lines up with the site grid, same as ".dz-front-hero-content"'s
+			 * own ".container" above — not for per-slide alignment.
+			 */
+			?>
+			<div class="dz-front-hero-pagination-row">
+				<div class="container">
+					<div class="dz-front-hero-pagination-inner">
+						<div class="swiper-pagination"></div>
+
+						<span class="dz-front-hero-counter">
+							<span class="dz-front-hero-counter-current">01</span> / <span class="dz-front-hero-counter-total"><?php echo esc_html( sprintf( '%02d', count( $dz_hero_slides ) ) ); ?></span>
+						</span>
+					</div>
+				</div>
+			</div>
 
 		</div>
 
 	</div>
 
-</section><!-- /Blog Hero Section -->
+</section><!-- /Front Hero Section -->

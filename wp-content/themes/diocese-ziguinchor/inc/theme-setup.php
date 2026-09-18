@@ -80,6 +80,33 @@ function dz_get_page_url_by_template( $template, $fallback_home = true ) {
 }
 
 /**
+ * Finds the front-end URL of a page by its exact title, without hardcoding
+ * a slug — used for pages the editorial team may rename/re-slug at any time
+ * (e.g. "Mot de l'évêque").
+ *
+ * @param string $title         Exact page title.
+ * @param bool   $fallback_home When true (default), returns the site's home URL
+ *                               if no such page exists yet.
+ * @return string
+ */
+function dz_get_page_url_by_title( $title, $fallback_home = true ) {
+	$pages = get_posts(
+		array(
+			'post_type'      => 'page',
+			'posts_per_page' => 1,
+			'title'          => $title,
+			'fields'         => 'ids',
+		)
+	);
+
+	if ( $pages ) {
+		return get_permalink( $pages[0] );
+	}
+
+	return $fallback_home ? home_url( '/' ) : '';
+}
+
+/**
  * Reads an ACF field on any post, without fataling if ACF is not active.
  * Use this (rather than get_field() directly) for every CPT relation/field
  * read in templates, per CONVENTIONS.md — a missing/incomplete field must
